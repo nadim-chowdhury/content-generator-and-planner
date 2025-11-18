@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserPlan {
+  FREE
+  PRO
+  AGENCY
+}
+
+enum IdeaStatus {
+  DRAFT
+  SCHEDULED
+  POSTED
+}
+
+enum SocialPlatform {
+  FACEBOOK
+  TWITTER
+  INSTAGRAM
+  THREADS
+  LINKEDIN
+  REDDIT
+  QUORA
+  PINTEREST
+  TIKTOK
+  YOUTUBE
+}
+
+model User {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  passwordHash          String
+  emailVerified         Boolean   @default(false)
+  emailVerificationToken String?  @unique
+  passwordResetToken    String?   @unique
+  passwordResetExpires  DateTime?
+  plan                  UserPlan  @default(FREE)
+  stripeCustomerId      String?   @unique
+  stripeSubscriptionId  String?   @unique
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  ideas                 Idea[]
+  sessions              Session[]
+  socialConnections     SocialConnection[]
+
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model Idea {
+  id          String     @id @default(cuid())
+  userId      String
+  title       String
+  description String?    @db.Text
+  script      String?    @db.Text
+  caption     String?    @db.Text
+  hashtags    String[]   @default([])
+  platform    String
+  niche        String
+  tone         String
+  duration     Int?       // Estimated duration in seconds
+  scheduledAt  DateTime?
+  status       IdeaStatus @default(DRAFT)
+  viralScore   Int?       // 0-100
+  postedTo     String[]   @default([]) // Platforms where this was posted
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([scheduledAt])
+  @@index([status])
+  @@map("ideas")
+}
+
+model IdeaGeneration {
+  id        String   @id @default(cuid())
+  userId    String
+  count     Int      @default(1)
+  date      DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  @@unique([userId, date])
+  @@index([userId, date])
+  @@map("idea_generations")
+}
+
+model SocialConnection {
+  id              String         @id @default(cuid())
+  userId          String
+  platform        SocialPlatform
+  accessToken     String         @db.Text
+  refreshToken    String?        @db.Text
+  tokenExpiresAt  DateTime?
+  platformUserId  String?
+  platformUsername String?
+  // For Facebook: pageId and pageName for pages
+  pageId          String?
+  pageName        String?
+  // Account name/label for user to identify multiple accounts
+  accountName     String?        // e.g., "Personal", "Business", "Page 1"
+  isActive        Boolean        @default(true)
+  isDefault       Boolean        @default(false) // Default account for this platform
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([platform])
+  @@index([userId, platform])
+  @@map("social_connections")
+}
