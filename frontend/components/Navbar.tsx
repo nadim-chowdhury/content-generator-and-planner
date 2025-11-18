@@ -51,11 +51,63 @@ export default function Navbar() {
                   Planner
                 </Link>
                 <Link
+                  href="/platforms"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Platforms
+                </Link>
+                <Link
+                  href="/languages"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Languages
+                </Link>
+                <Link
+                  href="/ai-tools"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  AI Tools
+                </Link>
+                <Link
+                  href="/pricing"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Pricing
+                </Link>
+                <Link
                   href="/billing"
                   className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
                   Billing
                 </Link>
+                <Link
+                  href="/settings/security"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Security
+                </Link>
+                <Link
+                  href="/settings/profile"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Profile
+                </Link>
+                {user?.plan === 'AGENCY' && (
+                  <Link
+                    href="/teams"
+                    className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >
+                    Teams
+                  </Link>
+                )}
+                {user?.role === 'ADMIN' && (
+                  <Link
+                    href="/admin/dashboard"
+                    className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >
+                    Admin
+                  </Link>
+                )}
               </div>
             )}
           </div>

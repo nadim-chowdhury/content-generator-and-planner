@@ -19,8 +19,8 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const { user, token } = await authApi.signup(email, password);
-      setAuth(user, token);
+      const { user, token, refreshToken } = await authApi.signup(email, password);
+      setAuth(user, token, refreshToken);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed. Please try again.');

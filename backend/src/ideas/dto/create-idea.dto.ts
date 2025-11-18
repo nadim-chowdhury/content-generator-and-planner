@@ -11,6 +11,10 @@ export class CreateIdeaDto {
 
   @IsString()
   @IsOptional()
+  hook?: string;
+
+  @IsString()
+  @IsOptional()
   script?: string;
 
   @IsString()
@@ -21,6 +25,20 @@ export class CreateIdeaDto {
   @IsString({ each: true })
   @IsOptional()
   hashtags?: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  categoryTags?: string[];
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  customTags?: string[]; // User-defined custom tags
+
+  @IsString()
+  @IsOptional()
+  folderId?: string; // Folder/collection to organize ideas
 
   @IsString()
   @IsNotEmpty()
@@ -45,5 +63,17 @@ export class CreateIdeaDto {
   @Max(100)
   @IsOptional()
   viralScore?: number;
+
+  @IsString()
+  @IsOptional()
+  thumbnailSuggestion?: string;
+
+  @IsString()
+  @IsOptional()
+  platformOptimization?: string;
+
+  @IsString()
+  @IsOptional()
+  language?: string; // Language code (default: 'en')
 }
 

@@ -13,7 +13,7 @@ import { ConnectPlatformDto } from './dto/connect-platform.dto';
 import { ConnectFacebookPageDto } from './dto/facebook-pages.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { SocialPlatform } from '@prisma/client';
+import { SocialPlatform } from './dto/connect-platform.dto';
 
 @Controller('api/social')
 @UseGuards(JwtAuthGuard)

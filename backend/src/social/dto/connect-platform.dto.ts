@@ -1,5 +1,17 @@
 import { IsEnum, IsString, IsOptional, IsBoolean } from 'class-validator';
-import { SocialPlatform } from '@prisma/client';
+
+export enum SocialPlatform {
+  FACEBOOK = 'FACEBOOK',
+  TWITTER = 'TWITTER',
+  INSTAGRAM = 'INSTAGRAM',
+  THREADS = 'THREADS',
+  LINKEDIN = 'LINKEDIN',
+  REDDIT = 'REDDIT',
+  QUORA = 'QUORA',
+  PINTEREST = 'PINTEREST',
+  TIKTOK = 'TIKTOK',
+  YOUTUBE = 'YOUTUBE',
+}
 
 export class ConnectPlatformDto {
   @IsEnum(SocialPlatform)

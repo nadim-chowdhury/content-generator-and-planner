@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { SocialPlatform } from '@prisma/client';
-import { ConnectPlatformDto } from './dto/connect-platform.dto';
+import { ConnectPlatformDto, SocialPlatform } from './dto/connect-platform.dto';
 import { FacebookService } from './facebook.service';
 import { ConnectFacebookPageDto } from './dto/facebook-pages.dto';
 
@@ -91,7 +90,7 @@ export class SocialService {
     return this.prisma.socialConnection.findMany({
       where: {
         userId,
-        platform: 'FACEBOOK',
+        platform: SocialPlatform.FACEBOOK,
         isActive: true,
       },
       select: {
@@ -196,11 +195,12 @@ export class SocialService {
     if (posted) {
       // Update idea to mark as posted
       const postedTo = idea.postedTo || [];
-      if (!postedTo.includes(platform)) {
+      const platformStr = connection.platform;
+      if (!postedTo.includes(platformStr)) {
         await this.prisma.idea.update({
           where: { id: ideaId },
           data: {
-            postedTo: [...postedTo, platform],
+            postedTo: [...postedTo, platformStr],
             status: 'POSTED',
           },
         });
@@ -233,7 +233,7 @@ export class SocialService {
 
       // Connect the page
       return this.connectPlatform(userId, {
-        platform: 'FACEBOOK',
+        platform: SocialPlatform.FACEBOOK,
         accessToken: dto.pageAccessToken,
         pageId: dto.pageId,
         pageName: dto.pageName || page.name,

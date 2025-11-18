@@ -19,10 +19,23 @@ enum UserPlan {
   AGENCY
 }
 
+enum UserRole {
+  USER
+  ADMIN
+}
+
 enum IdeaStatus {
   DRAFT
   SCHEDULED
   POSTED
+  ARCHIVED
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
 }
 
 enum SocialPlatform {
@@ -41,61 +54,221 @@ enum SocialPlatform {
 model User {
   id                    String    @id @default(cuid())
   email                 String    @unique
-  passwordHash          String
+  name                  String?
+  profileImage          String?   @db.Text
+  passwordHash          String?
   emailVerified         Boolean   @default(false)
   emailVerificationToken String?  @unique
   passwordResetToken    String?   @unique
   passwordResetExpires  DateTime?
   plan                  UserPlan  @default(FREE)
+  role                  UserRole  @default(USER)
   stripeCustomerId      String?   @unique
   stripeSubscriptionId  String?   @unique
+  // Lifetime deal (AppSumo)
+  lifetimeDeal         Boolean   @default(false)
+  appSumoLicenseKey     String?   @unique
+  lifetimeDealActivatedAt DateTime?
+  // Free trial
+  freeTrialUsed         Boolean   @default(false)
+  freeTrialStartedAt    DateTime?
+  freeTrialEndsAt       DateTime?
+  // Usage tracking
+  dailyAiGenerations    Int       @default(0)
+  lastGenerationReset   DateTime? // For resetting daily count
+  // Social login
+  googleId              String?   @unique
+  facebookId            String?   @unique
+  githubId              String?   @unique
+  // 2FA
+  twoFactorEnabled      Boolean   @default(false)
+  twoFactorSecret       String?
+  // Magic link
+  magicLinkToken        String?   @unique
+  magicLinkExpires      DateTime?
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
   ideas                 Idea[]
+  tasks                 Task[]
+  kanbanCards           KanbanCard[]
+  kanbanComments        KanbanComment[]
+  contentAnalytics       ContentAnalytics[]
+  notifications         Notification[]
   sessions              Session[]
   socialConnections     SocialConnection[]
+  loginActivities       LoginActivity[]
+  // Team management (Agency)
+  ownedTeams            Team[]    @relation("TeamOwner")
+  teamMemberships       TeamMember[]
+  // Notification preferences
+  notificationPreferences NotificationPreference?
 
   @@map("users")
+}
+
+model Team {
+  id          String   @id @default(cuid())
+  name        String
+  ownerId     String
+  owner       User     @relation("TeamOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members     TeamMember[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([ownerId])
+  @@map("teams")
+}
+
+model TeamMember {
+  id        String   @id @default(cuid())
+  teamId    String
+  userId    String
+  role      String   @default("MEMBER") // MEMBER, ADMIN
+  invitedBy String?
+  joinedAt  DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+  @@index([teamId])
+  @@map("team_members")
 }
 
 model Session {
   id        String   @id @default(cuid())
   userId    String
   token     String   @unique
+  refreshToken String? @unique
   expiresAt DateTime
+  refreshTokenExpiresAt DateTime?
+  deviceInfo String?  // Device name, browser, OS
+  ipAddress  String?
+  userAgent  String?
+  createdAt DateTime @default(now())
+  lastUsedAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([token])
+  @@index([refreshToken])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model IpThrottle {
+  id        String   @id @default(cuid())
+  ipAddress String   @unique
+  attempts  Int      @default(1)
+  blocked   Boolean  @default(false)
+  blockedUntil DateTime?
+  lastAttempt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([ipAddress])
+  @@index([blocked])
+  @@index([blockedUntil])
+  @@map("ip_throttles")
+}
+
+model SpamPrevention {
+  id        String   @id @default(cuid())
+  identifier String  // email, IP, or userId
+  type      String   // 'email', 'ip', 'user'
+  attempts  Int      @default(1)
+  blocked   Boolean  @default(false)
+  blockedUntil DateTime?
+  lastAttempt DateTime @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([identifier, type])
+  @@index([identifier, type])
+  @@index([blocked])
+  @@index([blockedUntil])
+  @@map("spam_prevention")
+}
+
+model LoginActivity {
+  id        String   @id @default(cuid())
+  userId    String
+  loginType String   // 'password', 'google', 'facebook', 'github', 'magic_link'
+  success   Boolean
+  ipAddress String?
+  userAgent String?
+  deviceInfo String?
+  failureReason String?
   createdAt DateTime @default(now())
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@map("sessions")
+  @@index([userId])
+  @@index([createdAt])
+  @@map("login_activities")
 }
 
 model Idea {
-  id          String     @id @default(cuid())
-  userId      String
-  title       String
-  description String?    @db.Text
-  script      String?    @db.Text
-  caption     String?    @db.Text
-  hashtags    String[]   @default([])
-  platform    String
-  niche        String
-  tone         String
-  duration     Int?       // Estimated duration in seconds
-  scheduledAt  DateTime?
-  status       IdeaStatus @default(DRAFT)
-  viralScore   Int?       // 0-100
-  postedTo     String[]   @default([]) // Platforms where this was posted
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
+  id                  String     @id @default(cuid())
+  userId              String
+  title               String
+  description         String?    @db.Text
+  hook                String?    @db.Text // Attention-grabbing hook
+  script              String?    @db.Text
+  caption             String?    @db.Text
+  hashtags            String[]   @default([])
+  categoryTags        String[]   @default([]) // Category/topic tags
+  customTags          String[]   @default([]) // User-defined custom tags
+  platform            String
+  niche               String
+  tone                String
+  language            String     @default("en") // Language code (en, bn, hi, ar, es, etc.)
+  duration            Int?       // Estimated duration in seconds (for video platforms)
+  scheduledAt         DateTime?
+  status              IdeaStatus @default(DRAFT)
+  viralScore          Int?       // 0-100
+  postedTo            String[]   @default([]) // Platforms where this was posted
+  thumbnailSuggestion String?    @db.Text // Description for thumbnail generation
+  platformOptimization String?   @db.Text // Platform-specific optimization notes
+  folderId            String?    // Folder/collection this idea belongs to
+  archivedAt          DateTime? // When idea was archived
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder              IdeaFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  kanbanCards         KanbanCard[]
+  analytics           ContentAnalytics[]
 
   @@index([userId])
   @@index([scheduledAt])
   @@index([status])
+  @@index([platform])
+  @@index([niche])
+  @@index([folderId])
+  @@index([userId, status])
   @@map("ideas")
+}
+
+model IdeaFolder {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  color       String?  // Hex color for folder
+  icon        String?  // Icon identifier
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ideas       Idea[]
+
+  @@index([userId])
+  @@map("idea_folders")
 }
 
 model IdeaGeneration {
@@ -135,4 +308,223 @@ model SocialConnection {
   @@index([platform])
   @@index([userId, platform])
   @@map("social_connections")
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  userId      String
+  title       String
+  description String?    @db.Text
+  platform    String?
+  deadline    DateTime?
+  status      TaskStatus @default(TODO)
+  attachments String[]   @default([]) // URLs or file paths
+  tags        String[]   @default([])
+  viralScore  Int?       // 0-100
+  notes       String?    @db.Text
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  completedAt DateTime?
+
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([deadline])
+  @@index([userId, status])
+  @@index([userId, deadline])
+  @@map("tasks")
+}
+
+enum NotificationType {
+  EMAIL
+  PUSH
+  IN_APP
+}
+
+enum NotificationCategory {
+  UPCOMING_CONTENT
+  TASK_REMINDER
+  DEADLINE_ALERT
+  SYSTEM
+  ACHIEVEMENT
+}
+
+model Notification {
+  id          String             @id @default(cuid())
+  userId      String
+  type        NotificationType
+  category    NotificationCategory
+  title       String
+  message     String             @db.Text
+  read        Boolean            @default(false)
+  readAt      DateTime?
+  metadata    Json?              // Additional data (e.g., ideaId, taskId)
+  createdAt   DateTime           @default(now())
+
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, read])
+  @@index([userId, createdAt])
+  @@index([category])
+  @@map("notifications")
+}
+
+model WebhookEvent {
+  id          String   @id @default(cuid())
+  eventId     String   @unique // Stripe event ID
+  eventType   String   // Stripe event type
+  userId      String?  // User ID if available
+  processed   Boolean  @default(false)
+  processedAt DateTime?
+  data        Json     // Full event data
+  error       String?  @db.Text
+  createdAt   DateTime @default(now())
+
+  @@index([eventId])
+  @@index([eventType])
+  @@index([userId])
+  @@index([processed])
+  @@map("webhook_events")
+}
+
+model NotificationPreference {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  emailEnabled          Boolean  @default(true)
+  pushEnabled           Boolean  @default(false)
+  inAppEnabled          Boolean  @default(true)
+  upcomingContentAlerts Boolean  @default(true)
+  taskReminders         Boolean  @default(true)
+  deadlineAlerts        Boolean  @default(true)
+  systemNotifications   Boolean  @default(true)
+  achievementAlerts     Boolean  @default(true)
+  emailReminderHours    Int[]    @default([24, 2]) // Hours before deadline to send reminder
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("notification_preferences")
+}
+
+enum KanbanStage {
+  IDEAS
+  DRAFTING
+  EDITING
+  READY
+  SCHEDULED
+  POSTED
+}
+
+model KanbanCard {
+  id          String       @id @default(cuid())
+  userId      String
+  title       String
+  description String?      @db.Text
+  stage       KanbanStage  @default(IDEAS)
+  position    Int          @default(0) // Order within stage
+  ideaId      String?      // Link to idea if created from idea
+  color       String?      // Card color
+  dueDate     DateTime?
+  attachments String[]     @default([]) // URLs or file paths
+  assignedTo  String[]      @default([]) // User IDs
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  idea        Idea?       @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+  checklists  KanbanChecklist[]
+  comments    KanbanComment[]
+
+  @@index([userId])
+  @@index([userId, stage])
+  @@index([stage])
+  @@index([ideaId])
+  @@map("kanban_cards")
+}
+
+model KanbanChecklist {
+  id        String   @id @default(cuid())
+  cardId    String
+  title     String
+  items     Json     // Array of { id, text, completed }
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  card      KanbanCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+  @@map("kanban_checklists")
+}
+
+model KanbanComment {
+  id        String   @id @default(cuid())
+  cardId    String
+  userId    String
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  card      KanbanCard @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+  @@index([userId])
+  @@map("kanban_comments")
+}
+
+model ContentAnalytics {
+  id                    String   @id @default(cuid())
+  userId                String
+  ideaId                String?  // Link to idea if available
+  platform              String
+  category              String?  // Content category/tag
+  niche                 String?
+  
+  // Performance metrics (can be manual or from API)
+  reach                 Int?     // Actual or predicted reach
+  impressions           Int?     // Actual or predicted impressions
+  engagement            Int?     // Actual or predicted engagement (likes, comments, shares)
+  likes                 Int?
+  comments              Int?
+  shares                Int?
+  views                 Int?     // For video platforms
+  clicks                Int?
+  saves                 Int?     // For platforms like Instagram
+  
+  // Predicted metrics (AI-generated)
+  predictedReach        Int?
+  predictedEngagement   Int?
+  reachPotential        Int?     // 0-100 score
+  engagementScore       Int?     // 0-100 score
+  
+  // Platform performance
+  platformScore         Int?     // 0-100 overall platform performance
+  
+  // Category performance
+  categoryScore         Int?     // 0-100 category performance
+  
+  // Metadata
+  postedAt              DateTime?
+  recordedAt            DateTime @default(now())
+  source                String   @default("MANUAL") // MANUAL, API, PREDICTED
+  notes                 String?  @db.Text
+  
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  idea                  Idea?    @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([ideaId])
+  @@index([platform])
+  @@index([category])
+  @@index([userId, platform])
+  @@index([userId, category])
+  @@index([recordedAt])
+  @@map("content_analytics")
 }

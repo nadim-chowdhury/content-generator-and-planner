@@ -1,0 +1,47 @@
+
+> backend@0.0.1 build
+> nest build
+
+[96msrc/auth/auth.service.ts[0m:[93m28[0m:[93m32[0m - [91merror[0m[90m TS2304: [0mCannot find name 'IpThrottleService'.
+
+[7m28[0m     private ipThrottleService: IpThrottleService,
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/auth.service.ts[0m:[93m29[0m:[93m36[0m - [91merror[0m[90m TS2304: [0mCannot find name 'SpamPreventionService'.
+
+[7m29[0m     private spamPreventionService: SpamPreventionService,
+[7m  [0m [91m                                   ~~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/auth/auth.service.ts[0m:[93m427[0m:[93m7[0m - [91merror[0m[90m TS2663: [0mCannot find name 'refreshToken'. Did you mean the instance member 'this.refreshToken'?
+
+[7m427[0m       refreshToken,
+[7m   [0m [91m      ~~~~~~~~~~~~[0m
+[96msrc/billing/billing.service.ts[0m:[93m7[0m:[93m10[0m - [91merror[0m[90m TS2305: [0mModule '"@prisma/client"' has no exported member 'NotificationCategory'.
+
+[7m7[0m import { NotificationCategory } from '@prisma/client';
+[7m [0m [91m         ~~~~~~~~~~~~~~~~~~~~[0m
+[96msrc/billing/billing.service.ts[0m:[93m406[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'subscription' does not exist on type 'Invoice'.
+
+[7m406[0m     if (typeof invoice.subscription === 'string') {
+[7m   [0m [91m                       ~~~~~~~~~~~~[0m
+[96msrc/billing/billing.service.ts[0m:[93m407[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'subscription' does not exist on type 'Invoice'.
+
+[7m407[0m       subscriptionId = invoice.subscription;
+[7m   [0m [91m                               ~~~~~~~~~~~~[0m
+[96msrc/billing/billing.service.ts[0m:[93m408[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'subscription' does not exist on type 'Invoice'.
+
+[7m408[0m     } else if (invoice.subscription && typeof invoice.subscription === 'object' && 'id' in invoice.subscription) {
+[7m   [0m [91m                       ~~~~~~~~~~~~[0m
+[96msrc/billing/billing.service.ts[0m:[93m408[0m:[93m55[0m - [91merror[0m[90m TS2339: [0mProperty 'subscription' does not exist on type 'Invoice'.
+
+[7m408[0m     } else if (invoice.subscription && typeof invoice.subscription === 'object' && 'id' in invoice.subscription) {
+[7m   [0m [91m                                                      ~~~~~~~~~~~~[0m
+[96msrc/billing/billing.service.ts[0m:[93m408[0m:[93m100[0m - [91merror[0m[90m TS2339: [0mProperty 'subscription' does not exist on type 'Invoice'.
+
+[7m408[0m     } else if (invoice.subscription && typeof invoice.subscription === 'object' && 'id' in invoice.subscription) {
+[7m   [0m [91m                                                                                                   ~~~~~~~~~~~~[0m
+[96msrc/billing/billing.service.ts[0m:[93m409[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'subscription' does not exist on type 'Invoice'.
+
+[7m409[0m       subscriptionId = invoice.subscription.id;
+[7m   [0m [91m                               ~~~~~~~~~~~~[0m
+
+Found 10 error(s).
+
