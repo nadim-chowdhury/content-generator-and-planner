@@ -23,7 +23,7 @@ export default function TeamsPage() {
     try {
       setLoading(true);
       const data = await teamsApi.getTeams();
-      setTeams(data);
+      setTeams([...data.owned, ...data.memberOf]);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to load teams');
     } finally {
@@ -155,4 +155,5 @@ export default function TeamsPage() {
     </ProtectedRoute>
   );
 }
+
 

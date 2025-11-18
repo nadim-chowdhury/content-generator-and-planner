@@ -13,8 +13,10 @@ export default function AccountSettingsPage() {
   const [password, setPassword] = useState('');
   const [confirmDelete, setConfirmDelete] = useState('');
   const [loading, setLoading] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const [error, setError] = useState('');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [hardDelete, setHardDelete] = useState(false);
 
   const handleDeleteAccount = async () => {
     if (confirmDelete !== 'DELETE') {
@@ -26,7 +28,7 @@ export default function AccountSettingsPage() {
     setLoading(true);
 
     try {
-      await authApi.deleteAccount(password || undefined);
+      await authApi.deleteAccount(password || undefined, hardDelete);
       clearAuth();
       alert('Your account has been deleted successfully.');
       router.push('/');
@@ -34,6 +36,26 @@ export default function AccountSettingsPage() {
       setError(err.response?.data?.message || 'Failed to delete account');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleExportData = async () => {
+    setExporting(true);
+    try {
+      const data = await authApi.exportData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `my-data-export-${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Failed to export data');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -46,6 +68,33 @@ export default function AccountSettingsPage() {
             Account Settings
           </h1>
 
+          {/* GDPR Data Export */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Your Data (GDPR)
+            </h2>
+
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+                  Export Your Data
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                  Download a copy of all your personal data in JSON format. This includes your profile,
+                  ideas, tasks, analytics, and all other data associated with your account.
+                </p>
+              </div>
+
+              <button
+                onClick={handleExportData}
+                disabled={exporting}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {exporting ? 'Exporting...' : 'Export My Data'}
+              </button>
+            </div>
+          </div>
+
           {/* Danger Zone */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
             <h2 className="text-xl font-semibold text-red-600 dark:text-red-400 mb-4">
@@ -55,12 +104,19 @@ export default function AccountSettingsPage() {
             <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
               <div className="mb-4">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                  Delete Account
+                  Delete Account (GDPR Compliant)
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                  Once you delete your account, there is no going back. Please be certain.
-                  All your data, ideas, and content will be permanently deleted.
+                  You have the right to request deletion of your account and personal data (GDPR Article 17).
+                  By default, we anonymize your data to comply with legal requirements. You can choose
+                  permanent deletion, but this may violate data retention laws.
                 </p>
+                <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-3 mb-4">
+                  <p className="text-sm text-blue-800 dark:text-blue-200">
+                    <strong>Note:</strong> We recommend exporting your data before deletion. 
+                    Account deletion is irreversible.
+                  </p>
+                </div>
               </div>
 
               <button
@@ -87,8 +143,30 @@ export default function AccountSettingsPage() {
                 )}
 
                 <div className="space-y-4">
+                  <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded p-3">
+                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                      <strong>GDPR Notice:</strong> By default, your data will be anonymized (soft delete)
+                      to comply with legal and business requirements. Personal identifiers will be removed,
+                      but some anonymized data may be retained for legal/audit purposes.
+                    </p>
+                  </div>
+
+                  <div>
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={hardDelete}
+                        onChange={(e) => setHardDelete(e.target.checked)}
+                        className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                      />
+                      <span className="text-sm text-gray-700 dark:text-gray-300">
+                        <strong>Permanent deletion</strong> - Remove all data completely (may violate data retention laws)
+                      </span>
+                    </label>
+                  </div>
+
                   <p className="text-sm text-gray-600 dark:text-gray-400">
-                    This action cannot be undone. This will permanently delete your account
+                    This action cannot be undone. This will {hardDelete ? 'permanently delete' : 'anonymize'} your account
                     and all associated data.
                   </p>
 
@@ -128,6 +206,7 @@ export default function AccountSettingsPage() {
                       setShowDeleteModal(false);
                       setPassword('');
                       setConfirmDelete('');
+                      setHardDelete(false);
                       setError('');
                     }}
                     className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"

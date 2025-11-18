@@ -24,3 +24,4 @@ export class TrendingTopicsDto {
   timeFrame?: string; // 'daily', 'weekly', 'monthly'
 }
 
+

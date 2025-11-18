@@ -9,6 +9,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { TeamsService } from './teams.service';
+import { WorkspaceService } from './services/workspace.service';
+import { TeamActivityService } from './services/team-activity.service';
 import { CreateTeamDto } from './dto/create-team.dto';
 import { InviteMemberDto } from './dto/invite-member.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
@@ -22,7 +24,11 @@ import { CurrentUser } from '../auth/decorators/current-user.decorator';
 @UseGuards(JwtAuthGuard, PlansGuard)
 @Plans('AGENCY')
 export class TeamsController {
-  constructor(private readonly teamsService: TeamsService) {}
+  constructor(
+    private readonly teamsService: TeamsService,
+    private readonly workspaceService: WorkspaceService,
+    private readonly teamActivityService: TeamActivityService,
+  ) {}
 
   @Post()
   async createTeam(
@@ -72,7 +78,7 @@ export class TeamsController {
       teamId,
       user.id,
       inviteMemberDto.email,
-      inviteMemberDto.role || 'MEMBER',
+      inviteMemberDto.role || 'EDITOR',
     );
   }
 
@@ -107,5 +113,36 @@ export class TeamsController {
   ) {
     return this.teamsService.leaveTeam(teamId, user.id);
   }
+
+  // Workspace endpoints
+  @Post('workspace/switch')
+  async switchWorkspace(
+    @CurrentUser() user: any,
+    @Body('workspaceId') workspaceId: string,
+  ) {
+    return this.workspaceService.switchWorkspace(user.id, workspaceId);
+  }
+
+  @Get('workspace/current')
+  async getCurrentWorkspace(@CurrentUser() user: any) {
+    return this.workspaceService.getCurrentWorkspace(user.id);
+  }
+
+  @Post('workspace/clear')
+  async clearWorkspace(@CurrentUser() user: any) {
+    return this.workspaceService.clearWorkspace(user.id);
+  }
+
+  // Team activities
+  @Get(':teamId/activities')
+  async getTeamActivities(
+    @Param('teamId') teamId: string,
+    @CurrentUser() user: any,
+  ) {
+    // Verify user has access
+    await this.teamsService.getTeam(teamId, user.id);
+    return this.teamActivityService.getTeamActivities(teamId);
+  }
 }
+
 

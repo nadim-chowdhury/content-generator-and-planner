@@ -18,7 +18,7 @@ export default function TeamDetailPage() {
   const [error, setError] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<'MEMBER' | 'ADMIN'>('MEMBER');
+  const [inviteRole, setInviteRole] = useState<'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN'>('EDITOR');
 
   useEffect(() => {
     loadTeam();
@@ -41,7 +41,7 @@ export default function TeamDetailPage() {
     try {
       await teamsApi.inviteMember(teamId, inviteEmail, inviteRole);
       setInviteEmail('');
-      setInviteRole('MEMBER');
+      setInviteRole('EDITOR');
       setShowInviteModal(false);
       await loadTeam();
       alert('Invitation sent!');
@@ -50,7 +50,7 @@ export default function TeamDetailPage() {
     }
   };
 
-  const handleUpdateRole = async (memberId: string, role: 'MEMBER' | 'ADMIN') => {
+  const handleUpdateRole = async (memberId: string, role: 'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN') => {
     try {
       await teamsApi.updateMemberRole(teamId, memberId, role);
       await loadTeam();
@@ -72,7 +72,7 @@ export default function TeamDetailPage() {
   };
 
   const isOwner = team?.ownerId === user?.id;
-  const isTeamAdmin = team?.members.some(m => m.userId === user?.id && m.role === 'ADMIN');
+  const isTeamAdmin = team?.members.some(m => m.userId === user?.id && (m.role === 'ADMIN' || m.role === 'MANAGER'));
 
   return (
     <ProtectedRoute>
@@ -180,15 +180,19 @@ export default function TeamDetailPage() {
                               {(isOwner || isTeamAdmin) && member.userId !== team.ownerId ? (
                                 <select
                                   value={member.role}
-                                  onChange={(e) => handleUpdateRole(member.id, e.target.value as 'MEMBER' | 'ADMIN')}
+                                  onChange={(e) => handleUpdateRole(member.id, e.target.value as 'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN')}
                                   className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 >
-                                  <option value="MEMBER">MEMBER</option>
+                                  <option value="VIEWER">VIEWER</option>
+                                  <option value="EDITOR">EDITOR</option>
+                                  <option value="MANAGER">MANAGER</option>
                                   <option value="ADMIN">ADMIN</option>
                                 </select>
                               ) : (
                                 <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  member.role === 'ADMIN' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                  member.role === 'ADMIN' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
+                                  member.role === 'MANAGER' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
+                                  member.role === 'EDITOR' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
                                   'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
                                 }`}>
                                   {member.role}
@@ -246,11 +250,13 @@ export default function TeamDetailPage() {
                       </label>
                       <select
                         value={inviteRole}
-                        onChange={(e) => setInviteRole(e.target.value as 'MEMBER' | 'ADMIN')}
+                        onChange={(e) => setInviteRole(e.target.value as 'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN')}
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
                       >
-                        <option value="MEMBER">MEMBER</option>
-                        <option value="ADMIN">ADMIN</option>
+                        <option value="VIEWER">VIEWER - Can only view content</option>
+                        <option value="EDITOR">EDITOR - Can create and edit content</option>
+                        <option value="MANAGER">MANAGER - Can manage team members</option>
+                        <option value="ADMIN">ADMIN - Full access</option>
                       </select>
                     </div>
                     <div className="flex justify-end space-x-4">
@@ -259,7 +265,7 @@ export default function TeamDetailPage() {
                         onClick={() => {
                           setShowInviteModal(false);
                           setInviteEmail('');
-                          setInviteRole('MEMBER');
+                          setInviteRole('EDITOR');
                         }}
                         className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
                       >
@@ -282,4 +288,5 @@ export default function TeamDetailPage() {
     </ProtectedRoute>
   );
 }
+
 

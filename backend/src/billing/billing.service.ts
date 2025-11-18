@@ -4,6 +4,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import Stripe from 'stripe';
 import { PlanType } from './dto/create-checkout.dto';
 import { NotificationsService } from '../notifications/notifications.service';
+import { EmailService } from '../email/email.service';
+import { Decimal } from '@prisma/client/runtime/library';
 import * as crypto from 'crypto';
 
 enum NotificationCategory {
@@ -29,6 +31,7 @@ export class BillingService {
     private prisma: PrismaService,
     private configService: ConfigService,
     private notificationsService: NotificationsService,
+    private emailService: EmailService,
   ) {
     this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2025-10-29.clover',
@@ -275,6 +278,33 @@ export class BillingService {
       where: { id: userId },
       data: updateData,
     });
+
+    // Create affiliate commission if user was referred by an affiliate
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { referredByAffiliate: true },
+    });
+
+    if (user?.referredByAffiliate) {
+      try {
+        const subscription = await this.stripe.subscriptions.retrieve(
+          session.subscription as string,
+        );
+        const subscriptionAmount = subscription.items.data[0]?.price?.unit_amount
+          ? subscription.items.data[0].price.unit_amount / 100
+          : 0;
+
+        if (subscriptionAmount > 0) {
+          await this.createAffiliateCommission(
+            user.referredByAffiliate,
+            subscription.id,
+            subscriptionAmount,
+          );
+        }
+      } catch (error: any) {
+        this.logger.error(`Failed to create affiliate commission: ${error.message}`);
+      }
+    }
   }
 
   /**
@@ -327,9 +357,61 @@ export class BillingService {
         data: updateData,
       });
 
+      // Create affiliate commission if user was referred by an affiliate
+      if (user.referredByAffiliate) {
+        try {
+          const subscriptionAmount = subscription.items.data[0]?.price?.unit_amount
+            ? subscription.items.data[0].price.unit_amount / 100
+            : 0;
+
+          if (subscriptionAmount > 0) {
+            await this.createAffiliateCommission(
+              user.referredByAffiliate,
+              subscription.id,
+              subscriptionAmount,
+            );
+          }
+        } catch (error: any) {
+          this.logger.error(`Failed to create affiliate commission: ${error.message}`);
+        }
+      }
+
       // Send notification
       await this.sendSubscriptionActivatedNotification(user.id, targetPlan, subscription.status === 'trialing');
     }
+  }
+
+  /**
+   * Create affiliate commission (helper method)
+   */
+  private async createAffiliateCommission(
+    affiliateId: string,
+    orderId: string,
+    amount: number,
+  ): Promise<void> {
+    const affiliate = await this.prisma.user.findUnique({
+      where: { id: affiliateId },
+    });
+
+    if (!affiliate || !affiliate.isAffiliate || !affiliate.affiliateApproved) {
+      return; // Invalid affiliate
+    }
+
+    const commissionPercentage = 20; // 20% default
+    const commissionAmount = (amount * commissionPercentage) / 100;
+
+    await this.prisma.affiliateCommission.create({
+      data: {
+        affiliateId,
+        orderId,
+        amount: new Decimal(commissionAmount),
+        percentage: new Decimal(commissionPercentage),
+        status: 'PENDING',
+        description: `Commission for subscription ${orderId}`,
+      },
+    });
+
+    this.logger.log(`Affiliate commission created: ${affiliateId} - $${commissionAmount}`);
   }
 
   /**
@@ -446,6 +528,7 @@ export class BillingService {
 
     const user = await this.prisma.user.findUnique({
       where: { stripeCustomerId: customerId },
+      select: { id: true, email: true, name: true, freeTrialEndsAt: true },
     });
 
     if (!user) {
@@ -456,6 +539,25 @@ export class BillingService {
     // Send notification
     const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
     await this.sendTrialEndingNotification(user.id, trialEnd);
+
+    // Send email
+    if (user.freeTrialEndsAt) {
+      const now = new Date();
+      const trialEndDate = new Date(user.freeTrialEndsAt);
+      const daysRemaining = Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (daysRemaining > 0 && daysRemaining <= 3) {
+        await this.emailService.queueEmail(
+          user.email,
+          `Your Trial Ends in ${daysRemaining} Day${daysRemaining !== 1 ? 's' : ''}`,
+          'trial-expiring',
+          {
+            userName: user.name || 'User',
+            daysRemaining,
+          },
+        );
+      }
+    }
   }
 
   async getSubscriptionStatus(userId: string) {
@@ -813,11 +915,21 @@ export class BillingService {
    */
   private async sendPaymentSucceededNotification(userId: string, amount: number, currency: string, invoiceUrl?: string | null) {
     try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        select: { email: true, name: true, plan: true },
+      });
+
+      if (!user) {
+        return;
+      }
+
       const formattedAmount = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: currency.toUpperCase(),
       }).format(amount / 100);
 
+      const planName = user.plan === UserPlan.AGENCY ? 'Agency' : user.plan === UserPlan.PRO ? 'Pro' : 'Premium';
       const title = 'Payment Successful';
       const message = `Your payment of ${formattedAmount} has been processed successfully. Thank you for your subscription!`;
 
@@ -827,6 +939,19 @@ export class BillingService {
         title,
         message,
         { amount, currency, invoiceUrl },
+      );
+
+      // Send email
+      await this.emailService.queueEmail(
+        user.email,
+        'Payment Successful - Thank You!',
+        'payment-success',
+        {
+          userName: user.name || 'User',
+          planName,
+          amount,
+          invoiceUrl,
+        },
       );
     } catch (error) {
       this.logger.error('Failed to send payment succeeded notification:', error);

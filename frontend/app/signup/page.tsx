@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { authApi } from '@/lib/auth';
 import { useAuthStore } from '@/store/auth-store';
@@ -12,6 +12,20 @@ export default function SignupPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [referralCode, setReferralCode] = useState<string | null>(null);
+  const [affiliateCode, setAffiliateCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get referral and affiliate codes from URL params
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const ref = params.get('ref');
+      const aff = params.get('aff');
+      if (ref) setReferralCode(ref);
+      if (aff) setAffiliateCode(aff);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,9 +33,23 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      const { user, token, refreshToken } = await authApi.signup(email, password);
+      const { user, token, refreshToken } = await authApi.signup(
+        email,
+        password,
+        referralCode || undefined,
+        affiliateCode || undefined,
+      );
       setAuth(user, token, refreshToken);
-      router.push('/dashboard');
+      
+      // Show success message about email verification
+      if (!user.emailVerified) {
+        setSuccess(true);
+        setTimeout(() => {
+          router.push('/dashboard');
+        }, 5000);
+      } else {
+        router.push('/dashboard');
+      }
     } catch (err: any) {
       setError(err.response?.data?.message || 'Signup failed. Please try again.');
     } finally {
@@ -37,12 +65,33 @@ export default function SignupPage() {
             Create your account
           </h2>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
-              {error}
+        {success ? (
+          <div className="mt-8 space-y-6">
+            <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded">
+              <h3 className="font-semibold mb-2">Account Created Successfully!</h3>
+              <p className="text-sm">
+                We've sent a verification email to <strong>{email}</strong>. Please check your inbox and click the verification link to activate your account.
+              </p>
+              <p className="text-sm mt-2">
+                Redirecting to dashboard in a few seconds...
+              </p>
             </div>
-          )}
+            <div className="text-center">
+              <a
+                href="/dashboard"
+                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
+              >
+                Go to Dashboard
+              </a>
+            </div>
+          </div>
+        ) : (
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {error && (
+              <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
+                {error}
+              </div>
+            )}
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
@@ -98,6 +147,7 @@ export default function SignupPage() {
             </a>
           </div>
         </form>
+        )}
       </div>
     </div>
   );

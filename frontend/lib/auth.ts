@@ -28,7 +28,9 @@ export interface Session {
   ipAddress?: string;
   userAgent?: string;
   createdAt: string;
-  lastActivity?: string;
+  lastUsedAt?: string;
+  expiresAt?: string;
+  isCurrent?: boolean;
 }
 
 export interface LoginActivity {
@@ -48,10 +50,12 @@ export interface TwoFactorSetup {
 }
 
 export const authApi = {
-  signup: async (email: string, password: string): Promise<AuthResponse> => {
+  signup: async (email: string, password: string, referralCode?: string, affiliateCode?: string): Promise<AuthResponse> => {
     const { data } = await api.post<AuthResponse>('/api/auth/signup', {
       email,
       password,
+      referralCode,
+      affiliateCode,
     });
     return data;
   },
@@ -182,10 +186,17 @@ export const authApi = {
     return data;
   },
 
-  // Delete Account
-  deleteAccount: async (password?: string): Promise<{ message: string }> => {
-    const config = password ? { data: { password } } : {};
-    const { data } = await api.delete<{ message: string }>('/api/auth/account', config);
+  // Delete Account (GDPR-compliant)
+  deleteAccount: async (password?: string, hardDelete: boolean = false): Promise<{ message: string }> => {
+    const { data } = await api.delete<{ message: string }>('/api/auth/account', {
+      data: { password, hardDelete },
+    });
+    return data;
+  },
+
+  // GDPR Data Export
+  exportData: async (): Promise<any> => {
+    const { data } = await api.get<any>('/api/auth/export-data');
     return data;
   },
 

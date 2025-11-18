@@ -1,89 +1,131 @@
 'use client';
 
-import { useEffect, useState, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { authApi } from '@/lib/auth';
-import { useAuthStore } from '@/store/auth-store';
+import Navbar from '@/components/Navbar';
+import Link from 'next/link';
 
-function VerifyEmailForm() {
-  const router = useRouter();
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
-  const { setAuth } = useAuthStore();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const router = useRouter();
+  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const token = searchParams.get('token');
-    if (!token) {
-      setError('Invalid verification link. No token provided.');
-      setLoading(false);
-      return;
+    if (token) {
+      verifyEmail(token);
+    } else {
+      setStatus('error');
+      setMessage('Verification token is missing');
     }
-
-    verifyEmail(token);
   }, [searchParams]);
 
   const verifyEmail = async (token: string) => {
     try {
-      const { user, token: authToken } = await authApi.verifyEmail(token);
-      setAuth(user, authToken);
-      setSuccess(true);
+      setStatus('loading');
+      await authApi.verifyEmail(token);
+      setStatus('success');
+      setMessage('Your email has been verified successfully!');
+      // Redirect to login after 3 seconds
       setTimeout(() => {
-        router.push('/dashboard');
-      }, 2000);
+        router.push('/login');
+      }, 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid or expired verification link');
-      setLoading(false);
+      setStatus('error');
+      setMessage(err.response?.data?.message || 'Failed to verify email. The link may have expired.');
     }
   };
 
-  if (loading && !error && !success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Verifying email...</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-      <div className="max-w-md w-full">
-        {success ? (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded">
-            <p className="font-medium">Email Verified Successfully!</p>
-            <p className="text-sm mt-1">Your email has been verified. Redirecting to dashboard...</p>
-          </div>
-        ) : (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
-            <p className="font-medium">Verification Failed</p>
-            <p className="text-sm mt-1">{error}</p>
-            <div className="mt-4 space-x-4">
-              <a
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Navbar />
+      <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+          {status === 'loading' && (
+            <>
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Verifying Email...
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400">
+                Please wait while we verify your email address.
+              </p>
+            </>
+          )}
+
+          {status === 'success' && (
+            <>
+              <div className="mb-4">
+                <svg
+                  className="mx-auto h-12 w-12 text-green-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Email Verified!
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">{message}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                Redirecting to login page...
+              </p>
+              <Link
                 href="/login"
-                className="text-sm underline"
+                className="mt-4 inline-block text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
               >
-                Back to login
-              </a>
-              <button
-                onClick={async () => {
-                  try {
-                    await authApi.resendVerification();
-                    alert('Verification email sent! Please check your inbox.');
-                  } catch (err: any) {
-                    alert(err.response?.data?.message || 'Failed to send verification email');
-                  }
-                }}
-                className="text-sm underline"
-              >
-                Resend verification email
-              </button>
-            </div>
-          </div>
-        )}
+                Go to Login
+              </Link>
+            </>
+          )}
+
+          {status === 'error' && (
+            <>
+              <div className="mb-4">
+                <svg
+                  className="mx-auto h-12 w-12 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Verification Failed
+              </h1>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">{message}</p>
+              <div className="space-y-2">
+                <Link
+                  href="/login"
+                  className="block text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
+                >
+                  Go to Login
+                </Link>
+                <Link
+                  href="/signup"
+                  className="block text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
+                >
+                  Sign Up Again
+                </Link>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -92,12 +134,17 @@ function VerifyEmailForm() {
 export default function VerifyEmailPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-        <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Navbar />
+        <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+            <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+          </div>
+        </div>
       </div>
     }>
-      <VerifyEmailForm />
+      <VerifyEmailContent />
     </Suspense>
   );
 }
-

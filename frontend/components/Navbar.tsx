@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/auth';
+import WorkspaceSwitcher from './WorkspaceSwitcher';
 
 export default function Navbar() {
   const router = useRouter();
@@ -45,6 +46,12 @@ export default function Navbar() {
                   Ideas
                 </Link>
                 <Link
+                  href="/search"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Search
+                </Link>
+                <Link
                   href="/planner"
                   className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
@@ -81,6 +88,30 @@ export default function Navbar() {
                   Billing
                 </Link>
                 <Link
+                  href="/referrals"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Referrals
+                </Link>
+                <Link
+                  href="/affiliates"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Affiliates
+                </Link>
+                <Link
+                  href="/settings/preferences"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Preferences
+                </Link>
+                <Link
+                  href="/export-import"
+                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                >
+                  Export/Import
+                </Link>
+                <Link
                   href="/settings/security"
                   className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                 >
@@ -113,6 +144,7 @@ export default function Navbar() {
           </div>
           {user ? (
             <div className="flex items-center space-x-4">
+              {user.plan === 'AGENCY' && <WorkspaceSwitcher />}
               <span className="text-sm text-gray-700 dark:text-gray-300">
                 {user.email}
               </span>

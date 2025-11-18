@@ -90,7 +90,7 @@ export default function AdminDashboardPage() {
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                 Quick Actions
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <a
                   href="/admin/users"
                   className="px-4 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-center"
@@ -98,10 +98,28 @@ export default function AdminDashboardPage() {
                   Manage Users
                 </a>
                 <a
-                  href="/admin/teams"
+                  href="/admin/billing"
                   className="px-4 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-center"
                 >
-                  Manage Teams
+                  Billing
+                </a>
+                <a
+                  href="/admin/analytics"
+                  className="px-4 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-center"
+                >
+                  Analytics
+                </a>
+                <a
+                  href="/admin/settings"
+                  className="px-4 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-center"
+                >
+                  Settings
+                </a>
+                <a
+                  href="/admin/moderation"
+                  className="px-4 py-3 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 text-center"
+                >
+                  Moderation
                 </a>
               </div>
             </div>

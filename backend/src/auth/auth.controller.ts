@@ -239,8 +239,24 @@ export class AuthController {
   // Sessions
   @Get('sessions')
   @UseGuards(JwtAuthGuard)
-  async getSessions(@CurrentUser() user: any) {
-    return this.authService.getUserSessions(user.id);
+  async getSessions(@CurrentUser() user: any, @Req() req: any) {
+    const sessions = await this.authService.getUserSessions(user.id);
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    // Mark current session
+    if (token) {
+      const currentSession = await this.authService['prisma'].session.findFirst({
+        where: { token },
+      });
+      if (currentSession) {
+        const sessionIndex = sessions.findIndex((s: any) => s.id === currentSession.id);
+        if (sessionIndex !== -1) {
+          sessions[sessionIndex].isCurrent = true;
+        }
+      }
+    }
+    
+    return sessions;
   }
 
   @Delete('sessions/:sessionId')
@@ -317,8 +333,16 @@ export class AuthController {
   async deleteAccount(
     @CurrentUser() user: any,
     @Body('password') password?: string,
+    @Body('hardDelete') hardDelete?: boolean,
   ) {
-    return this.authService.deleteAccount(user.id, password);
+    return this.authService.deleteAccount(user.id, password, hardDelete || false);
+  }
+
+  // GDPR Data Export
+  @Get('export-data')
+  @UseGuards(JwtAuthGuard)
+  async exportData(@CurrentUser() user: any) {
+    return this.authService.exportUserData(user.id);
   }
 }
 

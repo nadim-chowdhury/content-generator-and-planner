@@ -10,3 +10,4 @@ export class DuplicateIdeaDto {
   folderId?: string; // Optional folder to place duplicate in
 }
 
+

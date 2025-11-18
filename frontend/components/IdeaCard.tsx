@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Idea } from '@/lib/ideas';
 import { ideasApi } from '@/lib/ideas';
 import { analyticsApi } from '@/lib/analytics';
+import { sharingApi } from '@/lib/sharing';
 import PlatformBadge from './PlatformBadge';
 import LanguageBadge from './LanguageBadge';
 
@@ -38,6 +39,7 @@ export default function IdeaCard({
   const [saving, setSaving] = useState(false);
   const [predicting, setPredicting] = useState(false);
   const [prediction, setPrediction] = useState<{ reach?: number; engagement?: number; reasoning?: string } | null>(null);
+  const [sharing, setSharing] = useState(false);
 
   const handleSave = async () => {
     if (!onSave) return;
@@ -355,6 +357,84 @@ export default function IdeaCard({
           className="text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300"
         >
           {expanded ? 'Show Less' : 'Show More'}
+        </button>
+      </div>
+
+      {/* Share Buttons */}
+      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 flex gap-2">
+        <button
+          onClick={async () => {
+            setSharing(true);
+            try {
+              const imageUrl = sharingApi.getIdeaImageUrl(idea.id);
+              // Open image in new tab for sharing
+              window.open(imageUrl, '_blank');
+            } catch (err) {
+              alert('Failed to generate share image');
+            } finally {
+              setSharing(false);
+            }
+          }}
+          disabled={sharing}
+          className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 disabled:opacity-50 flex items-center gap-1"
+        >
+          {sharing ? 'Generating...' : '📷 Share as Image'}
+        </button>
+        <button
+          onClick={async () => {
+            setSharing(true);
+            try {
+              const imageUrl = sharingApi.getIdeaImageUrl(idea.id);
+              // Download image
+              const response = await fetch(imageUrl);
+              const blob = await response.blob();
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `idea-${idea.id}.png`;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+              document.body.removeChild(a);
+            } catch (err) {
+              alert('Failed to download image');
+            } finally {
+              setSharing(false);
+            }
+          }}
+          disabled={sharing}
+          className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 disabled:opacity-50 flex items-center gap-1"
+        >
+          {sharing ? 'Downloading...' : '⬇️ Download PNG'}
+        </button>
+        <button
+          onClick={async () => {
+            setSharing(true);
+            try {
+              const content = idea.caption || idea.description || idea.title;
+              const cardBlob = await sharingApi.generateContentCard({
+                title: idea.title,
+                content: content || '',
+                platform: idea.platform,
+              });
+              const url = window.URL.createObjectURL(cardBlob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `content-card-${idea.id}.png`;
+              document.body.appendChild(a);
+              a.click();
+              window.URL.revokeObjectURL(url);
+              document.body.removeChild(a);
+            } catch (err) {
+              alert('Failed to generate content card');
+            } finally {
+              setSharing(false);
+            }
+          }}
+          disabled={sharing}
+          className="text-xs bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 disabled:opacity-50 flex items-center gap-1"
+        >
+          {sharing ? 'Generating...' : '🎨 Content Card'}
         </button>
       </div>
     </div>

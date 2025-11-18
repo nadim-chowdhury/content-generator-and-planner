@@ -71,3 +71,4 @@ export class CreateAnalyticsDto {
   notes?: string;
 }
 
+

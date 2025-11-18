@@ -8,3 +8,4 @@ export class UpdateKanbanCardDto extends PartialType(CreateKanbanCardDto) {
   position?: number;
 }
 
+

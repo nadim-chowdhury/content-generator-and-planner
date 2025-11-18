@@ -22,6 +22,7 @@ export interface KanbanComment {
   cardId: string;
   userId: string;
   content: string;
+  mentions?: string[];
   createdAt: string;
   updatedAt: string;
   user: {

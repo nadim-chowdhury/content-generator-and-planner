@@ -1,6 +1,7 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleIdeaDto } from './dto/schedule-idea.dto';
+import { QueueService } from '../queue/queue.service';
 
 enum IdeaStatus {
   DRAFT = 'DRAFT',
@@ -10,7 +11,11 @@ enum IdeaStatus {
 
 @Injectable()
 export class PlannerService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    @Inject(forwardRef(() => QueueService))
+    private queueService?: QueueService,
+  ) {}
 
   async scheduleIdea(userId: string, ideaId: string, dto: ScheduleIdeaDto) {
     const idea = await this.prisma.idea.findFirst({
@@ -21,13 +26,30 @@ export class PlannerService {
       throw new NotFoundException('Idea not found');
     }
 
-    return this.prisma.idea.update({
+    const scheduledDate = new Date(dto.scheduledAt);
+    const updatedIdea = await this.prisma.idea.update({
       where: { id: ideaId },
       data: {
-        scheduledAt: new Date(dto.scheduledAt),
+        scheduledAt: scheduledDate,
         status: IdeaStatus.SCHEDULED,
       },
     });
+
+    // Schedule posting reminder
+    if (this.queueService) {
+      const reminderTime = new Date(scheduledDate.getTime() - 60 * 60 * 1000); // 1 hour before
+      await this.queueService.schedulePostingReminder(
+        {
+          userId,
+          ideaId,
+          scheduledAt: scheduledDate.toISOString(),
+          platform: idea.platform,
+        },
+        reminderTime,
+      );
+    }
+
+    return updatedIdea;
   }
 
   async unscheduleIdea(userId: string, ideaId: string) {

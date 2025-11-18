@@ -16,6 +16,10 @@ export default function AdminUsersPage() {
   const [error, setError] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [bonusCredits, setBonusCredits] = useState<Record<string, string>>({});
+  const [banReason, setBanReason] = useState('');
+  const [showBanModal, setShowBanModal] = useState(false);
+  const [banningUser, setBanningUser] = useState<User | null>(null);
 
   useEffect(() => {
     loadUsers();
@@ -68,6 +72,63 @@ export default function AdminUsersPage() {
       await loadUsers();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to delete user');
+    }
+  };
+
+  const handleBanUser = async (userId: string, reason?: string) => {
+    try {
+      await adminApi.banUser(userId, reason);
+      await loadUsers();
+      setShowBanModal(false);
+      setBanningUser(null);
+      setBanReason('');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to ban user');
+    }
+  };
+
+  const handleUnbanUser = async (userId: string) => {
+    if (!confirm('Are you sure you want to unban this user?')) {
+      return;
+    }
+
+    try {
+      await adminApi.unbanUser(userId);
+      await loadUsers();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to unban user');
+    }
+  };
+
+  const handleResetQuota = async (userId: string) => {
+    if (!confirm('Are you sure you want to reset this user\'s daily quota?')) {
+      return;
+    }
+
+    try {
+      await adminApi.resetUserQuota(userId);
+      await loadUsers();
+      alert('User quota reset successfully');
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to reset quota');
+    }
+  };
+
+  const handleAddBonusCredits = async (userId: string) => {
+    const creditsStr = bonusCredits[userId] || '';
+    const credits = parseInt(creditsStr, 10);
+    if (!credits || credits <= 0) {
+      alert('Please enter a valid number of credits');
+      return;
+    }
+
+    try {
+      await adminApi.addBonusCredits(userId, credits);
+      await loadUsers();
+      setBonusCredits({ ...bonusCredits, [userId]: '' });
+      alert(`Added ${credits} bonus credits successfully`);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to add bonus credits');
     }
   };
 
@@ -169,34 +230,86 @@ export default function AdminUsersPage() {
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            {user.emailVerified ? (
-                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                Verified
-                              </span>
-                            ) : (
-                              <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
-                                Unverified
-                              </span>
-                            )}
+                            <div className="flex flex-col gap-1">
+                              {user.emailVerified ? (
+                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                  Verified
+                                </span>
+                              ) : (
+                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                  Unverified
+                                </span>
+                              )}
+                              {user.banned && (
+                                <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                  Banned
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <button
-                              onClick={() => {
-                                setEditingUser(user);
-                                setShowEditModal(true);
-                              }}
-                              className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 mr-4"
-                            >
-                              Edit
-                            </button>
-                            {user.id !== currentUser?.id && (
-                              <button
-                                onClick={() => handleDeleteUser(user.id)}
-                                className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                              >
-                                Delete
-                              </button>
-                            )}
+                            <div className="flex flex-col gap-2">
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => {
+                                    setEditingUser(user);
+                                    setShowEditModal(true);
+                                  }}
+                                  className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300"
+                                >
+                                  Edit
+                                </button>
+                                {user.id !== currentUser?.id && (
+                                  <>
+                                    {user.banned ? (
+                                      <button
+                                        onClick={() => handleUnbanUser(user.id)}
+                                        className="text-green-600 dark:text-green-400 hover:text-green-900 dark:hover:text-green-300"
+                                      >
+                                        Unban
+                                      </button>
+                                    ) : (
+                                      <button
+                                        onClick={() => {
+                                          setBanningUser(user);
+                                          setShowBanModal(true);
+                                        }}
+                                        className="text-orange-600 dark:text-orange-400 hover:text-orange-900 dark:hover:text-orange-300"
+                                      >
+                                        Ban
+                                      </button>
+                                    )}
+                                    <button
+                                      onClick={() => handleResetQuota(user.id)}
+                                      className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300"
+                                    >
+                                      Reset Quota
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteUser(user.id)}
+                                      className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                                    >
+                                      Delete
+                                    </button>
+                                  </>
+                                )}
+                              </div>
+                              <div className="flex gap-2 items-center">
+                                <input
+                                  type="number"
+                                  placeholder="Bonus credits"
+                                  value={bonusCredits[user.id] || ''}
+                                  onChange={(e) => setBonusCredits({ ...bonusCredits, [user.id]: e.target.value })}
+                                  className="w-24 px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded dark:bg-gray-700 dark:text-white"
+                                />
+                                <button
+                                  onClick={() => handleAddBonusCredits(user.id)}
+                                  className="text-xs text-purple-600 dark:text-purple-400 hover:text-purple-900 dark:hover:text-purple-300"
+                                >
+                                  Add Credits
+                                </button>
+                              </div>
+                            </div>
                           </td>
                         </tr>
                       ))}
@@ -266,6 +379,17 @@ export default function AdminUsersPage() {
                         <option value="AGENCY">AGENCY</option>
                       </select>
                     </div>
+                    {editingUser.dailyAiGenerations !== undefined && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Usage Info
+                        </label>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          <p>Daily Generations: {editingUser.dailyAiGenerations}</p>
+                          <p>Bonus Credits: {editingUser.bonusCredits || 0}</p>
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   <div className="mt-6 flex justify-end">
@@ -277,6 +401,51 @@ export default function AdminUsersPage() {
                       className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       Close
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Ban Modal */}
+            {showBanModal && banningUser && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl max-w-md w-full p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                    Ban User: {banningUser.email}
+                  </h3>
+
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Reason (optional)
+                      </label>
+                      <textarea
+                        value={banReason}
+                        onChange={(e) => setBanReason(e.target.value)}
+                        placeholder="Enter reason for banning..."
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-end gap-2">
+                    <button
+                      onClick={() => {
+                        setShowBanModal(false);
+                        setBanningUser(null);
+                        setBanReason('');
+                      }}
+                      className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleBanUser(banningUser.id, banReason || undefined)}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
+                    >
+                      Ban User
                     </button>
                   </div>
                 </div>

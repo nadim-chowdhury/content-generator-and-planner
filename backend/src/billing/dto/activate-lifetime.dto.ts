@@ -6,3 +6,4 @@ export class ActivateLifetimeDto {
   licenseKey: string;
 }
 
+

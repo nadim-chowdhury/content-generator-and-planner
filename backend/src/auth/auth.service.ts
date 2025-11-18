@@ -16,6 +16,11 @@ import { MagicLinkService } from './services/magic-link.service';
 import { LoginActivityService } from './services/login-activity.service';
 import { IpThrottleService } from '../security/services/ip-throttle.service';
 import { SpamPreventionService } from '../security/services/spam-prevention.service';
+import { EncryptionService } from '../security/services/encryption.service';
+import { GdprDeletionService } from '../security/services/gdpr-deletion.service';
+import { ReferralsService } from '../referrals/referrals.service';
+import { AffiliatesService } from '../affiliates/affiliates.service';
+import { EmailService } from '../email/email.service';
 import { randomBytes } from 'crypto';
 
 @Injectable()
@@ -29,10 +34,15 @@ export class AuthService {
     private loginActivityService: LoginActivityService,
     private ipThrottleService: IpThrottleService,
     private spamPreventionService: SpamPreventionService,
+    private encryptionService: EncryptionService,
+    private gdprDeletionService: GdprDeletionService,
+    private referralsService: ReferralsService,
+    private affiliatesService: AffiliatesService,
+    private emailService: EmailService,
   ) {}
 
   async signup(signupDto: SignupDto) {
-    const { email, password } = signupDto;
+    const { email, password, referralCode, affiliateCode } = signupDto;
 
     // Check if user exists
     const existingUser = await this.prisma.user.findUnique({
@@ -43,8 +53,12 @@ export class AuthService {
       throw new ConflictException('User with this email already exists');
     }
 
-    // Hash password
+    // Hash password with Argon2 (industry-standard password hashing)
     const passwordHash = await argon2.hash(password);
+
+    // Note: Email is kept unencrypted for login/search efficiency
+    // In production, consider using a deterministic encryption or hash index
+    // For now, we encrypt other sensitive fields like name
 
     // Generate email verification token
     const emailVerificationToken = randomBytes(32).toString('hex');
@@ -52,8 +66,8 @@ export class AuthService {
     // Create user
     const user = await this.prisma.user.create({
       data: {
-        email,
-        passwordHash,
+        email, // Store email (consider encryption with searchable hash in production)
+        passwordHash, // Argon2 hashed password
         emailVerificationToken,
       },
       select: {
@@ -65,14 +79,53 @@ export class AuthService {
       },
     });
 
+    // Process referral if code provided
+    if (referralCode) {
+      try {
+        await this.referralsService.processReferralSignup(user.id, referralCode);
+      } catch (error) {
+        // Log but don't fail signup if referral processing fails
+        console.error('Failed to process referral:', error);
+      }
+    }
+
+    // Process affiliate tracking if code provided (store for later commission on subscription)
+    if (affiliateCode) {
+      try {
+        const affiliate = await this.prisma.user.findUnique({
+          where: { affiliateCode },
+        });
+        if (affiliate && affiliate.isAffiliate && affiliate.affiliateApproved) {
+          // Store affiliate reference in user record
+          await this.prisma.user.update({
+            where: { id: user.id },
+            data: {
+              referredByAffiliate: affiliate.id,
+            },
+          });
+        }
+      } catch (error) {
+        console.error('Failed to process affiliate code:', error);
+      }
+    }
+
     // Generate JWT token
     const token = this.generateToken(user.id, user.email);
 
     // Create session with refresh token
     const refreshToken = await this.createSession(user.id, token);
 
-    // TODO: Send verification email
-    // await this.emailService.sendVerificationEmail(user.email, emailVerificationToken);
+    // Send welcome email with verification link
+    const verificationLink = `${this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001'}/auth/verify-email?token=${emailVerificationToken}`;
+    await this.emailService.queueEmail(
+      user.email,
+      'Welcome to Content Generator & Planner!',
+      'welcome',
+      {
+        userName: user.name || 'User',
+        verificationToken: emailVerificationToken,
+      },
+    );
 
     return {
       user,
@@ -90,6 +143,7 @@ export class AuthService {
   ) {
     const { email, password } = loginDto;
 
+    // Find user by email (using Prisma prepared statement - SQL injection safe)
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
@@ -105,6 +159,20 @@ export class AuthService {
         failureReason: 'Invalid credentials',
       });
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Check if user is banned
+    if (user.banned) {
+      await this.loginActivityService.logActivity({
+        userId: user.id,
+        loginType: 'password',
+        success: false,
+        ipAddress,
+        userAgent,
+        deviceInfo,
+        failureReason: 'Account banned',
+      });
+      throw new UnauthorizedException('Your account has been banned');
     }
 
     // Verify password
@@ -228,8 +296,15 @@ export class AuthService {
       },
     });
 
-    // TODO: Send reset email
-    // await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+    // Send password reset email
+    await this.emailService.queueEmail(
+      user.email,
+      'Reset Your Password',
+      'password-reset',
+      {
+        resetToken,
+      },
+    );
 
     return { message: 'If the email exists, a reset link has been sent' };
   }
@@ -544,16 +619,30 @@ export class AuthService {
   }
 
   /**
-   * Session management
+   * Session management with enhanced revocation
    */
   async getUserSessions(userId: string) {
-    return this.prisma.session.findMany({
+    const sessions = await this.prisma.session.findMany({
       where: {
         userId,
-        expiresAt: { gt: new Date() },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { lastUsedAt: 'desc' },
     });
+
+    // Filter out expired sessions and format response
+    const now = new Date();
+    return sessions
+      .filter((session) => session.expiresAt > now)
+      .map((session) => ({
+        id: session.id,
+        deviceInfo: session.deviceInfo,
+        ipAddress: session.ipAddress,
+        userAgent: session.userAgent,
+        createdAt: session.createdAt,
+        lastUsedAt: session.lastUsedAt,
+        expiresAt: session.expiresAt,
+        isCurrent: false, // Will be set by controller
+      }));
   }
 
   async revokeSession(userId: string, sessionId: string) {
@@ -568,11 +657,20 @@ export class AuthService {
       throw new NotFoundException('Session not found');
     }
 
+    // Delete session (revoke access)
     await this.prisma.session.delete({
       where: { id: sessionId },
     });
 
-    return { message: 'Session revoked' };
+    // Log revocation activity
+    await this.loginActivityService.logActivity({
+      userId,
+      loginType: 'session_revocation',
+      success: true,
+      deviceInfo: `Session revoked: ${session.deviceInfo || 'Unknown'}`,
+    });
+
+    return { message: 'Session revoked successfully' };
   }
 
   async revokeAllSessions(userId: string, exceptSessionId?: string) {
@@ -581,9 +679,43 @@ export class AuthService {
       where.id = { not: exceptSessionId };
     }
 
-    await this.prisma.session.deleteMany({ where });
+    const deletedCount = await this.prisma.session.deleteMany({ where });
 
-    return { message: 'All sessions revoked' };
+    // Log revocation activity
+    await this.loginActivityService.logActivity({
+      userId,
+      loginType: 'session_revocation',
+      success: true,
+      deviceInfo: `All sessions revoked (${deletedCount.count} sessions)`,
+    });
+
+    return {
+      message: 'All sessions revoked successfully',
+      revokedCount: deletedCount.count,
+    };
+  }
+
+  async revokeExpiredSessions(userId: string): Promise<number> {
+    const now = new Date();
+    const result = await this.prisma.session.deleteMany({
+      where: {
+        userId,
+        expiresAt: { lt: now },
+      },
+    });
+
+    return result.count;
+  }
+
+  async revokeSessionsByDevice(userId: string, deviceInfo: string): Promise<number> {
+    const result = await this.prisma.session.deleteMany({
+      where: {
+        userId,
+        deviceInfo,
+      },
+    });
+
+    return result.count;
   }
 
   /**
@@ -633,10 +765,16 @@ export class AuthService {
       };
     }
 
+    // Encrypt sensitive fields before storing
+    const encryptedData: any = { ...updateData };
+    if (updateData.name) {
+      encryptedData.name = await this.encryptionService.encrypt(updateData.name);
+    }
+
     // Update profile without email change
     await this.prisma.user.update({
       where: { id: userId },
-      data: updateData,
+      data: encryptedData,
     });
 
     return {
@@ -681,9 +819,9 @@ export class AuthService {
   }
 
   /**
-   * Delete account
+   * Delete account (GDPR-compliant)
    */
-  async deleteAccount(userId: string, password?: string) {
+  async deleteAccount(userId: string, password?: string, hardDelete: boolean = false) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -692,24 +830,36 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
+    // Check if user can be deleted (business constraints)
+    const canDelete = await this.gdprDeletionService.canDeleteUser(userId);
+    if (!canDelete.canDelete) {
+      throw new BadRequestException(canDelete.reason || 'Cannot delete account');
+    }
+
     // If user has password, require it for deletion
     if (user.passwordHash) {
       if (!password) {
         throw new BadRequestException('Password required to delete account');
       }
 
+      // Verify password with Argon2
       const isValidPassword = await argon2.verify(user.passwordHash, password);
       if (!isValidPassword) {
         throw new UnauthorizedException('Password is incorrect');
       }
     }
 
-    // Delete user (cascade will handle related records)
-    await this.prisma.user.delete({
-      where: { id: userId },
-    });
+    // Use GDPR-compliant deletion service
+    await this.gdprDeletionService.deleteUserAccount(userId, hardDelete);
 
     return { message: 'Account deleted successfully' };
+  }
+
+  /**
+   * Export user data (GDPR Article 15 - Right of access)
+   */
+  async exportUserData(userId: string) {
+    return this.gdprDeletionService.exportUserData(userId);
   }
 
   /**
@@ -733,6 +883,16 @@ export class AuthService {
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    // Decrypt sensitive fields if encrypted
+    // Note: Currently name/email are not encrypted, but this allows future encryption
+    if (user.name) {
+      try {
+        user.name = await this.encryptionService.decrypt(user.name);
+      } catch {
+        // Name might not be encrypted (backward compatibility)
+      }
     }
 
     return user;
@@ -762,10 +922,15 @@ export class AuthService {
       data: { emailVerificationToken },
     });
 
-    // TODO: Send verification email
-    // const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
-    // const verificationLink = `${frontendUrl}/auth/verify-email?token=${emailVerificationToken}`;
-    // await this.emailService.sendVerificationEmail(user.email, verificationLink);
+    // Send verification email
+    await this.emailService.queueEmail(
+      user.email,
+      'Verify Your Email Address',
+      'email-verification',
+      {
+        verificationToken: emailVerificationToken,
+      },
+    );
 
     return { message: 'Verification email sent' };
   }

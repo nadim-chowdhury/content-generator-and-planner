@@ -28,11 +28,16 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         plan: true,
         role: true,
         emailVerified: true,
+        banned: true,
       },
     });
 
     if (!user) {
       throw new UnauthorizedException();
+    }
+
+    if (user.banned) {
+      throw new UnauthorizedException('Your account has been banned');
     }
 
     return user;

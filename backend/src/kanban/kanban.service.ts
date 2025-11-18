@@ -5,10 +5,18 @@ import { UpdateKanbanCardDto } from './dto/update-kanban-card.dto';
 import { MoveCardDto } from './dto/move-card.dto';
 import { AddChecklistDto } from './dto/add-checklist.dto';
 import { AddCommentDto } from './dto/add-comment.dto';
+import { CollaborationService } from '../collaboration/collaboration.service';
+import { CollaborationGateway } from '../collaboration/collaboration.gateway';
+import { TeamActivityService } from '../teams/services/team-activity.service';
 
 @Injectable()
 export class KanbanService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private collaborationService: CollaborationService,
+    private collaborationGateway: CollaborationGateway,
+    private teamActivityService: TeamActivityService,
+  ) {}
 
   /**
    * Get all cards for a user, organized by stage
@@ -371,18 +379,38 @@ export class KanbanService {
    */
   async addComment(userId: string, cardId: string, dto: AddCommentDto) {
     const card = await this.prisma.kanbanCard.findFirst({
-      where: { id: cardId, userId },
+      where: { id: cardId },
+      include: {
+        user: {
+          select: {
+            id: true,
+            currentWorkspaceId: true,
+          },
+        },
+      },
     });
 
     if (!card) {
       throw new NotFoundException('Card not found');
     }
 
-    return this.prisma.kanbanComment.create({
+    // Get workspace from card owner's current workspace
+    const workspaceId = card.user.currentWorkspaceId;
+
+    // Extract mentions from comment
+    const mentionStrings = this.collaborationService.extractMentions(dto.content);
+    const mentionedUserIds = await this.collaborationService.resolveMentions(
+      mentionStrings,
+      workspaceId,
+    );
+
+    // Create comment with mentions
+    const comment = await this.prisma.kanbanComment.create({
       data: {
         cardId,
         userId,
         content: dto.content,
+        mentions: mentionedUserIds,
       },
       include: {
         user: {
@@ -395,6 +423,40 @@ export class KanbanService {
         },
       },
     });
+
+    // Notify mentioned users
+    if (mentionedUserIds.length > 0 && workspaceId) {
+      await this.collaborationService.notifyMentions(
+        mentionedUserIds,
+        workspaceId,
+        cardId,
+        comment.id,
+        userId,
+      );
+    }
+
+    // Log team activity
+    if (workspaceId) {
+      await this.teamActivityService.logCommentAdded(
+        workspaceId,
+        userId,
+        card.title,
+        cardId,
+        comment.id,
+      );
+    }
+
+    // Broadcast real-time update
+    if (workspaceId) {
+      this.collaborationGateway.broadcastComment(
+        workspaceId,
+        cardId,
+        comment,
+        userId,
+      );
+    }
+
+    return comment;
   }
 
   /**
@@ -510,4 +572,5 @@ export class KanbanService {
     });
   }
 }
+
 

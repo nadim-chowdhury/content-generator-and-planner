@@ -21,7 +21,7 @@ export interface TeamMember {
   id: string;
   teamId: string;
   userId: string;
-  role: 'MEMBER' | 'ADMIN';
+  role: 'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN';
   user: {
     id: string;
     email: string;
@@ -39,8 +39,8 @@ export const teamsApi = {
     return data;
   },
 
-  getTeams: async (): Promise<Team[]> => {
-    const { data } = await api.get<Team[]>('/api/teams');
+  getTeams: async (): Promise<{ owned: Team[]; memberOf: Team[] }> => {
+    const { data } = await api.get<{ owned: Team[]; memberOf: Team[] }>('/api/teams');
     return data;
   },
 
@@ -60,13 +60,35 @@ export const teamsApi = {
   },
 
   // Team Members
-  inviteMember: async (teamId: string, email: string, role: 'MEMBER' | 'ADMIN' = 'MEMBER'): Promise<{ message: string }> => {
+  inviteMember: async (teamId: string, email: string, role: 'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN' = 'EDITOR'): Promise<{ message: string }> => {
     const { data } = await api.post<{ message: string }>(`/api/teams/${teamId}/members`, { email, role });
     return data;
   },
 
-  updateMemberRole: async (teamId: string, memberId: string, role: 'MEMBER' | 'ADMIN'): Promise<TeamMember> => {
+  updateMemberRole: async (teamId: string, memberId: string, role: 'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN'): Promise<TeamMember> => {
     const { data } = await api.put<TeamMember>(`/api/teams/${teamId}/members/${memberId}/role`, { role });
+    return data;
+  },
+
+  // Workspace management
+  switchWorkspace: async (workspaceId: string): Promise<{ message: string; workspace: any }> => {
+    const { data } = await api.post('/api/teams/workspace/switch', { workspaceId });
+    return data;
+  },
+
+  getCurrentWorkspace: async (): Promise<Team | null> => {
+    const { data } = await api.get('/api/teams/workspace/current');
+    return data;
+  },
+
+  clearWorkspace: async (): Promise<{ message: string }> => {
+    const { data } = await api.post('/api/teams/workspace/clear');
+    return data;
+  },
+
+  // Team activities
+  getTeamActivities: async (teamId: string): Promise<any[]> => {
+    const { data } = await api.get(`/api/teams/${teamId}/activities`);
     return data;
   },
 

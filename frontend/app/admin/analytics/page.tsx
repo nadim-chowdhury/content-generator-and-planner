@@ -2,11 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { adminAnalyticsApi, BusinessAnalyticsSummary } from '@/lib/admin-analytics';
+import { adminApi } from '@/lib/admin';
 import Navbar from '@/components/Navbar';
 import AdminRoute from '@/components/AdminRoute';
 
 export default function AdminAnalyticsPage() {
   const [summary, setSummary] = useState<BusinessAnalyticsSummary | null>(null);
+  const [dau, setDau] = useState<number>(0);
+  const [mau, setMau] = useState<number>(0);
+  const [dauTrend, setDauTrend] = useState<Array<{ date: string; count: number }>>([]);
+  const [mauTrend, setMauTrend] = useState<Array<{ month: string; count: number }>>([]);
+  const [ltv, setLtv] = useState<any>(null);
+  const [socialMetrics, setSocialMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
 
@@ -17,8 +24,22 @@ export default function AdminAnalyticsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const data = await adminAnalyticsApi.getBusinessAnalytics(days);
-      setSummary(data);
+      const [summaryData, dauData, mauData, dauTrendData, mauTrendData, ltvData, socialData] = await Promise.all([
+        adminAnalyticsApi.getBusinessAnalytics(days),
+        adminApi.getDailyActiveUsers(),
+        adminApi.getMonthlyActiveUsers(),
+        adminApi.getDailyActiveUsersTrend(30),
+        adminApi.getMonthlyActiveUsersTrend(12),
+        adminApi.getLTV(),
+        adminApi.getSocialSharingMetrics(30),
+      ]);
+      setSummary(summaryData);
+      setDau(dauData.count);
+      setMau(mauData.count);
+      setDauTrend(dauTrendData);
+      setMauTrend(mauTrendData);
+      setLtv(ltvData);
+      setSocialMetrics(socialData);
     } catch (err) {
       console.error('Failed to load business analytics:', err);
       alert('Failed to load analytics. Make sure you have admin access.');
@@ -79,13 +100,18 @@ export default function AdminAnalyticsPage() {
               {/* Key Metrics */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Active Users</div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {summary.activeUsers.toLocaleString()}
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Daily Active Users</div>
+                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                    {dau.toLocaleString()}
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    of {summary.totalUsers.toLocaleString()} total
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">DAU</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Monthly Active Users</div>
+                  <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                    {mau.toLocaleString()}
                   </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">MAU</div>
                 </div>
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                   <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Monthly Recurring Revenue</div>
@@ -94,6 +120,17 @@ export default function AdminAnalyticsPage() {
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">MRR</div>
                 </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Average LTV</div>
+                  <div className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                    {ltv ? formatCurrency(ltv.averageLTV) : '$0'}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Lifetime Value</div>
+                </div>
+              </div>
+
+              {/* Secondary Metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
                   <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Annual Recurring Revenue</div>
                   <div className="text-2xl font-bold text-green-600 dark:text-green-400">
@@ -107,6 +144,22 @@ export default function AdminAnalyticsPage() {
                     {summary.conversionRate.toFixed(2)}%
                   </div>
                   <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Free → Pro</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Social Shares</div>
+                  <div className="text-2xl font-bold text-pink-600 dark:text-pink-400">
+                    {socialMetrics?.totalShares?.toLocaleString() || 0}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">Last 30 days</div>
+                </div>
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Active Users</div>
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {summary.activeUsers.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    of {summary.totalUsers.toLocaleString()} total
+                  </div>
                 </div>
               </div>
 
@@ -200,6 +253,121 @@ export default function AdminAnalyticsPage() {
                   </div>
                 </div>
               </div>
+
+              {/* DAU Trend */}
+              {dauTrend.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Daily Active Users Trend</h2>
+                  <div className="h-64 flex items-end gap-1">
+                    {dauTrend.map((day, idx) => {
+                      const maxCount = Math.max(...dauTrend.map(d => d.count), 1);
+                      const height = (day.count / maxCount) * 100;
+                      return (
+                        <div key={idx} className="flex-1 flex flex-col items-center">
+                          <div
+                            className="w-full bg-blue-600 hover:bg-blue-700 rounded-t transition-colors cursor-pointer"
+                            style={{ height: `${Math.max(height, 2)}%` }}
+                            title={`${day.date}: ${day.count} users`}
+                          />
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 transform -rotate-45 origin-top-left whitespace-nowrap">
+                            {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* MAU Trend */}
+              {mauTrend.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Monthly Active Users Trend</h2>
+                  <div className="h-64 flex items-end gap-2">
+                    {mauTrend.map((month, idx) => {
+                      const maxCount = Math.max(...mauTrend.map(m => m.count), 1);
+                      const height = (month.count / maxCount) * 100;
+                      return (
+                        <div key={idx} className="flex-1 flex flex-col items-center">
+                          <div
+                            className="w-full bg-purple-600 hover:bg-purple-700 rounded-t transition-colors cursor-pointer"
+                            style={{ height: `${Math.max(height, 2)}%` }}
+                            title={`${month.month}: ${month.count} users`}
+                          />
+                          <div className="text-xs text-gray-600 dark:text-gray-400 mt-1 transform -rotate-45 origin-top-left whitespace-nowrap">
+                            {month.month}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* LTV Breakdown */}
+              {ltv && (
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Lifetime Value (LTV)</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Average LTV</p>
+                      <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                        {formatCurrency(ltv.averageLTV)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Median LTV</p>
+                      <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+                        {formatCurrency(ltv.medianLTV)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">Total LTV</p>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        {formatCurrency(ltv.totalLTV)}
+                      </p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">By Plan</p>
+                      <div className="text-sm text-gray-900 dark:text-white mt-2">
+                        <div>Pro: {formatCurrency(ltv.byPlan?.PRO || 0)}</div>
+                        <div>Agency: {formatCurrency(ltv.byPlan?.AGENCY || 0)}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Social Sharing Metrics */}
+              {socialMetrics && (
+                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
+                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Social Sharing Metrics</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Shares by Platform</h3>
+                      <div className="space-y-2">
+                        {socialMetrics.sharesByPlatform?.map((platform: any, idx: number) => (
+                          <div key={idx} className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700 dark:text-gray-300">{platform.platform}</span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">{platform.count}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Top Shared Ideas</h3>
+                      <div className="space-y-2">
+                        {socialMetrics.topSharedIdeas?.slice(0, 5).map((idea: any, idx: number) => (
+                          <div key={idx} className="flex items-center justify-between">
+                            <span className="text-sm text-gray-700 dark:text-gray-300 truncate">{idea.title}</span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">{idea.shares} shares</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Top Niches Trending */}
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">

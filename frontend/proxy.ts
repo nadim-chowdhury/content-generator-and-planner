@@ -7,7 +7,7 @@ const protectedRoutes = ['/dashboard', '/ideas', '/planner', '/billing'];
 // Routes that should redirect to dashboard if already authenticated
 const authRoutes = ['/login', '/signup'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get('token')?.value || 
                 request.headers.get('authorization')?.replace('Bearer ', '');
@@ -37,6 +37,7 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Matcher config for Next.js 16
 export const config = {
   matcher: [
     /*
@@ -46,6 +47,7 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - static assets
      */
     '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],

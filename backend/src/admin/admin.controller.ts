@@ -2,6 +2,8 @@ import {
   Controller,
   Get,
   Put,
+  Post,
+  Delete,
   Body,
   Param,
   UseGuards,
@@ -12,6 +14,11 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { BusinessAnalyticsService } from './services/business-analytics.service';
+import { AdminUserManagementService } from './services/admin-user-management.service';
+import { AdminBillingService } from './services/admin-billing.service';
+import { PlatformSettingsService } from './services/platform-settings.service';
+import { ContentModerationService } from './services/content-moderation.service';
+import { EnhancedAnalyticsService } from './services/enhanced-analytics.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -24,6 +31,11 @@ export class AdminController {
   constructor(
     private prisma: PrismaService,
     private businessAnalytics: BusinessAnalyticsService,
+    private userManagement: AdminUserManagementService,
+    private billingService: AdminBillingService,
+    private platformSettings: PlatformSettingsService,
+    private contentModeration: ContentModerationService,
+    private enhancedAnalytics: EnhancedAnalyticsService,
   ) {}
 
   @Get('users')
@@ -57,6 +69,10 @@ export class AdminController {
           plan: true,
           role: true,
           emailVerified: true,
+          banned: true,
+          bannedAt: true,
+          bonusCredits: true,
+          dailyAiGenerations: true,
           createdAt: true,
           _count: {
             select: {
@@ -234,6 +250,279 @@ export class AdminController {
   @Get('analytics/top-niches')
   getTopNiches(@Query('limit') limit?: string) {
     return this.businessAnalytics.getTopNiches(limit ? parseInt(limit, 10) : 10);
+  }
+
+  // User Management Endpoints
+  @Post('users/:userId/ban')
+  async banUser(
+    @Param('userId') userId: string,
+    @CurrentUser() admin: any,
+    @Body('reason') reason?: string,
+  ) {
+    if (userId === admin.id) {
+      throw new BadRequestException('Cannot ban yourself');
+    }
+    await this.userManagement.banUser(userId, reason);
+    return { message: 'User banned successfully' };
+  }
+
+  @Post('users/:userId/unban')
+  async unbanUser(@Param('userId') userId: string) {
+    await this.userManagement.unbanUser(userId);
+    return { message: 'User unbanned successfully' };
+  }
+
+  @Post('users/:userId/reset-quota')
+  async resetUserQuota(@Param('userId') userId: string) {
+    await this.userManagement.resetUserQuota(userId);
+    return { message: 'User quota reset successfully' };
+  }
+
+  @Post('users/:userId/bonus-credits')
+  async addBonusCredits(
+    @Param('userId') userId: string,
+    @Body('credits') credits: number,
+  ) {
+    if (!credits || credits <= 0) {
+      throw new BadRequestException('Credits must be a positive number');
+    }
+    await this.userManagement.addBonusCredits(userId, credits);
+    return { message: `Added ${credits} bonus credits successfully` };
+  }
+
+  @Get('users/:userId/quota')
+  async getUserQuota(@Param('userId') userId: string) {
+    return this.userManagement.getUserWithQuota(userId);
+  }
+
+  // Billing Management Endpoints
+  @Get('billing/subscriptions')
+  async getAllSubscriptions(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    return this.billingService.getAllSubscriptions(
+      parseInt(page, 10) || 1,
+      parseInt(limit, 10) || 20,
+    );
+  }
+
+  @Get('billing/invoices')
+  async getAllInvoices(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    return this.billingService.getAllInvoices(
+      parseInt(page, 10) || 1,
+      parseInt(limit, 10) || 20,
+    );
+  }
+
+  @Get('billing/users/:userId/subscription')
+  async getUserSubscription(@Param('userId') userId: string) {
+    return this.billingService.getUserSubscription(userId);
+  }
+
+  @Get('billing/users/:userId/invoices')
+  async getUserInvoices(
+    @Param('userId') userId: string,
+    @Query('limit') limit: string = '10',
+  ) {
+    return this.billingService.getUserInvoices(userId, parseInt(limit, 10) || 10);
+  }
+
+  @Post('billing/refund')
+  async processRefund(
+    @Body('paymentIntentId') paymentIntentId: string,
+    @Body('amount') amount?: number,
+    @Body('reason') reason?: string,
+  ) {
+    if (!paymentIntentId) {
+      throw new BadRequestException('Payment intent ID is required');
+    }
+    return this.billingService.processRefund(paymentIntentId, amount, reason);
+  }
+
+  @Post('billing/users/:userId/cancel-subscription')
+  async cancelUserSubscription(
+    @Param('userId') userId: string,
+    @Body('immediately') immediately: boolean = false,
+  ) {
+    await this.billingService.cancelUserSubscription(userId, immediately);
+    return {
+      message: immediately
+        ? 'Subscription canceled immediately'
+        : 'Subscription will be canceled at period end',
+    };
+  }
+
+  // Platform Settings Endpoints
+  @Get('settings/platform')
+  async getPlatformSettings() {
+    return this.platformSettings.getAllSettings();
+  }
+
+  @Get('settings/ai-tokens')
+  async getAiTokenUsage() {
+    return this.platformSettings.getAiTokenUsage();
+  }
+
+  @Get('settings/quotas')
+  async getQuotaSettings() {
+    return this.platformSettings.getQuotaSettings();
+  }
+
+  @Put('settings/quotas/:plan')
+  async updateQuotaSettings(
+    @Param('plan') plan: 'free' | 'pro' | 'agency',
+    @Body() settings: { dailyGenerations?: number; monthlyGenerations?: number },
+  ) {
+    return this.platformSettings.updateQuotaSettings(plan, settings);
+  }
+
+  @Get('settings/stripe')
+  async getStripeProductIds() {
+    return this.platformSettings.getStripeProductIds();
+  }
+
+  @Put('settings/stripe')
+  async updateStripeProductIds(@Body() settings: {
+    proMonthlyPriceId?: string;
+    proYearlyPriceId?: string;
+    agencyPriceId?: string;
+  }) {
+    return this.platformSettings.updateStripeProductIds(settings);
+  }
+
+  @Get('settings/api-keys')
+  async getApiKeysStatus() {
+    return this.platformSettings.getApiKeysStatus();
+  }
+
+  // Content Moderation Endpoints
+  @Get('moderation/flagged')
+  async getFlaggedIdeas(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '20',
+  ) {
+    return this.contentModeration.getFlaggedIdeas(
+      parseInt(page, 10) || 1,
+      parseInt(limit, 10) || 20,
+    );
+  }
+
+  @Post('moderation/flag/:ideaId')
+  async flagIdea(
+    @Param('ideaId') ideaId: string,
+    @Body('reason') reason: string,
+    @Body('category') category: string = 'OTHER',
+    @CurrentUser() admin: any,
+  ) {
+    return this.contentModeration.flagIdea(ideaId, reason, category, admin.id);
+  }
+
+  @Post('moderation/review/:flagId')
+  async reviewFlag(
+    @Param('flagId') flagId: string,
+    @Body('action') action: 'BLOCKED' | 'IGNORED' | 'DELETED',
+    @CurrentUser() admin: any,
+  ) {
+    return this.contentModeration.reviewFlag(flagId, action, admin.id);
+  }
+
+  @Post('moderation/block/:ideaId')
+  async blockIdea(
+    @Param('ideaId') ideaId: string,
+    @Body('reason') reason: string,
+  ) {
+    return this.contentModeration.blockIdea(ideaId, reason);
+  }
+
+  @Post('moderation/unblock/:ideaId')
+  async unblockIdea(@Param('ideaId') ideaId: string) {
+    return this.contentModeration.unblockIdea(ideaId);
+  }
+
+  @Get('moderation/blacklist')
+  async getBlacklistKeywords(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '50',
+  ) {
+    return this.contentModeration.getBlacklistKeywords(
+      parseInt(page, 10) || 1,
+      parseInt(limit, 10) || 50,
+    );
+  }
+
+  @Post('moderation/blacklist')
+  async addBlacklistKeyword(
+    @Body('keyword') keyword: string,
+    @Body('category') category: string = 'GENERAL',
+    @Body('severity') severity: string = 'MEDIUM',
+    @Body('action') action: string = 'FLAG',
+    @CurrentUser() admin: any,
+  ) {
+    return this.contentModeration.addBlacklistKeyword(keyword, category, severity, action, admin.id);
+  }
+
+  @Delete('moderation/blacklist/:keywordId')
+  async deleteBlacklistKeyword(@Param('keywordId') keywordId: string) {
+    return this.contentModeration.deleteBlacklistKeyword(keywordId);
+  }
+
+  @Put('moderation/blacklist/:keywordId')
+  async updateBlacklistKeyword(
+    @Param('keywordId') keywordId: string,
+    @Body() updates: {
+      category?: string;
+      severity?: string;
+      action?: string;
+      enabled?: boolean;
+    },
+  ) {
+    return this.contentModeration.updateBlacklistKeyword(keywordId, updates);
+  }
+
+  // Enhanced Analytics Endpoints
+  @Get('analytics/dau')
+  async getDailyActiveUsers(@Query('date') date?: string) {
+    const targetDate = date ? new Date(date) : undefined;
+    return { count: await this.enhancedAnalytics.getDailyActiveUsers(targetDate) };
+  }
+
+  @Get('analytics/dau/trend')
+  async getDailyActiveUsersTrend(@Query('days') days: string = '30') {
+    return this.enhancedAnalytics.getDailyActiveUsersTrend(parseInt(days, 10) || 30);
+  }
+
+  @Get('analytics/mau')
+  async getMonthlyActiveUsers(@Query('year') year?: string, @Query('month') month?: string) {
+    return {
+      count: await this.enhancedAnalytics.getMonthlyActiveUsers(
+        year ? parseInt(year, 10) : undefined,
+        month ? parseInt(month, 10) : undefined,
+      ),
+    };
+  }
+
+  @Get('analytics/mau/trend')
+  async getMonthlyActiveUsersTrend(@Query('months') months: string = '12') {
+    return this.enhancedAnalytics.getMonthlyActiveUsersTrend(parseInt(months, 10) || 12);
+  }
+
+  @Get('analytics/ltv')
+  async getLTV() {
+    return this.enhancedAnalytics.calculateLTV();
+  }
+
+  @Get('analytics/social-sharing')
+  async getSocialSharingMetrics(@Query('days') days: string = '30') {
+    return this.enhancedAnalytics.getSocialSharingMetrics(parseInt(days, 10) || 30);
+  }
+
+  @Get('analytics/comprehensive')
+  async getComprehensiveReport() {
+    return this.enhancedAnalytics.getComprehensiveReport();
   }
 }
 

@@ -1,0 +1,14 @@
+import { Module } from '@nestjs/common';
+import { AffiliatesController } from './affiliates.controller';
+import { AffiliatesService } from './affiliates.service';
+import { PrismaModule } from '../prisma/prisma.module';
+import { ConfigModule } from '@nestjs/config';
+
+@Module({
+  imports: [PrismaModule, ConfigModule],
+  controllers: [AffiliatesController],
+  providers: [AffiliatesService],
+  exports: [AffiliatesService],
+})
+export class AffiliatesModule {}
+

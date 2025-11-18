@@ -18,6 +18,16 @@ import { TeamsModule } from './teams/teams.module';
 import { AdminModule } from './admin/admin.module';
 import { AiToolsModule } from './ai-tools/ai-tools.module';
 import { SecurityModule } from './security/security.module';
+import { InfrastructureModule } from './infrastructure/infrastructure.module';
+import { CollaborationModule } from './collaboration/collaboration.module';
+import { ReferralsModule } from './referrals/referrals.module';
+import { AffiliatesModule } from './affiliates/affiliates.module';
+import { BlogModule } from './blog/blog.module';
+import { SharingModule } from './sharing/sharing.module';
+import { QueueModule } from './queue/queue.module';
+import { SettingsModule } from './settings/settings.module';
+import { ExportImportModule } from './export-import/export-import.module';
+import { SearchModule } from './search/search.module';
 
 @Module({
   imports: [
@@ -43,6 +53,8 @@ import { SecurityModule } from './security/security.module';
     ]),
     PrismaModule,
     SecurityModule,
+    InfrastructureModule,
+    CollaborationModule,
     AuthModule,
     IdeasModule,
     PlannerModule,
@@ -55,6 +67,14 @@ import { SecurityModule } from './security/security.module';
     TeamsModule,
     AdminModule,
     AiToolsModule,
+    ReferralsModule,
+    AffiliatesModule,
+    BlogModule,
+    SharingModule,
+    QueueModule,
+    SettingsModule,
+    ExportImportModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [

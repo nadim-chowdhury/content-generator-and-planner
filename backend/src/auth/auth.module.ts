@@ -13,11 +13,17 @@ import { MagicLinkService } from './services/magic-link.service';
 import { LoginActivityService } from './services/login-activity.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SecurityModule } from '../security/security.module';
+import { ReferralsModule } from '../referrals/referrals.module';
+import { AffiliatesModule } from '../affiliates/affiliates.module';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
     PrismaModule,
     SecurityModule,
+    ReferralsModule,
+    AffiliatesModule,
+    EmailModule,
     PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
