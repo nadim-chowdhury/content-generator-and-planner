@@ -20,3 +20,4 @@ ALTER TABLE "saved_searches" ADD CONSTRAINT "saved_searches_userId_fkey" FOREIGN
 
 
 
+
