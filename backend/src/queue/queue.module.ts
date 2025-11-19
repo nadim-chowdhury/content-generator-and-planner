@@ -36,6 +36,15 @@ import { SocialModule } from '../social/social.module';
               10,
             ),
             password: configService.get<string>('REDIS_PASSWORD'),
+            // Connection timeout settings to prevent hanging
+            connectTimeout: 5000, // 5 seconds
+            lazyConnect: true, // Don't connect immediately - connect on first use
+            maxRetriesPerRequest: 3,
+            retryStrategy: (times: number) => {
+              // Exponential backoff: 50ms, 100ms, 200ms, etc.
+              const delay = Math.min(times * 50, 2000);
+              return delay;
+            },
             ...(redisUrl.startsWith('redis://') ||
             redisUrl.startsWith('rediss://')
               ? { url: redisUrl }

@@ -14,9 +14,16 @@ export class QueueScheduler implements OnModuleInit {
 
   async onModuleInit() {
     this.logger.log('Queue scheduler initialized');
-    // Schedule initial jobs
-    await this.scheduleDailyQuotaResets();
-    await this.scheduleTrialExpirationChecks();
+    // Schedule initial jobs asynchronously (non-blocking)
+    // Don't block server startup - run in background
+    setImmediate(async () => {
+      try {
+        await this.scheduleDailyQuotaResets();
+        await this.scheduleTrialExpirationChecks();
+      } catch (error: any) {
+        this.logger.error(`Failed to schedule initial jobs: ${error.message}`, error.stack);
+      }
+    });
   }
 
   /**

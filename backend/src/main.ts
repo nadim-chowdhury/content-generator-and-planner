@@ -85,51 +85,77 @@ async function bootstrap() {
     }),
   );
 
-  // Swagger API Documentation
+  // Swagger API Documentation (generate asynchronously to not block startup)
   if (
     process.env.NODE_ENV !== 'production' ||
     process.env.ENABLE_SWAGGER === 'true'
   ) {
-    const config = new DocumentBuilder()
-      .setTitle('Content Generator & Planner API')
-      .setDescription('API documentation for Content Generator & Planner SaaS')
-      .setVersion('1.0')
-      .addBearerAuth(
-        {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          name: 'JWT',
-          description: 'Enter JWT token',
-          in: 'header',
-        },
-        'JWT-auth',
-      )
-      .addTag('auth', 'Authentication endpoints')
-      .addTag('ideas', 'Content ideas management')
-      .addTag('planner', 'Content planning and scheduling')
-      .addTag('billing', 'Billing and subscription management')
-      .addTag('teams', 'Team and workspace management')
-      .addTag('admin', 'Admin panel endpoints')
-      .addTag('ai-tools', 'AI-powered content tools')
-      .addServer(
-        process.env.API_URL || 'http://localhost:3000',
-        'Development server',
-      )
-      .build();
+    // Generate Swagger in background to not block server startup
+    setImmediate(() => {
+      try {
+        const config = new DocumentBuilder()
+          .setTitle('Content Generator & Planner API')
+          .setDescription('API documentation for Content Generator & Planner SaaS')
+          .setVersion('1.0')
+          .addBearerAuth(
+            {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+              name: 'JWT',
+              description: 'Enter JWT token',
+              in: 'header',
+            },
+            'JWT-auth',
+          )
+          .addTag('auth', 'Authentication endpoints')
+          .addTag('ideas', 'Content ideas management')
+          .addTag('planner', 'Content planning and scheduling')
+          .addTag('billing', 'Billing and subscription management')
+          .addTag('teams', 'Team and workspace management')
+          .addTag('admin', 'Admin panel endpoints')
+          .addTag('ai-tools', 'AI-powered content tools')
+          .addServer(
+            process.env.API_URL || 'http://localhost:3000',
+            'Development server',
+          )
+          .build();
 
-    const document = SwaggerModule.createDocument(app, config);
-    SwaggerModule.setup('api/docs', app, document, {
-      customSiteTitle: 'Content Generator API Docs',
-      customfavIcon: '/favicon.ico',
-      customCss: '.swagger-ui .topbar { display: none }',
+        const document = SwaggerModule.createDocument(app, config);
+        SwaggerModule.setup('api/docs', app, document, {
+          customSiteTitle: 'Content Generator API Docs',
+          customfavIcon: '/favicon.ico',
+          customCss: '.swagger-ui .topbar { display: none }',
+        });
+
+        logger.log(`📚 Swagger API documentation available at /api/docs`);
+      } catch (error: any) {
+        logger.warn(`Failed to generate Swagger docs: ${error.message}`);
+      }
     });
-
-    logger.log(`📚 Swagger API documentation available at /api/docs`);
   }
 
   const port = process.env.PORT || 5000;
   await app.listen(port);
   logger.log(`🚀 Backend server running on http://localhost:${port}`);
 }
-bootstrap();
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason: any, promise: Promise<any>) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  // Don't exit the process, just log the error
+});
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (error: Error) => {
+  console.error('Uncaught Exception:', error);
+  // Exit gracefully
+  process.exit(1);
+});
+
+// Bootstrap with error handling
+bootstrap().catch((error) => {
+  console.error('❌ Failed to start server:', error);
+  console.error('Stack trace:', error.stack);
+  process.exit(1);
+});

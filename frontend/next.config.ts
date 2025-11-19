@@ -4,6 +4,8 @@ import { withSentryConfig } from "@sentry/nextjs";
 const nextConfig: NextConfig = {
   // Suppress the middleware deprecation warning
   // The middleware.ts file is still the correct approach for auth/route protection in Next.js 16
+  // Note: clientTraceMetadata experimental feature is automatically enabled by @sentry/nextjs
+  // This is safe for production and is used for Sentry performance monitoring
   experimental: {
     // This helps with the middleware warning
   },

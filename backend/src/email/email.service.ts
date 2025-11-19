@@ -29,15 +29,22 @@ export class EmailService {
         user: this.configService.get<string>('SMTP_USER'),
         pass: this.configService.get<string>('SMTP_PASSWORD'), // App password for Gmail
       },
+      // Connection timeout settings to prevent hanging
+      connectionTimeout: 5000, // 5 seconds
+      greetingTimeout: 5000,
+      socketTimeout: 5000,
     });
 
-    // Verify connection
-    this.transporter.verify((error) => {
-      if (error) {
-        this.logger.error('SMTP connection error:', error);
-      } else {
-        this.logger.log('SMTP server is ready to send emails');
-      }
+    // Verify connection asynchronously (non-blocking)
+    // Don't block startup - verify in background
+    setImmediate(() => {
+      this.transporter.verify((error) => {
+        if (error) {
+          this.logger.warn('SMTP connection verification failed (will retry on first email):', error.message);
+        } else {
+          this.logger.log('SMTP server is ready to send emails');
+        }
+      });
     });
   }
 

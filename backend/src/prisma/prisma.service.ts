@@ -18,11 +18,23 @@ export class PrismaService
   implements OnModuleInit, OnModuleDestroy
 {
   async onModuleInit() {
-    await this.$connect();
+    try {
+      // Set connection timeout to prevent hanging
+      await Promise.race([
+        this.$connect(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Database connection timeout')), 10000),
+        ),
+      ]);
 
-    // Log connection status (optional, for debugging)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('✅ Prisma connected with prepared statements enabled');
+      // Log connection status (optional, for debugging)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('✅ Prisma connected with prepared statements enabled');
+      }
+    } catch (error: any) {
+      console.error('❌ Failed to connect to database:', error.message);
+      // Don't throw - allow server to start and retry on first query
+      // This prevents blocking startup if DB is temporarily unavailable
     }
   }
 
