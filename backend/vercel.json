@@ -1,9 +1,13 @@
 {
   "version": 2,
+  "installCommand": "npm install --ignore-optional",
   "builds": [
     {
       "src": "src/main.ts",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "includeFiles": ["dist/**", "prisma/**", "package.json"]
+      }
     }
   ],
   "routes": [
