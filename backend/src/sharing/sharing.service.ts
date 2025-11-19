@@ -10,6 +10,7 @@ import { ConfigService } from '@nestjs/config';
 // Dynamic import for canvas (optional dependency)
 let canvas: any;
 try {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   canvas = require('canvas');
 } catch (error) {
   // Canvas not installed - will throw error when used
@@ -117,12 +118,12 @@ export class SharingService {
   /**
    * Generate content card image
    */
-  async generateContentCard(data: {
+  generateContentCard(data: {
     title: string;
     content: string;
     platform?: string;
     author?: string;
-  }): Promise<Buffer> {
+  }): Buffer {
     if (!canvas) {
       throw new ServiceUnavailableException(
         'Image generation service is not available. Please install canvas package.',

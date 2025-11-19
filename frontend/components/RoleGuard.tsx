@@ -27,36 +27,42 @@ export default function RoleGuard({
   const [hasAccess, setHasAccess] = useState<boolean | null>(null);
 
   useEffect(() => {
-    if (!user) {
-      setHasAccess(false);
-      return;
-    }
-
-    // Check role
-    if (allowedRoles && !allowedRoles.includes(user.role || "USER")) {
-      setHasAccess(false);
-      return;
-    }
-
-    // Check plan
-    if (allowedPlans && !allowedPlans.includes(user.plan)) {
-      setHasAccess(false);
-      return;
-    }
-
-    // Check required plan
-    if (requirePlan) {
-      const planHierarchy = { FREE: 0, PRO: 1, AGENCY: 2 };
-      const userPlanLevel = planHierarchy[user.plan] || 0;
-      const requiredPlanLevel = planHierarchy[requirePlan] || 0;
-
-      if (userPlanLevel < requiredPlanLevel) {
+    // Use setTimeout to avoid synchronous setState in effect
+    const checkAccess = () => {
+      if (!user) {
         setHasAccess(false);
         return;
       }
-    }
 
-    setHasAccess(true);
+      // Check role
+      if (allowedRoles && !allowedRoles.includes(user.role || "USER")) {
+        setHasAccess(false);
+        return;
+      }
+
+      // Check plan
+      if (allowedPlans && !allowedPlans.includes(user.plan)) {
+        setHasAccess(false);
+        return;
+      }
+
+      // Check required plan
+      if (requirePlan) {
+        const planHierarchy = { FREE: 0, PRO: 1, AGENCY: 2 };
+        const userPlanLevel = planHierarchy[user.plan] || 0;
+        const requiredPlanLevel = planHierarchy[requirePlan] || 0;
+
+        if (userPlanLevel < requiredPlanLevel) {
+          setHasAccess(false);
+          return;
+        }
+      }
+
+      setHasAccess(true);
+    };
+
+    // Use requestAnimationFrame to defer state updates
+    requestAnimationFrame(checkAccess);
   }, [user, allowedRoles, allowedPlans, requirePlan]);
 
   useEffect(() => {

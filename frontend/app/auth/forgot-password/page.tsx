@@ -18,7 +18,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Sparkles, Mail, CheckCircle2, ArrowLeft } from "lucide-react";
 
 export default function ForgotPasswordPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -53,7 +52,7 @@ export default function ForgotPasswordPage() {
               Reset your password
             </CardTitle>
             <CardDescription>
-              Enter your email address and we'll send you a link to reset your
+              Enter your email address and we&apos;ll send you a link to reset your
               password
             </CardDescription>
           </CardHeader>
@@ -65,7 +64,7 @@ export default function ForgotPasswordPage() {
                   <div className="space-y-2">
                     <p className="font-semibold">Check Your Email</p>
                     <p className="text-sm">
-                      If an account exists with that email, we've sent you a
+                      If an account exists with that email, we&apos;ve sent you a
                       password reset link. Please check your inbox and follow
                       the instructions.
                     </p>

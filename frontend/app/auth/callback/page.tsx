@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { useAuthStore } from "@/store/auth-store";
 import { authApi } from "@/lib/auth";
 
@@ -11,30 +12,6 @@ function AuthCallback() {
   const { setAuth } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    // Social login callbacks return token and user in query params or redirect
-    // The backend should handle the OAuth flow and redirect here with a token
-    // For now, we'll check if there's a token in the URL or try to get user info
-
-    const token = searchParams.get("token");
-    const refreshToken = searchParams.get("refreshToken");
-    const error = searchParams.get("error");
-
-    if (error) {
-      setError(decodeURIComponent(error));
-      setLoading(false);
-      return;
-    }
-
-    if (token) {
-      // If token is in URL, store it and fetch user
-      handleTokenAuth(token, refreshToken);
-    } else {
-      // Try to get current user (backend should have set session)
-      handleSessionAuth();
-    }
-  }, [searchParams]);
 
   const handleTokenAuth = async (
     token: string,
@@ -80,6 +57,31 @@ function AuthCallback() {
     }
   };
 
+  useEffect(() => {
+    // Social login callbacks return token and user in query params or redirect
+    // The backend should handle the OAuth flow and redirect here with a token
+    // For now, we'll check if there's a token in the URL or try to get user info
+
+    const token = searchParams.get("token");
+    const refreshToken = searchParams.get("refreshToken");
+    const errorParam = searchParams.get("error");
+
+    if (errorParam) {
+      setError(decodeURIComponent(errorParam));
+      setLoading(false);
+      return;
+    }
+
+    if (token) {
+      // If token is in URL, store it and fetch user
+      handleTokenAuth(token, refreshToken);
+    } else {
+      // Try to get current user (backend should have set session)
+      handleSessionAuth();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
@@ -113,9 +115,9 @@ function AuthCallback() {
                 </p>
               </div>
             ) : null}
-            <a href="/login" className="text-sm underline mt-2 inline-block">
+            <Link href="/login" className="text-sm underline mt-2 inline-block">
               Back to login
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded">

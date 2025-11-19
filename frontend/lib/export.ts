@@ -43,7 +43,7 @@ export function exportToCSV(ideas: Idea[]): void {
   const csvContent = [
     headers.join(","),
     ...rows.map((row) =>
-      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+      row.map((cell) => `"${String(cell).replace(/"/g, "\"\"")}"`).join(",")
     ),
   ].join("\n");
 

@@ -381,12 +381,12 @@ export class AdminController {
   }
 
   @Get('settings/quotas')
-  async getQuotaSettings() {
+  getQuotaSettings() {
     return this.platformSettings.getQuotaSettings();
   }
 
   @Put('settings/quotas/:plan')
-  async updateQuotaSettings(
+  updateQuotaSettings(
     @Param('plan') plan: 'free' | 'pro' | 'agency',
     @Body()
     settings: { dailyGenerations?: number; monthlyGenerations?: number },
@@ -395,12 +395,12 @@ export class AdminController {
   }
 
   @Get('settings/stripe')
-  async getStripeProductIds() {
+  getStripeProductIds() {
     return this.platformSettings.getStripeProductIds();
   }
 
   @Put('settings/stripe')
-  async updateStripeProductIds(
+  updateStripeProductIds(
     @Body()
     settings: {
       proMonthlyPriceId?: string;
@@ -412,7 +412,7 @@ export class AdminController {
   }
 
   @Get('settings/api-keys')
-  async getApiKeysStatus() {
+  getApiKeysStatus() {
     return this.platformSettings.getApiKeysStatus();
   }
 

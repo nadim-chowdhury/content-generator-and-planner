@@ -54,7 +54,7 @@ describe('BillingController', () => {
         mockUser,
       );
 
-      expect(service.createCheckoutSession).toHaveBeenCalledWith(
+      expect(mockBillingService.createCheckoutSession).toHaveBeenCalledWith(
         planId,
         mockUser.id,
       );
@@ -74,7 +74,9 @@ describe('BillingController', () => {
 
       const result = await controller.getSubscription(mockUser);
 
-      expect(service.getSubscription).toHaveBeenCalledWith(mockUser.id);
+      expect(mockBillingService.getSubscription).toHaveBeenCalledWith(
+        mockUser.id,
+      );
       expect(result).toEqual(expectedResult);
     });
   });

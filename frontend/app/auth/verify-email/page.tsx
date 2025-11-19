@@ -14,16 +14,6 @@ function VerifyEmailContent() {
   );
   const [message, setMessage] = useState("");
 
-  useEffect(() => {
-    const token = searchParams.get("token");
-    if (token) {
-      verifyEmail(token);
-    } else {
-      setStatus("error");
-      setMessage("Verification token is missing");
-    }
-  }, [searchParams]);
-
   const verifyEmail = async (token: string) => {
     try {
       setStatus("loading");
@@ -42,6 +32,17 @@ function VerifyEmailContent() {
       );
     }
   };
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (token) {
+      verifyEmail(token);
+    } else {
+      setStatus("error");
+      setMessage("Verification token is missing");
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

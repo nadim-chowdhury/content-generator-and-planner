@@ -79,7 +79,7 @@ export class InfrastructureController {
 
   // PITR Endpoints
   @Get('pitr/config')
-  async getPitrConfig() {
+  getPitrConfig() {
     return this.pitrService.generatePitrConfig();
   }
 

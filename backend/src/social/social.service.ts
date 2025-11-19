@@ -326,7 +326,7 @@ export class SocialService {
           }
           return { success: false, error: 'Facebook page ID required' };
 
-        case SocialPlatform.INSTAGRAM:
+        case SocialPlatform.INSTAGRAM: {
           // Instagram requires Instagram Business Account ID
           // This should be stored in platformUserId or pageId
           const instagramAccountId =
@@ -342,8 +342,9 @@ export class SocialService {
             instagramAccountId,
             content,
           );
+        }
 
-        case SocialPlatform.LINKEDIN:
+        case SocialPlatform.LINKEDIN: {
           // LinkedIn requires person URN
           const personUrn = connection.platformUserId;
           if (!personUrn) {
@@ -370,6 +371,7 @@ export class SocialService {
             personUrn,
             content,
           );
+        }
 
         default:
           this.logger.warn(
@@ -399,7 +401,7 @@ export class SocialService {
 
     try {
       switch (connection.platform) {
-        case SocialPlatform.FACEBOOK:
+        case SocialPlatform.FACEBOOK: {
           const facebookAppId =
             this.configService.get<string>('FACEBOOK_APP_ID');
           const facebookAppSecret = this.configService.get<string>(
@@ -425,6 +427,7 @@ export class SocialService {
             }
           }
           break;
+        }
 
         // Add other platforms as needed
       }

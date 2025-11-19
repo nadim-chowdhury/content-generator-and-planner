@@ -38,10 +38,6 @@ export default function CommentWithMentions({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [currentWorkspace, setCurrentWorkspace] = useState<Team | null>(null);
 
-  useEffect(() => {
-    loadWorkspaceAndMembers();
-  }, []);
-
   const loadWorkspaceAndMembers = async () => {
     try {
       const workspace = await teamsApi.getCurrentWorkspace();
@@ -63,6 +59,11 @@ export default function CommentWithMentions({
       console.error("Failed to load workspace:", err);
     }
   };
+
+  useEffect(() => {
+    loadWorkspaceAndMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleCommentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const value = e.target.value;

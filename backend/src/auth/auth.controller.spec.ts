@@ -56,7 +56,7 @@ describe('AuthController', () => {
 
       const result = await controller.signup(signupDto);
 
-      expect(service.signup).toHaveBeenCalledWith(signupDto);
+      expect(mockAuthService.signup).toHaveBeenCalledWith(signupDto);
       expect(result).toEqual(expectedResult);
     });
   });
@@ -78,7 +78,7 @@ describe('AuthController', () => {
 
       const result = await controller.login(loginDto);
 
-      expect(service.login).toHaveBeenCalledWith(loginDto);
+      expect(mockAuthService.login).toHaveBeenCalledWith(loginDto);
       expect(result).toHaveProperty('accessToken');
       expect(result).toHaveProperty('refreshToken');
     });

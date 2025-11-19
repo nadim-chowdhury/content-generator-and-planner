@@ -105,7 +105,7 @@ export class PlatformSettingsService {
   /**
    * Get quota settings
    */
-  async getQuotaSettings() {
+  getQuotaSettings() {
     return {
       free: {
         dailyGenerations: parseInt(
@@ -143,7 +143,7 @@ export class PlatformSettingsService {
   /**
    * Update quota settings
    */
-  async updateQuotaSettings(
+  updateQuotaSettings(
     plan: 'free' | 'pro' | 'agency',
     settings: { dailyGenerations?: number; monthlyGenerations?: number },
   ) {
@@ -176,7 +176,7 @@ export class PlatformSettingsService {
   /**
    * Get Stripe product/price IDs
    */
-  async getStripeProductIds() {
+  getStripeProductIds() {
     return {
       proMonthlyPriceId:
         this.configService.get<string>('STRIPE_PRO_MONTHLY_PRICE_ID') ||
@@ -193,7 +193,7 @@ export class PlatformSettingsService {
   /**
    * Update Stripe product IDs
    */
-  async updateStripeProductIds(settings: {
+  updateStripeProductIds(settings: {
     proMonthlyPriceId?: string;
     proYearlyPriceId?: string;
     agencyPriceId?: string;
@@ -209,7 +209,7 @@ export class PlatformSettingsService {
   /**
    * Get API keys status (masked for security)
    */
-  async getApiKeysStatus() {
+  getApiKeysStatus() {
     const openaiKey = this.configService.get<string>('OPENAI_API_KEY');
     const stripeKey = this.configService.get<string>('STRIPE_SECRET_KEY');
 
@@ -240,9 +240,9 @@ export class PlatformSettingsService {
   async getAllSettings(): Promise<PlatformSettings> {
     const [aiTokens, quotas, stripe, apiKeys] = await Promise.all([
       this.getAiTokenUsage(),
-      this.getQuotaSettings(),
-      this.getStripeProductIds(),
-      this.getApiKeysStatus(),
+      Promise.resolve(this.getQuotaSettings()),
+      Promise.resolve(this.getStripeProductIds()),
+      Promise.resolve(this.getApiKeysStatus()),
     ]);
 
     return {

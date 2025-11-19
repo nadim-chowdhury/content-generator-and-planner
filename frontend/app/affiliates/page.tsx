@@ -42,10 +42,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
-  DollarSign,
   Copy,
   CheckCircle2,
-  Loader2,
   AlertCircle,
   TrendingUp,
   Wallet,
@@ -210,7 +208,7 @@ export default function AffiliatesPage() {
               <AlertDescription className="text-yellow-800 dark:text-yellow-200">
                 <div className="font-semibold mb-1">Application Pending</div>
                 <div>
-                  Your affiliate application is pending approval. You'll be able
+                  Your affiliate application is pending approval. You&apos;ll be able
                   to access your dashboard once approved.
                 </div>
               </AlertDescription>

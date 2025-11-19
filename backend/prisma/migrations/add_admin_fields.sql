@@ -10,3 +10,4 @@ CREATE INDEX IF NOT EXISTS "users_banned_idx" ON "users"("banned");
 
 
 
+

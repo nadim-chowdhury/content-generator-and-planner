@@ -1,5 +1,5 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from '@sentry/nextjs';
+import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   // Suppress the middleware deprecation warning
@@ -9,8 +9,8 @@ const nextConfig: NextConfig = {
   },
   // Allow cross-origin requests in development (Next.js 16+)
   // This fixes the warning: "Cross origin request detected from 127.0.0.1 to /_next/* resource"
-  allowedDevOrigins: process.env.NODE_ENV === 'development' 
-    ? ['127.0.0.1', 'localhost', 'http://127.0.0.1:3001', 'http://localhost:3001']
+  allowedDevOrigins: process.env.NODE_ENV === "development" 
+    ? ["127.0.0.1", "localhost", "http://127.0.0.1:3001", "http://localhost:3001"]
     : undefined,
   // Suppress source map warnings in development
   // These warnings are harmless and come from Next.js internal files in node_modules

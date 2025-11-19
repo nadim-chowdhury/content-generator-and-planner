@@ -123,7 +123,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'User profile retrieved' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
-  async getMe(@CurrentUser() user: any) {
+  getMe(@CurrentUser() user: any) {
     return { user };
   }
 

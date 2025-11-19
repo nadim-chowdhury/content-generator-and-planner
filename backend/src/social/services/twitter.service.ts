@@ -69,7 +69,7 @@ export class TwitterService {
   /**
    * Refresh access token (if refresh token is available)
    */
-  async refreshToken(refreshToken: string): Promise<string | null> {
+  refreshToken(refreshToken: string): string | null {
     // Twitter OAuth 2.0 token refresh implementation
     // This requires the OAuth 2.0 client ID and secret
     // For now, return null - token refresh should be handled at OAuth level

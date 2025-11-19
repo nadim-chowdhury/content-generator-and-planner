@@ -33,12 +33,12 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     });
   }
 
-  async validate(
+  validate(
     accessToken: string,
     refreshToken: string,
     profile: Profile,
     done: (err: any, user: any, info?: any) => void,
-  ): Promise<any> {
+  ): any {
     const { id, username, emails, photos } = profile;
     const user = {
       githubId: id.toString(),

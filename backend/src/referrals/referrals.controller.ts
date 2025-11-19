@@ -39,4 +39,3 @@ export class ReferralsController {
     return { message: 'Referral tracked' };
   }
 }
-

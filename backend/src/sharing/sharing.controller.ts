@@ -33,7 +33,7 @@ export class SharingController {
 
   @Post('content-card')
   @UseGuards(JwtAuthGuard)
-  async generateContentCard(
+  generateContentCard(
     @CurrentUser() user: any,
     @Body()
     data: {
@@ -45,7 +45,7 @@ export class SharingController {
     @Res() res: Response,
   ) {
     try {
-      const imageBuffer = await this.sharingService.generateContentCard({
+      const imageBuffer = this.sharingService.generateContentCard({
         ...data,
         author: data.author || user.name || user.email,
       });

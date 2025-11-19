@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+import Link from "next/link";
 import { blogApi, BlogPost } from "@/lib/blog";
 import Navbar from "@/components/Navbar";
 
@@ -67,12 +68,12 @@ export default function BlogPostPage() {
             <p className="text-gray-600 dark:text-gray-400">
               {error || "The blog post you are looking for does not exist."}
             </p>
-            <a
+            <Link
               href="/blog"
               className="mt-4 inline-block text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
             >
               Back to Blog
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -153,12 +154,12 @@ export default function BlogPostPage() {
 
         {/* Back to Blog */}
         <div className="mt-12 pt-8 border-t border-gray-200 dark:border-gray-700">
-          <a
+          <Link
             href="/blog"
             className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
           >
             ← Back to Blog
-          </a>
+          </Link>
         </div>
       </article>
     </div>

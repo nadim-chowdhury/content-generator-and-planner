@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { authApi } from "@/lib/auth";
 import { useAuthStore } from "@/store/auth-store";
 
@@ -11,17 +12,6 @@ function MagicLinkVerification() {
   const { setAuth } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    const token = searchParams.get("token");
-    if (!token) {
-      setError("Invalid magic link. No token provided.");
-      setLoading(false);
-      return;
-    }
-
-    verifyToken(token);
-  }, [searchParams]);
 
   const verifyToken = async (token: string) => {
     try {
@@ -37,6 +27,18 @@ function MagicLinkVerification() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const token = searchParams.get("token");
+    if (!token) {
+      setError("Invalid magic link. No token provided.");
+      setLoading(false);
+      return;
+    }
+
+    verifyToken(token);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
 
   if (loading) {
     return (
@@ -58,9 +60,9 @@ function MagicLinkVerification() {
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
             <p className="font-medium">Verification Failed</p>
             <p className="text-sm mt-1">{error}</p>
-            <a href="/login" className="text-sm underline mt-2 inline-block">
+            <Link href="/login" className="text-sm underline mt-2 inline-block">
               Back to login
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded">

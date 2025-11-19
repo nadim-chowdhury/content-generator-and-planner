@@ -57,7 +57,10 @@ describe('IdeasController', () => {
 
       const result = await controller.create(createIdeaDto, mockUser);
 
-      expect(service.create).toHaveBeenCalledWith(createIdeaDto, mockUser.id);
+      expect(mockIdeasService.create).toHaveBeenCalledWith(
+        createIdeaDto,
+        mockUser.id,
+      );
       expect(result).toEqual(expectedResult);
     });
   });
@@ -73,7 +76,7 @@ describe('IdeasController', () => {
 
       const result = await controller.findAll(mockUser, {});
 
-      expect(service.findAll).toHaveBeenCalledWith(mockUser.id, {});
+      expect(mockIdeasService.findAll).toHaveBeenCalledWith(mockUser.id, {});
       expect(result).toEqual(expectedResult);
     });
   });

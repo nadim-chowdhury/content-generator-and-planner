@@ -95,4 +95,3 @@ export class TrialExpirationProcessor extends WorkerHost {
     }
   }
 }
-

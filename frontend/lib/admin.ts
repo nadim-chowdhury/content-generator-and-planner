@@ -241,7 +241,7 @@ export const adminApi = {
     amount?: number,
     reason?: string
   ): Promise<any> => {
-    const { data } = await api.post<any>(`/api/admin/billing/refund`, {
+    const { data } = await api.post<any>("/api/admin/billing/refund", {
       paymentIntentId,
       amount,
       reason,
