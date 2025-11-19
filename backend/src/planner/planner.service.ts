@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import { SocialPlatform } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleIdeaDto } from './dto/schedule-idea.dto';
 import { QueueService } from '../queue/queue.service';
@@ -43,7 +44,7 @@ export class PlannerService {
           userId,
           ideaId,
           scheduledAt: scheduledDate.toISOString(),
-          platform: idea.platform,
+          platform: idea.platform as SocialPlatform,
         },
         reminderTime,
       );
@@ -52,7 +53,7 @@ export class PlannerService {
       const connections = await this.prisma.socialConnection.findMany({
         where: {
           userId,
-          platform: idea.platform,
+          platform: idea.platform as SocialPlatform,
           isActive: true,
         },
       });
@@ -90,7 +91,7 @@ export class PlannerService {
       const connections = await this.prisma.socialConnection.findMany({
         where: {
           userId,
-          platform: idea.platform,
+          platform: idea.platform as SocialPlatform,
           isActive: true,
         },
       });
@@ -131,16 +132,6 @@ export class PlannerService {
     return this.prisma.idea.findMany({
       where,
       orderBy: { scheduledAt: 'asc' },
-      include: {
-        folder: {
-          select: {
-            id: true,
-            name: true,
-            color: true,
-            icon: true,
-          },
-        },
-      },
       select: {
         id: true,
         title: true,
@@ -261,7 +252,9 @@ export class PlannerService {
 
     // Find available time slots
     const suggestions: Array<{ date: Date; reason: string; score: number }> = [];
-    const scheduledDates = scheduledIdeas.map(i => i.scheduledAt.toISOString().split('T')[0]);
+    const scheduledDates = scheduledIdeas
+      .filter(i => i.scheduledAt !== null)
+      .map(i => i.scheduledAt!.toISOString().split('T')[0]);
     
     // Check each day in the range
     for (let i = 0; i <= lookAheadDays; i++) {

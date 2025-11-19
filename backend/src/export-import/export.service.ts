@@ -306,7 +306,7 @@ export class ExportService {
         })),
         activities: team.activities.map((a) => ({
           type: a.type,
-          description: a.description,
+          message: a.message,
           metadata: a.metadata,
           createdAt: a.createdAt.toISOString(),
         })),

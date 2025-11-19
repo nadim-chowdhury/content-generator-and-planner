@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { SocialPlatform } from '@prisma/client';
 import { UpdateUserSettingsDto } from './dto/update-user-settings.dto';
 import { UpdateWorkspaceSettingsDto } from './dto/update-workspace-settings.dto';
 import { TeamsService } from '../teams/teams.service';
@@ -35,12 +36,19 @@ export class SettingsService {
     // Ensure settings exist
     await this.getUserSettings(userId);
 
+    const updateData: any = {
+      ...updateDto,
+      updatedAt: new Date(),
+    };
+
+    // Cast preferredPlatforms to SocialPlatform[] if provided
+    if (updateDto.preferredPlatforms) {
+      updateData.preferredPlatforms = updateDto.preferredPlatforms as SocialPlatform[];
+    }
+
     const updated = await this.prisma.userSettings.update({
       where: { userId },
-      data: {
-        ...updateDto,
-        updatedAt: new Date(),
-      },
+      data: updateData,
     });
 
     return updated;

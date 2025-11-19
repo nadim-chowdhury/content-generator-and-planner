@@ -205,7 +205,7 @@ export class QueueScheduler implements OnModuleInit {
         const connections = await this.prisma.socialConnection.findMany({
           where: {
             userId: idea.userId,
-            platform: idea.platform,
+            platform: idea.platform as any,
             isActive: true,
           },
         });

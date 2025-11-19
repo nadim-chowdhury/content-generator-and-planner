@@ -13,6 +13,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserRole, UserPlan } from '@prisma/client';
 import { BusinessAnalyticsService } from './services/business-analytics.service';
 import { AdminUserManagementService } from './services/admin-user-management.service';
 import { AdminBillingService } from './services/admin-billing.service';
@@ -145,7 +146,7 @@ export class AdminController {
 
     return this.prisma.user.update({
       where: { id: userId },
-      data: { role },
+      data: { role: role as UserRole },
       select: {
         id: true,
         email: true,
@@ -165,7 +166,7 @@ export class AdminController {
 
     return this.prisma.user.update({
       where: { id: userId },
-      data: { plan },
+      data: { plan: plan as UserPlan },
       select: {
         id: true,
         email: true,

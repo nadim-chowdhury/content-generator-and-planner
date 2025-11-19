@@ -86,7 +86,8 @@ export class AutoPostProcessor extends WorkerHost {
       await this.prisma.notification.create({
         data: {
           userId,
-          type: 'SYSTEM',
+          type: 'IN_APP',
+          category: 'SYSTEM',
           title: 'Auto-Post Failed',
           message: `Failed to automatically post your content. Error: ${error}`,
           metadata: {

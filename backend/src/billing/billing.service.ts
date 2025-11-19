@@ -6,6 +6,7 @@ import { PlanType } from './dto/create-checkout.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { EmailService } from '../email/email.service';
 import { Decimal } from '@prisma/client/runtime/library';
+import { UserPlan } from '@prisma/client';
 import * as crypto from 'crypto';
 
 enum NotificationCategory {
@@ -14,12 +15,6 @@ enum NotificationCategory {
   DEADLINE_ALERT = 'DEADLINE_ALERT',
   SYSTEM = 'SYSTEM',
   ACHIEVEMENT = 'ACHIEVEMENT',
-}
-
-export enum UserPlan {
-  FREE = 'FREE',
-  PRO = 'PRO',
-  AGENCY = 'AGENCY',
 }
 
 @Injectable()
@@ -330,7 +325,7 @@ export class BillingService {
     if (subscription.status === 'active' || subscription.status === 'trialing') {
       // Determine plan from subscription items
       const items = subscription.items.data;
-      let targetPlan = UserPlan.PRO;
+      let targetPlan: UserPlan = UserPlan.PRO;
 
       for (const item of items) {
         const priceId = item.price.id;

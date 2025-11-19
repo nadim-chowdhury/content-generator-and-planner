@@ -204,7 +204,7 @@ export class SocialService {
     const result = await this.postToPlatformAPI(connection, {
       caption: content.caption || idea.caption || idea.title,
       hashtags: content.hashtags || idea.hashtags || [],
-      imageUrl: idea.thumbnailUrl,
+      imageUrl: undefined, // thumbnailUrl field doesn't exist in Idea model
     });
 
     if (result.success) {
@@ -217,7 +217,6 @@ export class SocialService {
           data: {
             postedTo: [...postedTo, platformStr],
             status: 'POSTED',
-            postedAt: new Date(),
           },
         });
       }

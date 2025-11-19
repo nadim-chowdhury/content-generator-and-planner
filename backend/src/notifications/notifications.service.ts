@@ -279,11 +279,13 @@ export class NotificationsService {
       if (upcomingContent.length > 0) {
         await this.sendUpcomingContentAlert(
           user.id,
-          upcomingContent.map((item) => ({
-            title: item.title,
-            scheduledAt: item.scheduledAt.toISOString(),
-            platform: item.platform,
-          })),
+          upcomingContent
+            .filter((item) => item.scheduledAt !== null)
+            .map((item) => ({
+              title: item.title,
+              scheduledAt: item.scheduledAt!.toISOString(),
+              platform: item.platform,
+            })),
         );
       }
     }
@@ -336,6 +338,7 @@ export class NotificationsService {
         });
 
         for (const task of tasks) {
+          if (!task.deadline) continue;
           await this.sendTaskReminder(user.id, {
             title: task.title,
             deadline: task.deadline.toISOString(),

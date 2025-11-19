@@ -6,6 +6,7 @@ import {
   ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+import { TeamRole } from '@prisma/client';
 
 @Injectable()
 export class TeamsService {
@@ -170,7 +171,7 @@ export class TeamsService {
   /**
    * Invite member to team
    */
-  async inviteMember(teamId: string, ownerId: string, userEmail: string, role: string = 'MEMBER') {
+  async inviteMember(teamId: string, ownerId: string, userEmail: string, role: string = 'VIEWER') {
     const team = await this.prisma.team.findUnique({
       where: { id: teamId },
     });
@@ -211,7 +212,7 @@ export class TeamsService {
       data: {
         teamId,
         userId: user.id,
-        role,
+        role: role as TeamRole,
         invitedBy: ownerId,
       },
       include: {
@@ -284,8 +285,8 @@ export class TeamsService {
       throw new ForbiddenException('Only team owner can update member roles');
     }
 
-    if (!['MEMBER', 'ADMIN'].includes(role)) {
-      throw new BadRequestException('Invalid role. Must be MEMBER or ADMIN');
+    if (!['VIEWER', 'EDITOR', 'MANAGER', 'ADMIN'].includes(role)) {
+      throw new BadRequestException('Invalid role. Must be VIEWER, EDITOR, MANAGER, or ADMIN');
     }
 
     return this.prisma.teamMember.update({
@@ -295,7 +296,7 @@ export class TeamsService {
           userId: memberId,
         },
       },
-      data: { role },
+      data: { role: role as TeamRole },
       include: {
         user: {
           select: {

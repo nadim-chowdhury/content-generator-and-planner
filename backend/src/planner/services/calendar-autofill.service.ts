@@ -147,9 +147,9 @@ export class CalendarAutofillService {
 
         // Check if time slot is already taken
         const dateKey = slotDate.toISOString().split('T')[0];
-        const isTaken = existingSchedules.some(
-          (s) => s.scheduledAt.toISOString().split('T')[0] === dateKey,
-        );
+        const isTaken = existingSchedules
+          .filter(s => s.scheduledAt !== null)
+          .some((s) => s.scheduledAt!.toISOString().split('T')[0] === dateKey);
 
         if (isTaken) {
           continue;
@@ -301,9 +301,9 @@ export class CalendarAutofillService {
         if (slotDate < startDate || slotDate > endDate) continue;
 
         const dateKey = slotDate.toISOString().split('T')[0];
-        const isTaken = existingSchedules.some(
-          (s) => s.scheduledAt.toISOString().split('T')[0] === dateKey,
-        );
+        const isTaken = existingSchedules
+          .filter(s => s.scheduledAt !== null)
+          .some((s) => s.scheduledAt!.toISOString().split('T')[0] === dateKey);
 
         if (isTaken) continue;
 

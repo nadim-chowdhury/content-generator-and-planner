@@ -117,12 +117,16 @@ export class AuthService {
 
     // Send welcome email with verification link
     const verificationLink = `${this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001'}/auth/verify-email?token=${emailVerificationToken}`;
+    const userWithName = await this.prisma.user.findUnique({
+      where: { id: user.id },
+      select: { name: true },
+    });
     await this.emailService.queueEmail(
       user.email,
       'Welcome to Content Generator & Planner!',
       'welcome',
       {
-        userName: user.name || 'User',
+        userName: userWithName?.name || 'User',
         verificationToken: emailVerificationToken,
       },
     );
@@ -442,12 +446,12 @@ export class AuthService {
     userAgent?: string,
     deviceInfo?: string,
   ) {
-    const providerIdField = `${provider}Id`;
+    const providerIdField = `${provider}Id` as 'googleId' | 'facebookId' | 'githubId';
     const providerId = profile[providerIdField] || profile.id;
 
     // Find user by provider ID
     let user = await this.prisma.user.findUnique({
-      where: { [providerIdField]: providerId },
+      where: { [providerIdField]: providerId } as any,
     });
 
     // If not found, try to find by email
