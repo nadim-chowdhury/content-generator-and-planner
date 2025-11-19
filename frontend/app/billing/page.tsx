@@ -7,6 +7,28 @@ import { billingApi, SubscriptionStatus, Invoice, UsageStats } from '@/lib/billi
 import { notificationsApi } from '@/lib/notifications';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  CreditCard, 
+  TrendingUp, 
+  Bell, 
+  FileText, 
+  CheckCircle2, 
+  AlertCircle,
+  XCircle,
+  Loader2,
+  ExternalLink
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function BillingPage() {
   const router = useRouter();
@@ -31,13 +53,12 @@ export default function BillingPage() {
         billingApi.getStatus(),
         billingApi.getInvoices(10),
         billingApi.getUsageStats(),
-        notificationsApi.getNotifications(10).catch(() => []), // Get recent notifications
+        notificationsApi.getNotifications(10).catch(() => []),
       ]);
       setStatus(statusData);
       setInvoices(invoicesData);
       setUsage(usageData);
       
-      // Filter billing-related notifications
       if (notificationsData && Array.isArray(notificationsData)) {
         const billingNotifs = notificationsData.filter((n: any) => 
           n.category === 'SYSTEM' && 
@@ -66,7 +87,7 @@ export default function BillingPage() {
     setProcessing(true);
     try {
       const { url } = await billingApi.createPortalSession();
-      window.location.href = url;
+      window.location.href = url; // Stripe portal URL - external redirect
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to open billing portal');
       setProcessing(false);
@@ -107,271 +128,289 @@ export default function BillingPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Billing & Subscription</h1>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">Billing & Subscription</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your subscription and billing information
+            </p>
+          </div>
 
           {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-              <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+            <div className="space-y-4">
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-64 w-full" />
             </div>
           ) : (
             <div className="space-y-6">
               {/* Subscription Status */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Current Plan</h2>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
-                      {status?.plan || 'Free'}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CreditCard className="w-5 h-5 text-primary" />
+                    Current Plan
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-2xl font-bold mb-2">
+                        {status?.plan || 'Free'}
+                      </div>
+                      {status?.onTrial && status?.trialEndsAt && (
+                        <Alert className="border-yellow-200 dark:border-yellow-800 bg-yellow-50 dark:bg-yellow-900/20 mb-2">
+                          <AlertCircle className="h-4 w-4 text-yellow-600 dark:text-yellow-400" />
+                          <AlertDescription className="text-yellow-800 dark:text-yellow-200">
+                            Free trial ends on {formatDate(status.trialEndsAt)}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                      {status?.cancelAtPeriodEnd && status?.currentPeriodEnd && (
+                        <Alert variant="destructive" className="mb-2">
+                          <XCircle className="h-4 w-4" />
+                          <AlertDescription>
+                            Cancels on {formatDate(status.currentPeriodEnd)}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                      {status?.active && !status?.onTrial && !status?.cancelAtPeriodEnd && status?.currentPeriodEnd && (
+                        <Alert className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20 mb-2">
+                          <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                          <AlertDescription className="text-green-800 dark:text-green-200">
+                            Active until {formatDate(status.currentPeriodEnd)}
+                          </AlertDescription>
+                        </Alert>
+                      )}
                     </div>
-                    {status?.onTrial && status?.trialEndsAt && (
-                      <div className="text-sm text-yellow-600 dark:text-yellow-400">
-                        Free trial ends on {formatDate(status.trialEndsAt)}
-                      </div>
-                    )}
-                    {status?.cancelAtPeriodEnd && status?.currentPeriodEnd && (
-                      <div className="text-sm text-red-600 dark:text-red-400">
-                        Cancels on {formatDate(status.currentPeriodEnd)}
-                      </div>
-                    )}
-                    {status?.active && !status?.onTrial && !status?.cancelAtPeriodEnd && status?.currentPeriodEnd && (
-                      <div className="text-sm text-green-600 dark:text-green-400">
-                        Active until {formatDate(status.currentPeriodEnd)}
-                      </div>
-                    )}
+                    <div className="flex gap-3">
+                      {!isPro && (
+                        <Button onClick={handleUpgrade}>
+                          Upgrade
+                        </Button>
+                      )}
+                      {isPro && !status?.cancelAtPeriodEnd && (
+                        <>
+                          <Button variant="outline" onClick={handleManage} disabled={processing}>
+                            {processing ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Opening...
+                              </>
+                            ) : (
+                              <>
+                                <ExternalLink className="w-4 h-4 mr-2" />
+                                Manage Subscription
+                              </>
+                            )}
+                          </Button>
+                          <Button variant="destructive" onClick={() => setShowCancelConfirm(true)}>
+                            Cancel
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex gap-3">
-                    {!isPro && (
-                      <button
-                        onClick={handleUpgrade}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                      >
-                        Upgrade
-                      </button>
-                    )}
-                    {isPro && !status?.cancelAtPeriodEnd && (
-                      <>
-                        <button
-                          onClick={handleManage}
-                          disabled={processing}
-                          className="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50"
-                        >
-                          {processing ? 'Opening...' : 'Manage Subscription'}
-                        </button>
-                        <button
-                          onClick={() => setShowCancelConfirm(true)}
-                          className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               {/* Usage Statistics */}
               {usage && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Usage Statistics</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Daily AI Generations</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                        {usage.dailyGenerations}
-                        {usage.isUnlimited ? '' : ` / ${usage.dailyLimit}`}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <TrendingUp className="w-5 h-5 text-primary" />
+                      Usage Statistics
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Daily AI Generations</div>
+                        <div className="text-2xl font-bold">
+                          {usage.dailyGenerations}
+                          {usage.isUnlimited ? '' : ` / ${usage.dailyLimit}`}
+                        </div>
+                      </div>
+                      {!usage.isUnlimited && (
+                        <div>
+                          <div className="text-sm text-muted-foreground mb-1">Remaining Today</div>
+                          <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                            {usage.remaining}
+                          </div>
+                        </div>
+                      )}
+                      <div>
+                        <div className="text-sm text-muted-foreground mb-1">Plan</div>
+                        <div className="text-2xl font-bold">{usage.plan}</div>
                       </div>
                     </div>
                     {!usage.isUnlimited && (
-                      <div>
-                        <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Remaining Today</div>
-                        <div className="text-2xl font-bold text-green-600 dark:text-green-400">
-                          {usage.remaining}
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Usage</span>
+                          <span>{((usage.dailyGenerations / (usage.dailyLimit || 1)) * 100).toFixed(0)}%</span>
                         </div>
+                        <Progress value={(usage.dailyGenerations / (usage.dailyLimit || 1)) * 100} />
                       </div>
                     )}
-                    <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Plan</div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white">{usage.plan}</div>
-                    </div>
-                  </div>
-                  {!usage.isUnlimited && (
-                    <div className="mt-4">
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-indigo-600 h-2 rounded-full transition-all"
-                          style={{
-                            width: `${((usage.dailyGenerations / (usage.dailyLimit || 1)) * 100).toFixed(0)}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </div>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Recent Billing Notifications */}
               {recentBillingNotifications.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Recent Billing Updates</h2>
-                  <div className="space-y-3">
-                    {recentBillingNotifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`p-4 rounded-lg border ${
-                          notification.read
-                            ? 'bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600'
-                            : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                              {notification.title}
-                            </h3>
-                            <p className="text-sm text-gray-600 dark:text-gray-400">
-                              {notification.message}
-                            </p>
-                            <p className="text-xs text-gray-500 dark:text-gray-500 mt-2">
-                              {new Date(notification.createdAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </p>
-                          </div>
-                          {!notification.read && (
-                            <div className="ml-4 w-2 h-2 bg-blue-600 rounded-full"></div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bell className="w-5 h-5 text-primary" />
+                      Recent Billing Updates
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {recentBillingNotifications.map((notification) => (
+                        <Alert
+                          key={notification.id}
+                          className={cn(
+                            notification.read ? 'bg-muted/50' : 'bg-primary/5 border-primary/50'
                           )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                        >
+                          <div className="flex items-start justify-between w-full">
+                            <div className="flex-1">
+                              <div className="font-semibold mb-1">{notification.title}</div>
+                              <div className="text-sm text-muted-foreground">{notification.message}</div>
+                              <div className="text-xs text-muted-foreground mt-2">
+                                {new Date(notification.createdAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit',
+                                })}
+                              </div>
+                            </div>
+                            {!notification.read && (
+                              <div className="ml-4 w-2 h-2 bg-primary rounded-full" />
+                            )}
+                          </div>
+                        </Alert>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               )}
 
               {/* Invoices */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Invoices</h2>
-                {invoices.length === 0 ? (
-                  <p className="text-gray-600 dark:text-gray-400">No invoices found</p>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                      <thead className="bg-gray-50 dark:bg-gray-700">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Date
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Amount
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-primary" />
+                    Invoices
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {invoices.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">No invoices found</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Date</TableHead>
+                          <TableHead>Amount</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                         {invoices.map((invoice) => (
-                          <tr key={invoice.id}>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                              {formatDate(invoice.created)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                          <TableRow key={invoice.id}>
+                            <TableCell>{formatDate(invoice.created)}</TableCell>
+                            <TableCell className="font-medium">
                               {formatCurrency(invoice.amount, invoice.currency)}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span
-                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                variant={
                                   invoice.status === 'paid'
-                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                    ? 'default'
                                     : invoice.status === 'open'
-                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                    : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                                }`}
+                                    ? 'secondary'
+                                    : 'destructive'
+                                }
                               >
                                 {invoice.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              {invoice.hostedInvoiceUrl && (
-                                <a
-                                  href={invoice.hostedInvoiceUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                >
-                                  View
-                                </a>
-                              )}
-                              {invoice.invoicePdf && (
-                                <a
-                                  href={invoice.invoicePdf}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="ml-4 text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300"
-                                >
-                                  Download PDF
-                                </a>
-                              )}
-                            </td>
-                          </tr>
+                              </Badge>
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-2">
+                                {invoice.hostedInvoiceUrl && (
+                                  <Button variant="ghost" size="sm" asChild>
+                                    <a href={invoice.hostedInvoiceUrl} target="_blank" rel="noopener noreferrer">
+                                      <ExternalLink className="w-4 h-4 mr-1" />
+                                      View
+                                    </a>
+                                  </Button>
+                                )}
+                                {invoice.invoicePdf && (
+                                  <Button variant="ghost" size="sm" asChild>
+                                    <a href={invoice.invoicePdf} target="_blank" rel="noopener noreferrer">
+                                      <FileText className="w-4 h-4 mr-1" />
+                                      PDF
+                                    </a>
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
                         ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
             </div>
           )}
 
-          {/* Cancel Confirmation Modal */}
-          {showCancelConfirm && (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Cancel Subscription</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
+          {/* Cancel Confirmation Dialog */}
+          <Dialog open={showCancelConfirm} onOpenChange={setShowCancelConfirm}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Cancel Subscription</DialogTitle>
+                <DialogDescription>
                   Are you sure you want to cancel your subscription?
-                </p>
-                <div className="mb-4">
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={cancelAtPeriodEnd}
-                      onChange={(e) => setCancelAtPeriodEnd(e.target.checked)}
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Cancel at end of billing period (recommended)
-                    </span>
-                  </label>
-                </div>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowCancelConfirm(false)}
-                    className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
-                  >
-                    Keep Subscription
-                  </button>
-                  <button
-                    onClick={handleCancel}
-                    disabled={processing}
-                    className="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
-                  >
-                    {processing ? 'Cancelling...' : 'Cancel Subscription'}
-                  </button>
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="cancelAtPeriodEnd"
+                    checked={cancelAtPeriodEnd}
+                    onCheckedChange={(checked) => setCancelAtPeriodEnd(checked as boolean)}
+                  />
+                  <Label htmlFor="cancelAtPeriodEnd" className="cursor-pointer">
+                    Cancel at end of billing period (recommended)
+                  </Label>
                 </div>
               </div>
-            </div>
-          )}
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowCancelConfirm(false)}>
+                  Keep Subscription
+                </Button>
+                <Button variant="destructive" onClick={handleCancel} disabled={processing}>
+                  {processing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Cancelling...
+                    </>
+                  ) : (
+                    'Cancel Subscription'
+                  )}
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </ProtectedRoute>

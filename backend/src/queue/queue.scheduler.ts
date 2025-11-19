@@ -168,5 +168,85 @@ export class QueueScheduler implements OnModuleInit {
       this.logger.error(`Failed to schedule posting reminders: ${error.message}`, error.stack);
     }
   }
+
+  /**
+   * Check for scheduled posts and queue auto-post jobs - runs every minute
+   */
+  @Cron(CronExpression.EVERY_MINUTE)
+  async checkScheduledPosts() {
+    this.logger.log('Checking for scheduled posts to auto-publish...');
+
+    try {
+      const now = new Date();
+      const oneMinuteFromNow = new Date(now.getTime() + 60 * 1000);
+
+      // Find ideas scheduled in the next minute that haven't been posted yet
+      const ideas = await this.prisma.idea.findMany({
+        where: {
+          status: 'SCHEDULED',
+          scheduledAt: {
+            lte: oneMinuteFromNow,
+            gte: now,
+          },
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      });
+
+      for (const idea of ideas) {
+        if (!idea.scheduledAt) continue;
+
+        // Get user's social connections for this platform
+        const connections = await this.prisma.socialConnection.findMany({
+          where: {
+            userId: idea.userId,
+            platform: idea.platform,
+            isActive: true,
+          },
+        });
+
+        if (connections.length === 0) {
+          this.logger.warn(`No active connections found for idea ${idea.id} on platform ${idea.platform}`);
+          continue;
+        }
+
+        // Schedule auto-post for each connection (or just default connection)
+        const connectionsToUse = connections.filter(c => c.isDefault).length > 0
+          ? connections.filter(c => c.isDefault)
+          : connections.slice(0, 1); // Use first connection if no default
+
+        for (const connection of connectionsToUse) {
+          try {
+            await this.queueService.scheduleAutoPost(
+              {
+                userId: idea.userId,
+                ideaId: idea.id,
+                connectionId: connection.id,
+                scheduledAt: idea.scheduledAt.toISOString(),
+              },
+              idea.scheduledAt,
+            );
+            this.logger.log(`Scheduled auto-post for idea ${idea.id} to ${connection.platform}`);
+          } catch (error: any) {
+            // Job might already exist, which is fine
+            if (!error.message?.includes('already exists')) {
+              this.logger.warn(`Failed to schedule auto-post for idea ${idea.id}: ${error.message}`);
+            }
+          }
+        }
+      }
+
+      if (ideas.length > 0) {
+        this.logger.log(`Processed ${ideas.length} scheduled ideas for auto-posting`);
+      }
+    } catch (error: any) {
+      this.logger.error(`Failed to check scheduled posts: ${error.message}`, error.stack);
+    }
+  }
 }
 

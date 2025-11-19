@@ -54,3 +54,4 @@ CREATE INDEX IF NOT EXISTS "blacklist_keywords_keyword_idx" ON "blacklist_keywor
 CREATE INDEX IF NOT EXISTS "blacklist_keywords_category_idx" ON "blacklist_keywords"("category");
 CREATE INDEX IF NOT EXISTS "blacklist_keywords_enabled_idx" ON "blacklist_keywords"("enabled");
 
+

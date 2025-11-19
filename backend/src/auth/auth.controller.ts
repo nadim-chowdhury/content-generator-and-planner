@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -25,11 +26,16 @@ import { CurrentUser } from './decorators/current-user.decorator';
 import { SpamPreventionGuard } from '../security/guards/spam-prevention.guard';
 import { IpThrottleGuard } from '../security/guards/ip-throttle.guard';
 
+@ApiTags('auth')
 @Controller('api/auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
+  @ApiOperation({ summary: 'Create a new user account' })
+  @ApiResponse({ status: 201, description: 'User successfully created' })
+  @ApiResponse({ status: 400, description: 'Bad request' })
+  @ApiResponse({ status: 409, description: 'User already exists' })
   @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 signups per minute
   @UseGuards(SpamPreventionGuard, IpThrottleGuard)
   async signup(@Body() signupDto: SignupDto, @Req() req?: any) {
@@ -54,6 +60,9 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiResponse({ status: 200, description: 'Login successful' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @HttpCode(HttpStatus.OK)
   @Throttle({ default: { limit: 5, ttl: 60000 } }) // 5 login attempts per minute
   @UseGuards(SpamPreventionGuard, IpThrottleGuard)
@@ -85,6 +94,10 @@ export class AuthController {
   }
 
   @Get('me')
+  @ApiOperation({ summary: 'Get current user profile' })
+  @ApiBearerAuth('JWT-auth')
+  @ApiResponse({ status: 200, description: 'User profile retrieved' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   async getMe(@CurrentUser() user: any) {
     return { user };
@@ -125,72 +138,102 @@ export class AuthController {
   @UseGuards(AuthGuard('google'))
   async googleAuth() {
     // Initiates Google OAuth flow
+    // If credentials are missing, Passport will throw an error
   }
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req: any, @Res() res: any) {
-    const profile = req.user;
-    const ipAddress = req.ip || req.connection?.remoteAddress;
-    const userAgent = req.headers?.['user-agent'];
-    const deviceInfo = req.headers?.['device-info'];
-    const result = await this.authService.handleSocialLogin('google', profile, ipAddress, userAgent, deviceInfo);
-    
-    // Redirect to frontend with token and refresh token
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-    const params = new URLSearchParams({
-      token: result.token,
-      ...(result.refreshToken && { refreshToken: result.refreshToken }),
-    });
-    res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    try {
+      if (!req.user) {
+        throw new Error('Authentication failed: No user data received');
+      }
+      const profile = req.user;
+      const ipAddress = req.ip || req.connection?.remoteAddress;
+      const userAgent = req.headers?.['user-agent'];
+      const deviceInfo = req.headers?.['device-info'];
+      const result = await this.authService.handleSocialLogin('google', profile, ipAddress, userAgent, deviceInfo);
+      
+      // Redirect to frontend with token and refresh token
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      const params = new URLSearchParams({
+        token: result.token,
+        ...(result.refreshToken && { refreshToken: result.refreshToken }),
+      });
+      res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    } catch (error: any) {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      const errorMessage = encodeURIComponent(error.message || 'Authentication failed');
+      res.redirect(`${frontendUrl}/auth/callback?error=${errorMessage}`);
+    }
   }
 
   @Get('facebook')
   @UseGuards(AuthGuard('facebook'))
   async facebookAuth() {
     // Initiates Facebook OAuth flow
+    // If credentials are missing, Passport will throw an error
   }
 
   @Get('facebook/callback')
   @UseGuards(AuthGuard('facebook'))
   async facebookCallback(@Req() req: any, @Res() res: any) {
-    const profile = req.user;
-    const ipAddress = req.ip || req.connection?.remoteAddress;
-    const userAgent = req.headers?.['user-agent'];
-    const deviceInfo = req.headers?.['device-info'];
-    const result = await this.authService.handleSocialLogin('facebook', profile, ipAddress, userAgent, deviceInfo);
-    
-    // Redirect to frontend with token and refresh token
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-    const params = new URLSearchParams({
-      token: result.token,
-      ...(result.refreshToken && { refreshToken: result.refreshToken }),
-    });
-    res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    try {
+      if (!req.user) {
+        throw new Error('Authentication failed: No user data received');
+      }
+      const profile = req.user;
+      const ipAddress = req.ip || req.connection?.remoteAddress;
+      const userAgent = req.headers?.['user-agent'];
+      const deviceInfo = req.headers?.['device-info'];
+      const result = await this.authService.handleSocialLogin('facebook', profile, ipAddress, userAgent, deviceInfo);
+      
+      // Redirect to frontend with token and refresh token
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      const params = new URLSearchParams({
+        token: result.token,
+        ...(result.refreshToken && { refreshToken: result.refreshToken }),
+      });
+      res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    } catch (error: any) {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      const errorMessage = encodeURIComponent(error.message || 'Authentication failed');
+      res.redirect(`${frontendUrl}/auth/callback?error=${errorMessage}`);
+    }
   }
 
   @Get('github')
   @UseGuards(AuthGuard('github'))
   async githubAuth() {
     // Initiates GitHub OAuth flow
+    // If credentials are missing, Passport will throw an error
   }
 
   @Get('github/callback')
   @UseGuards(AuthGuard('github'))
   async githubCallback(@Req() req: any, @Res() res: any) {
-    const profile = req.user;
-    const ipAddress = req.ip || req.connection?.remoteAddress;
-    const userAgent = req.headers?.['user-agent'];
-    const deviceInfo = req.headers?.['device-info'];
-    const result = await this.authService.handleSocialLogin('github', profile, ipAddress, userAgent, deviceInfo);
-    
-    // Redirect to frontend with token and refresh token
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-    const params = new URLSearchParams({
-      token: result.token,
-      ...(result.refreshToken && { refreshToken: result.refreshToken }),
-    });
-    res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    try {
+      if (!req.user) {
+        throw new Error('Authentication failed: No user data received');
+      }
+      const profile = req.user;
+      const ipAddress = req.ip || req.connection?.remoteAddress;
+      const userAgent = req.headers?.['user-agent'];
+      const deviceInfo = req.headers?.['device-info'];
+      const result = await this.authService.handleSocialLogin('github', profile, ipAddress, userAgent, deviceInfo);
+      
+      // Redirect to frontend with token and refresh token
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      const params = new URLSearchParams({
+        token: result.token,
+        ...(result.refreshToken && { refreshToken: result.refreshToken }),
+      });
+      res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
+    } catch (error: any) {
+      const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+      const errorMessage = encodeURIComponent(error.message || 'Authentication failed');
+      res.redirect(`${frontendUrl}/auth/callback?error=${errorMessage}`);
+    }
   }
 
   // Magic Link

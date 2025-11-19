@@ -10,9 +10,17 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     private configService: ConfigService,
     private authService: AuthService,
   ) {
+    const clientID = configService.get<string>('GITHUB_CLIENT_ID') || '';
+    const clientSecret = configService.get<string>('GITHUB_CLIENT_SECRET') || '';
+    
+    if (!clientID || !clientSecret) {
+      console.warn('⚠️  GitHub OAuth credentials are not configured. GitHub login will not work.');
+      console.warn('   Please set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET in your .env file');
+    }
+    
     super({
-      clientID: configService.get<string>('GITHUB_CLIENT_ID') || '',
-      clientSecret: configService.get<string>('GITHUB_CLIENT_SECRET') || '',
+      clientID,
+      clientSecret,
       callbackURL: configService.get<string>('GITHUB_CALLBACK_URL') || '/api/auth/github/callback',
       scope: ['user:email'],
     });

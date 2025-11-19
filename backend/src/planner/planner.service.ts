@@ -35,7 +35,7 @@ export class PlannerService {
       },
     });
 
-    // Schedule posting reminder
+    // Schedule posting reminder and auto-post
     if (this.queueService) {
       const reminderTime = new Date(scheduledDate.getTime() - 60 * 60 * 1000); // 1 hour before
       await this.queueService.schedulePostingReminder(
@@ -47,6 +47,30 @@ export class PlannerService {
         },
         reminderTime,
       );
+
+      // Schedule auto-post if user has connected accounts for this platform
+      const connections = await this.prisma.socialConnection.findMany({
+        where: {
+          userId,
+          platform: idea.platform,
+          isActive: true,
+        },
+      });
+
+      if (connections.length > 0) {
+        // Use default connection or first available
+        const connectionToUse = connections.find(c => c.isDefault) || connections[0];
+        
+        await this.queueService.scheduleAutoPost(
+          {
+            userId,
+            ideaId,
+            connectionId: connectionToUse.id,
+            scheduledAt: scheduledDate.toISOString(),
+          },
+          scheduledDate,
+        );
+      }
     }
 
     return updatedIdea;
@@ -59,6 +83,21 @@ export class PlannerService {
 
     if (!idea) {
       throw new NotFoundException('Idea not found');
+    }
+
+    // Cancel auto-post jobs if any
+    if (this.queueService) {
+      const connections = await this.prisma.socialConnection.findMany({
+        where: {
+          userId,
+          platform: idea.platform,
+          isActive: true,
+        },
+      });
+
+      for (const connection of connections) {
+        await this.queueService.cancelAutoPost(userId, ideaId, connection.id);
+      }
     }
 
     return this.prisma.idea.update({

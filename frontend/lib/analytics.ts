@@ -1,60 +1,5 @@
 import api from './api';
 
-export interface ContentAnalytics {
-  id: string;
-  userId: string;
-  ideaId?: string;
-  platform: string;
-  category?: string;
-  niche?: string;
-  reach?: number;
-  impressions?: number;
-  engagement?: number;
-  likes?: number;
-  comments?: number;
-  shares?: number;
-  views?: number;
-  clicks?: number;
-  saves?: number;
-  predictedReach?: number;
-  predictedEngagement?: number;
-  reachPotential?: number;
-  engagementScore?: number;
-  platformScore?: number;
-  categoryScore?: number;
-  postedAt?: string;
-  recordedAt: string;
-  source: 'MANUAL' | 'API' | 'PREDICTED';
-  notes?: string;
-  createdAt: string;
-  updatedAt: string;
-  idea?: {
-    id: string;
-    title: string;
-    platform: string;
-  };
-}
-
-export interface PlatformPerformance {
-  platform: string;
-  totalPosts: number;
-  avgReach: number;
-  avgEngagement: number;
-  totalEngagement: number;
-  avgEngagementRate: number;
-  score: number;
-}
-
-export interface CategoryPerformance {
-  category: string;
-  totalPosts: number;
-  avgReach: number;
-  avgEngagement: number;
-  totalEngagement: number;
-  avgEngagementRate: number;
-  score: number;
-}
-
 export interface AnalyticsSummary {
   totalPosts: number;
   totalReach: number;
@@ -65,30 +10,57 @@ export interface AnalyticsSummary {
   categories: CategoryPerformance[];
 }
 
-export interface PredictionResult {
-  reach?: number;
-  engagement?: number;
-  score: number;
-  reasoning: string;
+export interface PlatformPerformance {
+  platform: string;
+  totalPosts: number;
+  totalReach: number;
+  totalEngagement: number;
+  avgReach: number;
+  avgEngagement: number;
+  engagementRate: number;
+}
+
+export interface CategoryPerformance {
+  category: string;
+  totalPosts: number;
+  totalReach: number;
+  totalEngagement: number;
+  avgReach: number;
+  avgEngagement: number;
+  engagementRate: number;
+}
+
+export interface ContentAnalytics {
+  id: string;
+  ideaId: string;
+  platform: string;
+  category?: string | null;
+  reach?: number | null;
+  engagement?: number | null;
+  likes?: number | null;
+  comments?: number | null;
+  shares?: number | null;
+  views?: number | null;
+  clicks?: number | null;
+  recordedAt: string;
+  idea?: {
+    id: string;
+    title: string;
+    platform: string;
+  };
 }
 
 export interface CreateAnalyticsDto {
-  ideaId?: string;
+  ideaId: string;
   platform: string;
   category?: string;
-  niche?: string;
   reach?: number;
-  impressions?: number;
   engagement?: number;
   likes?: number;
   comments?: number;
   shares?: number;
   views?: number;
   clicks?: number;
-  saves?: number;
-  postedAt?: string;
-  source?: 'MANUAL' | 'API' | 'PREDICTED';
-  notes?: string;
 }
 
 export const analyticsApi = {
@@ -140,13 +112,13 @@ export const analyticsApi = {
     return data;
   },
 
-  predictReach: async (ideaId: string): Promise<PredictionResult> => {
-    const { data } = await api.get<PredictionResult>(`/api/analytics/predictions/reach/${ideaId}`);
+  predictReach: async (ideaId: string): Promise<{ reach: number; score: number; reasoning: string }> => {
+    const { data } = await api.get(`/api/analytics/predictions/reach/${ideaId}`);
     return data;
   },
 
-  predictEngagement: async (ideaId: string): Promise<PredictionResult> => {
-    const { data } = await api.get<PredictionResult>(`/api/analytics/predictions/engagement/${ideaId}`);
+  predictEngagement: async (ideaId: string): Promise<{ engagement: number; score: number; reasoning: string }> => {
+    const { data } = await api.get(`/api/analytics/predictions/engagement/${ideaId}`);
     return data;
   },
 
@@ -164,5 +136,3 @@ export const analyticsApi = {
     await api.delete(`/api/analytics/${id}`);
   },
 };
-
-

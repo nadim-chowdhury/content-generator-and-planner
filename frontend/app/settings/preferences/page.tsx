@@ -4,6 +4,29 @@ import { useState, useEffect } from 'react';
 import { settingsApi, UserSettings, UpdateUserSettingsDto } from '@/lib/settings';
 import { SocialPlatform } from '@/lib/settings';
 import Navbar from '@/components/Navbar';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
+import { 
+  Settings, 
+  Globe, 
+  Palette, 
+  Sparkles, 
+  CheckCircle2, 
+  AlertCircle,
+  Languages,
+  Clock,
+  Monitor
+} from 'lucide-react';
 
 const LANGUAGES = [
   { code: 'en', name: 'English' },
@@ -86,258 +109,302 @@ export default function PreferencesSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center">Loading settings...</div>
+      <ProtectedRoute>
+        <div className="min-h-screen bg-background">
+          <Navbar />
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <div className="space-y-4">
+              <Skeleton className="h-10 w-64" />
+              <Skeleton className="h-96 w-full" />
+            </div>
+          </div>
         </div>
-      </div>
+      </ProtectedRoute>
     );
   }
 
   if (!settings) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-red-600 dark:text-red-400">{error || 'Settings not found'}</div>
+      <ProtectedRoute>
+        <div className="min-h-screen bg-background">
+          <Navbar />
+          <div className="max-w-4xl mx-auto px-4 py-8">
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error || 'Settings not found'}</AlertDescription>
+            </Alert>
+          </div>
         </div>
-      </div>
+      </ProtectedRoute>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Navbar />
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">User Preferences</h1>
-
-        {error && (
-          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded mb-6">
-            {error}
+    <ProtectedRoute>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">User Preferences</h1>
+            <p className="text-muted-foreground mt-1">
+              Customize your GenPlan experience
+            </p>
           </div>
-        )}
 
-        {success && (
-          <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 px-4 py-3 rounded mb-6">
-            Settings saved successfully!
-          </div>
-        )}
+          {error && (
+            <Alert variant="destructive" className="mb-6">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
-        <div className="space-y-6">
-          {/* Language & Localization */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Language & Localization
-            </h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Language
-                </label>
-                <select
-                  value={settings.language}
-                  onChange={(e) => handleSave({ language: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  {LANGUAGES.map((lang) => (
-                    <option key={lang.code} value={lang.code}>
-                      {lang.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Timezone
-                </label>
-                <select
-                  value={settings.timezone}
-                  onChange={(e) => handleSave({ timezone: e.target.value })}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  {TIMEZONES.map((tz) => (
-                    <option key={tz} value={tz}>
-                      {tz}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Date Format
-                  </label>
-                  <input
-                    type="text"
-                    value={settings.dateFormat}
-                    onChange={(e) => handleSave({ dateFormat: e.target.value })}
-                    placeholder="MM/DD/YYYY"
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Time Format
-                  </label>
-                  <select
-                    value={settings.timeFormat}
-                    onChange={(e) => handleSave({ timeFormat: e.target.value as '12h' | '24h' })}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          {success && (
+            <Alert className="mb-6 border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
+              <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <AlertDescription className="text-green-800 dark:text-green-200">
+                Settings saved successfully!
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-6">
+            {/* Language & Localization */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Globe className="w-5 h-5 text-primary" />
+                  Language & Localization
+                </CardTitle>
+                <CardDescription>
+                  Configure language, timezone, and date/time formats
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Language</Label>
+                  <Select
+                    value={settings.language}
+                    onValueChange={(value) => handleSave({ language: value })}
                   >
-                    <option value="12h">12-hour</option>
-                    <option value="24h">24-hour</option>
-                  </select>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {LANGUAGES.map((lang) => (
+                        <SelectItem key={lang.code} value={lang.code}>
+                          {lang.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
-            </div>
-          </section>
-
-          {/* Preferred Platforms */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Preferred Platforms
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {PLATFORMS.map((platform) => {
-                const isSelected = settings.preferredPlatforms.includes(platform.value);
-                return (
-                  <label
-                    key={platform.value}
-                    className="flex items-center space-x-2 cursor-pointer"
+                <div className="space-y-2">
+                  <Label>Timezone</Label>
+                  <Select
+                    value={settings.timezone}
+                    onValueChange={(value) => handleSave({ timezone: value })}
                   >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={(e) => {
-                        const newPlatforms = e.target.checked
-                          ? [...settings.preferredPlatforms, platform.value]
-                          : settings.preferredPlatforms.filter((p) => p !== platform.value);
-                        handleSave({ preferredPlatforms: newPlatforms });
-                      }}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {TIMEZONES.map((tz) => (
+                        <SelectItem key={tz} value={tz}>
+                          {tz}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Date Format</Label>
+                    <Input
+                      type="text"
+                      value={settings.dateFormat}
+                      onChange={(e) => handleSave({ dateFormat: e.target.value })}
+                      placeholder="MM/DD/YYYY"
                     />
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      {platform.label}
-                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Time Format</Label>
+                    <Select
+                      value={settings.timeFormat}
+                      onValueChange={(value) => handleSave({ timeFormat: value as '12h' | '24h' })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="12h">12-hour</SelectItem>
+                        <SelectItem value="24h">24-hour</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Preferred Platforms */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="w-5 h-5 text-primary" />
+                  Preferred Platforms
+                </CardTitle>
+                <CardDescription>
+                  Select your preferred social media platforms
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {PLATFORMS.map((platform) => {
+                    const isSelected = settings.preferredPlatforms.includes(platform.value);
+                    return (
+                      <label
+                        key={platform.value}
+                        className="flex items-center space-x-2 cursor-pointer hover:bg-accent p-2 rounded-md transition-colors"
+                      >
+                        <Checkbox
+                          checked={isSelected}
+                          onCheckedChange={(checked) => {
+                            const newPlatforms = checked
+                              ? [...settings.preferredPlatforms, platform.value]
+                              : settings.preferredPlatforms.filter((p) => p !== platform.value);
+                            handleSave({ preferredPlatforms: newPlatforms });
+                          }}
+                        />
+                        <span className="text-sm">{platform.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* AI Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  AI Settings
+                </CardTitle>
+                <CardDescription>
+                  Customize AI content generation preferences
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>AI Tone</Label>
+                  <Select
+                    value={settings.aiTone}
+                    onValueChange={(value) =>
+                      handleSave({ aiTone: value as UserSettings['aiTone'] })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="professional">Professional</SelectItem>
+                      <SelectItem value="casual">Casual</SelectItem>
+                      <SelectItem value="friendly">Friendly</SelectItem>
+                      <SelectItem value="formal">Formal</SelectItem>
+                      <SelectItem value="creative">Creative</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>AI Style</Label>
+                  <Select
+                    value={settings.aiStyle}
+                    onValueChange={(value) =>
+                      handleSave({ aiStyle: value as UserSettings['aiStyle'] })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="balanced">Balanced</SelectItem>
+                      <SelectItem value="concise">Concise</SelectItem>
+                      <SelectItem value="detailed">Detailed</SelectItem>
+                      <SelectItem value="engaging">Engaging</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label>AI Personality (Optional)</Label>
+                  <Textarea
+                    value={settings.aiPersonality || ''}
+                    onChange={(e) => handleSave({ aiPersonality: e.target.value })}
+                    placeholder="Describe the personality you want AI content to have..."
+                    rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Max Content Length: {settings.aiMaxLength} characters</Label>
+                  <Slider
+                    value={[settings.aiMaxLength]}
+                    onValueChange={(value) => handleSave({ aiMaxLength: value[0] })}
+                    min={50}
+                    max={2000}
+                    step={50}
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-3">
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <Checkbox
+                      checked={settings.aiIncludeHashtags}
+                      onCheckedChange={(checked) => handleSave({ aiIncludeHashtags: checked as boolean })}
+                    />
+                    <span className="text-sm">Include hashtags in AI-generated content</span>
                   </label>
-                );
-              })}
-            </div>
-          </section>
+                  <label className="flex items-center space-x-2 cursor-pointer">
+                    <Checkbox
+                      checked={settings.aiIncludeEmojis}
+                      onCheckedChange={(checked) => handleSave({ aiIncludeEmojis: checked as boolean })}
+                    />
+                    <span className="text-sm">Include emojis in AI-generated content</span>
+                  </label>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* AI Settings */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">AI Settings</h2>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  AI Tone
-                </label>
-                <select
-                  value={settings.aiTone}
-                  onChange={(e) =>
-                    handleSave({ aiTone: e.target.value as UserSettings['aiTone'] })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="professional">Professional</option>
-                  <option value="casual">Casual</option>
-                  <option value="friendly">Friendly</option>
-                  <option value="formal">Formal</option>
-                  <option value="creative">Creative</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  AI Style
-                </label>
-                <select
-                  value={settings.aiStyle}
-                  onChange={(e) =>
-                    handleSave({ aiStyle: e.target.value as UserSettings['aiStyle'] })
-                  }
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                >
-                  <option value="balanced">Balanced</option>
-                  <option value="concise">Concise</option>
-                  <option value="detailed">Detailed</option>
-                  <option value="engaging">Engaging</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  AI Personality (Optional)
-                </label>
-                <textarea
-                  value={settings.aiPersonality || ''}
-                  onChange={(e) => handleSave({ aiPersonality: e.target.value })}
-                  placeholder="Describe the personality you want AI content to have..."
-                  rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Max Content Length: {settings.aiMaxLength} characters
-                </label>
-                <input
-                  type="range"
-                  min="50"
-                  max="2000"
-                  value={settings.aiMaxLength}
-                  onChange={(e) => handleSave({ aiMaxLength: parseInt(e.target.value) })}
-                  className="w-full"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.aiIncludeHashtags}
-                    onChange={(e) => handleSave({ aiIncludeHashtags: e.target.checked })}
-                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Include hashtags in AI-generated content
-                  </span>
-                </label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.aiIncludeEmojis}
-                    onChange={(e) => handleSave({ aiIncludeEmojis: e.target.checked })}
-                    className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                  />
-                  <span className="text-sm text-gray-700 dark:text-gray-300">
-                    Include emojis in AI-generated content
-                  </span>
-                </label>
-              </div>
-            </div>
-          </section>
-
-          {/* Theme */}
-          <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Appearance</h2>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Theme
-              </label>
-              <select
-                value={settings.theme}
-                onChange={(e) => handleSave({ theme: e.target.value as 'light' | 'dark' | 'auto' })}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                <option value="light">Light</option>
-                <option value="dark">Dark</option>
-                <option value="auto">Auto (System)</option>
-              </select>
-            </div>
-          </section>
+            {/* Theme */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Monitor className="w-5 h-5 text-primary" />
+                  Appearance
+                </CardTitle>
+                <CardDescription>
+                  Customize the look and feel of the application
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <Label>Theme</Label>
+                  <Select
+                    value={settings.theme}
+                    onValueChange={(value) => handleSave({ theme: value as 'light' | 'dark' | 'auto' })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="light">Light</SelectItem>
+                      <SelectItem value="dark">Dark</SelectItem>
+                      <SelectItem value="auto">Auto (System)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
-

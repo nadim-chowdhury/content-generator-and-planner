@@ -19,6 +19,14 @@ function AuthCallback() {
     
     const token = searchParams.get('token');
     const refreshToken = searchParams.get('refreshToken');
+    const error = searchParams.get('error');
+    
+    if (error) {
+      setError(decodeURIComponent(error));
+      setLoading(false);
+      return;
+    }
+    
     if (token) {
       // If token is in URL, store it and fetch user
       handleTokenAuth(token, refreshToken);
@@ -84,6 +92,13 @@ function AuthCallback() {
           <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
             <p className="font-medium">Authentication Failed</p>
             <p className="text-sm mt-1">{error}</p>
+            {error.includes('credentials') || error.includes('configured') ? (
+              <div className="mt-3 text-xs bg-red-100 dark:bg-red-900/40 p-2 rounded">
+                <p className="font-medium mb-1">Setup Required:</p>
+                <p>Social login requires OAuth credentials to be configured in the backend.</p>
+                <p className="mt-1">Please contact your administrator or check the backend configuration.</p>
+              </div>
+            ) : null}
             <a
               href="/login"
               className="text-sm underline mt-2 inline-block"

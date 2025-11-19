@@ -9,3 +9,4 @@ export class UpdateKanbanCardDto extends PartialType(CreateKanbanCardDto) {
 }
 
 
+

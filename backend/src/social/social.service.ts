@@ -1,14 +1,26 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConnectPlatformDto, SocialPlatform } from './dto/connect-platform.dto';
 import { FacebookService } from './facebook.service';
 import { ConnectFacebookPageDto } from './dto/facebook-pages.dto';
+import { TwitterService } from './services/twitter.service';
+import { FacebookPostingService } from './services/facebook.service';
+import { InstagramService } from './services/instagram.service';
+import { LinkedInService } from './services/linkedin.service';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class SocialService {
+  private readonly logger = new Logger(SocialService.name);
+
   constructor(
     private prisma: PrismaService,
     private facebookService: FacebookService,
+    private twitterService: TwitterService,
+    private facebookPostingService: FacebookPostingService,
+    private instagramService: InstagramService,
+    private linkedInService: LinkedInService,
+    private configService: ConfigService,
   ) {}
 
   async connectPlatform(userId: string, dto: ConnectPlatformDto) {
@@ -188,11 +200,14 @@ export class SocialService {
       throw new NotFoundException('Idea not found');
     }
 
-    // TODO: Implement actual posting logic for each platform
-    // This is a placeholder - you'll need to integrate with each platform's API
-    const posted = await this.postToPlatformAPI(connection, content);
+    // Post to platform
+    const result = await this.postToPlatformAPI(connection, {
+      caption: content.caption || idea.caption || idea.title,
+      hashtags: content.hashtags || idea.hashtags || [],
+      imageUrl: idea.thumbnailUrl,
+    });
 
-    if (posted) {
+    if (result.success) {
       // Update idea to mark as posted
       const postedTo = idea.postedTo || [];
       const platformStr = connection.platform;
@@ -202,12 +217,32 @@ export class SocialService {
           data: {
             postedTo: [...postedTo, platformStr],
             status: 'POSTED',
+            postedAt: new Date(),
           },
         });
       }
-    }
 
-    return { success: true, platform: connection.platform, message: `Posted to ${connection.platform}` };
+      // Log successful post
+      await this.prisma.contentAnalytics.create({
+        data: {
+          userId,
+          ideaId,
+          platform: connection.platform,
+          postedAt: new Date(),
+        },
+      });
+
+      return {
+        success: true,
+        platform: connection.platform,
+        postId: result.postId,
+        message: `Successfully posted to ${connection.platform}`,
+      };
+    } else {
+      throw new BadRequestException(
+        result.error || `Failed to post to ${connection.platform}`,
+      );
+    }
   }
 
   /**
@@ -248,33 +283,119 @@ export class SocialService {
 
   private async postToPlatformAPI(
     connection: any,
-    content: { caption?: string; hashtags?: string[] },
-  ): Promise<boolean> {
-    // Placeholder - implement actual API calls for each platform
-    // Each platform has different APIs:
-    // - Twitter: Twitter API v2
-    // - Facebook: Facebook Graph API
-    // - Instagram: Instagram Basic Display API / Instagram Graph API
-    // - LinkedIn: LinkedIn API
-    // - Reddit: Reddit API
-    // - Pinterest: Pinterest API
-    // etc.
+    content: { caption?: string; hashtags?: string[]; imageUrl?: string },
+  ): Promise<{ success: boolean; postId?: string; error?: string }> {
+    try {
+      // Check if token is expired and refresh if needed
+      if (connection.tokenExpiresAt && new Date(connection.tokenExpiresAt) < new Date()) {
+        const refreshed = await this.refreshConnectionToken(connection);
+        if (!refreshed) {
+          return { success: false, error: 'Token expired and refresh failed' };
+        }
+        // Reload connection with new token
+        const updated = await this.prisma.socialConnection.findUnique({
+          where: { id: connection.id },
+        });
+        if (updated) {
+          connection = updated;
+        }
+      }
 
-    switch (connection.platform) {
-      case 'TWITTER':
-        // return await this.postToTwitter(connection.accessToken, content);
-        break;
-      case 'FACEBOOK':
-        // return await this.postToFacebook(connection.accessToken, content);
-        break;
-      case 'INSTAGRAM':
-        // return await this.postToInstagram(connection.accessToken, content);
-        break;
-      // Add other platforms...
+      switch (connection.platform) {
+        case SocialPlatform.TWITTER:
+          return await this.twitterService.postTweet(connection.accessToken, content);
+
+        case SocialPlatform.FACEBOOK:
+          if (connection.pageId) {
+            return await this.facebookPostingService.postToPage(
+              connection.accessToken,
+              connection.pageId,
+              content,
+              content.imageUrl,
+            );
+          }
+          return { success: false, error: 'Facebook page ID required' };
+
+        case SocialPlatform.INSTAGRAM:
+          // Instagram requires Instagram Business Account ID
+          // This should be stored in platformUserId or pageId
+          const instagramAccountId = connection.platformUserId || connection.pageId;
+          if (!instagramAccountId) {
+            return { success: false, error: 'Instagram Business Account ID required' };
+          }
+          return await this.instagramService.postToInstagram(
+            connection.accessToken,
+            instagramAccountId,
+            content,
+          );
+
+        case SocialPlatform.LINKEDIN:
+          // LinkedIn requires person URN
+          const personUrn = connection.platformUserId;
+          if (!personUrn) {
+            // Try to get it from the token
+            const urn = await this.linkedInService.getPersonUrn(connection.accessToken);
+            if (!urn) {
+              return { success: false, error: 'LinkedIn person URN required' };
+            }
+            // Update connection with URN
+            await this.prisma.socialConnection.update({
+              where: { id: connection.id },
+              data: { platformUserId: urn },
+            });
+            return await this.linkedInService.postToLinkedIn(connection.accessToken, urn, content);
+          }
+          return await this.linkedInService.postToLinkedIn(connection.accessToken, personUrn, content);
+
+        default:
+          this.logger.warn(`Platform ${connection.platform} not yet implemented`);
+          return { success: false, error: `Platform ${connection.platform} not supported` };
+      }
+    } catch (error: any) {
+      this.logger.error(`Failed to post to platform: ${error.message}`, error.stack);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Refresh connection token if refresh token is available
+   */
+  private async refreshConnectionToken(connection: any): Promise<boolean> {
+    if (!connection.refreshToken) {
+      return false;
     }
 
-    // For now, return true as placeholder
-    return true;
+    try {
+      switch (connection.platform) {
+        case SocialPlatform.FACEBOOK:
+          const facebookAppId = this.configService.get<string>('FACEBOOK_APP_ID');
+          const facebookAppSecret = this.configService.get<string>('FACEBOOK_APP_SECRET');
+          if (facebookAppId && facebookAppSecret) {
+            const refreshed = await this.facebookPostingService.refreshToken(
+              facebookAppId,
+              facebookAppSecret,
+              connection.refreshToken,
+            );
+            if (refreshed) {
+              await this.prisma.socialConnection.update({
+                where: { id: connection.id },
+                data: {
+                  accessToken: refreshed.accessToken,
+                  tokenExpiresAt: new Date(Date.now() + refreshed.expiresIn * 1000),
+                },
+              });
+              return true;
+            }
+          }
+          break;
+
+        // Add other platforms as needed
+      }
+      return false;
+    } catch (error) {
+      this.logger.error(`Failed to refresh token for connection ${connection.id}: ${error}`);
+      return false;
+    }
   }
 }
 

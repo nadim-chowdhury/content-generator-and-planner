@@ -4,6 +4,24 @@ import { useState, useEffect } from 'react';
 import { referralsApi, ReferralStats, LeaderboardEntry } from '@/lib/referrals';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Users, 
+  Copy, 
+  CheckCircle2,
+  Trophy,
+  Gift,
+  Loader2,
+  AlertCircle
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function ReferralsPage() {
   const [referralCode, setReferralCode] = useState<string>('');
@@ -59,188 +77,229 @@ export default function ReferralsPage() {
     });
   };
 
+  const getStatusVariant = (status: string): "default" | "secondary" | "destructive" | "outline" => {
+    if (status === 'REWARDED') return 'default';
+    if (status === 'CONVERTED') return 'secondary';
+    return 'outline';
+  };
+
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-            Referral Program
-          </h1>
+      <div className="min-h-screen bg-background">
+      <Navbar />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-2">
+            <Gift className="w-6 h-6 text-primary" />
+            <h1 className="text-3xl font-bold tracking-tight">
+              Referral Program
+            </h1>
+          </div>
+          <p className="text-muted-foreground">
+            Refer friends and earn credits for every successful referral
+          </p>
+        </div>
 
-          {error && (
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded mb-6">
-              {error}
-            </div>
-          )}
+        {error && (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
 
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-              <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
-            </div>
-          ) : (
-            <div className="space-y-6">
-              {/* Referral Link Section */}
-              <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+        {loading ? (
+          <div className="space-y-4">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-64 w-full" />
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Referral Link Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
                   Your Referral Link
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Referral Code
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={referralCode}
-                        readOnly
-                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white font-mono"
-                      />
-                      <button
-                        onClick={() => copyToClipboard(referralCode)}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                      >
-                        {copied ? 'Copied!' : 'Copy Code'}
-                      </button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Referral Link
-                    </label>
-                    <div className="flex gap-2">
-                      <input
-                        type="text"
-                        value={referralLink}
-                        readOnly
-                        className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                      />
-                      <button
-                        onClick={() => copyToClipboard(referralLink)}
-                        className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
-                      >
-                        {copied ? 'Copied!' : 'Copy Link'}
-                      </button>
-                    </div>
-                  </div>
-                  <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4">
-                    <p className="text-sm text-blue-800 dark:text-blue-200">
-                      <strong>How it works:</strong> Share your referral link with friends. When they sign up, you both earn credits!
-                    </p>
+                </CardTitle>
+                <CardDescription>
+                  Share your referral link to earn credits
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Referral Code</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      value={referralCode}
+                      readOnly
+                      className="font-mono"
+                    />
+                    <Button
+                      onClick={() => copyToClipboard(referralCode)}
+                      variant="outline"
+                    >
+                      {copied ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4 mr-2" />
+                          Copy Code
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
-              </div>
-
-              {/* Stats Section */}
-              {stats && (
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Referrals</p>
-                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
-                      {stats.totalReferrals}
-                    </p>
+                <div className="space-y-2">
+                  <Label>Referral Link</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      type="text"
+                      value={referralLink}
+                      readOnly
+                    />
+                    <Button
+                      onClick={() => copyToClipboard(referralLink)}
+                      variant="outline"
+                    >
+                      {copied ? (
+                        <>
+                          <CheckCircle2 className="w-4 h-4 mr-2" />
+                          Copied!
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4 mr-2" />
+                          Copy Link
+                        </>
+                      )}
+                    </Button>
                   </div>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Converted</p>
-                    <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                </div>
+                <Alert>
+                  <AlertCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>How it works:</strong> Share your referral link with friends. When they sign up, you both earn credits!
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+
+            {/* Stats Section */}
+            {stats && (
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>Total Referrals</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold">{stats.totalReferrals}</div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>Converted</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                       {stats.convertedReferrals}
-                    </p>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Pending</p>
-                    <p className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>Pending</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                       {stats.pendingReferrals}
-                    </p>
-                  </div>
-                  <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Credits</p>
-                    <p className="text-3xl font-bold text-indigo-600 dark:text-indigo-400">
+                    </div>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardHeader className="pb-2">
+                    <CardDescription>Total Credits</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="text-3xl font-bold text-primary">
                       {stats.totalCreditsEarned}
-                    </p>
-                  </div>
-                </div>
-              )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
-              {/* Referrals List */}
-              {stats && stats.referrals.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Your Referrals
-                    </h2>
-                  </div>
-                  <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead className="bg-gray-50 dark:bg-gray-900">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          User
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Credits Earned
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                          Date
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+            {/* Referrals List */}
+            {stats && stats.referrals.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Your Referrals</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>User</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Credits Earned</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
                       {stats.referrals.map((referral) => (
-                        <tr key={referral.id}>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                        <TableRow key={referral.id}>
+                          <TableCell>
                             {referral.referredUser ? (
                               <div>
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                <div className="font-medium">
                                   {referral.referredUser.name || 'No name'}
                                 </div>
-                                <div className="text-sm text-gray-500 dark:text-gray-400">
+                                <div className="text-sm text-muted-foreground">
                                   {referral.referredUser.email}
                                 </div>
                               </div>
                             ) : (
-                              <span className="text-sm text-gray-500 dark:text-gray-400">Pending signup</span>
+                              <span className="text-sm text-muted-foreground">Pending signup</span>
                             )}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              referral.status === 'REWARDED' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                              referral.status === 'CONVERTED' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                              'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                            }`}>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={getStatusVariant(referral.status)}>
                               {referral.status}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">
                             {referral.creditsEarned}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
                             {formatDate(referral.createdAt)}
-                          </td>
-                        </tr>
+                          </TableCell>
+                        </TableRow>
                       ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
 
-              {/* Leaderboard */}
-              {leaderboard.length > 0 && (
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
-                  <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      Referral Leaderboard
-                    </h2>
-                  </div>
-                  <div className="divide-y divide-gray-200 dark:divide-gray-700">
+            {/* Leaderboard */}
+            {leaderboard.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Trophy className="w-5 h-5 text-primary" />
+                    Referral Leaderboard
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
                     {leaderboard.map((entry) => (
-                      <div key={entry.userId} className="px-6 py-4 flex items-center justify-between">
+                      <div key={entry.userId} className="flex items-center justify-between p-3 rounded-lg border">
                         <div className="flex items-center gap-4">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                            <span className="text-indigo-600 dark:text-indigo-400 font-bold">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                            <span className="text-primary font-bold">
                               #{entry.rank}
                             </span>
                           </div>
@@ -251,39 +310,39 @@ export default function ReferralsPage() {
                               className="h-10 w-10 rounded-full"
                             />
                           ) : (
-                            <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                              <span className="text-gray-500 dark:text-gray-400">
+                            <div className="h-10 w-10 rounded-full bg-muted flex items-center justify-center">
+                              <span className="text-muted-foreground">
                                 {entry.name?.charAt(0) || entry.email.charAt(0).toUpperCase()}
                               </span>
                             </div>
                           )}
                           <div>
-                            <div className="text-sm font-medium text-gray-900 dark:text-white">
+                            <div className="font-medium">
                               {entry.name || 'No name'}
                             </div>
-                            <div className="text-sm text-gray-500 dark:text-gray-400">
+                            <div className="text-sm text-muted-foreground">
                               {entry.email}
                             </div>
                           </div>
                         </div>
                         <div className="text-right">
-                          <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                          <div className="font-semibold">
                             {entry.totalReferrals} referrals
                           </div>
-                          <div className="text-sm text-indigo-600 dark:text-indigo-400">
+                          <div className="text-sm text-primary">
                             {entry.totalCredits} credits
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        )}
       </div>
+    </div>
     </ProtectedRoute>
   );
 }
-

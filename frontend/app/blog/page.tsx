@@ -1,10 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Head from 'next/head';
 import Link from 'next/link';
 import { blogApi, BlogPost } from '@/lib/blog';
 import Navbar from '@/components/Navbar';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import { 
+  BookOpen, 
+  Calendar, 
+  Eye,
+  ChevronLeft,
+  ChevronRight
+} from 'lucide-react';
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -44,12 +54,15 @@ export default function BlogPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-4">Blog</h1>
-          <p className="text-xl text-gray-600 dark:text-gray-400">
+          <div className="flex items-center justify-center gap-2 mb-4">
+            <BookOpen className="w-8 h-8 text-primary" />
+            <h1 className="text-4xl font-bold tracking-tight">Blog</h1>
+          </div>
+          <p className="text-xl text-muted-foreground">
             Tips, insights, and updates about content creation
           </p>
         </div>
@@ -57,100 +70,115 @@ export default function BlogPage() {
         {/* Categories */}
         {categories.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-8 justify-center">
-            <button
+            <Button
+              variant={!selectedCategory ? 'default' : 'outline'}
+              size="sm"
               onClick={() => setSelectedCategory(undefined)}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                !selectedCategory
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
             >
               All
-            </button>
+            </Button>
             {categories.map((cat) => (
-              <button
+              <Button
                 key={cat.category}
+                variant={selectedCategory === cat.category ? 'default' : 'outline'}
+                size="sm"
                 onClick={() => setSelectedCategory(cat.category)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  selectedCategory === cat.category
-                    ? 'bg-indigo-600 text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
               >
                 {cat.category} ({cat.count})
-              </button>
+              </Button>
             ))}
           </div>
         )}
 
         {loading ? (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading posts...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <Card key={i}>
+                <Skeleton className="w-full h-48" />
+                <CardContent className="p-6">
+                  <Skeleton className="h-4 w-20 mb-2" />
+                  <Skeleton className="h-6 w-full mb-2" />
+                  <Skeleton className="h-4 w-full mb-4" />
+                  <Skeleton className="h-4 w-24" />
+                </CardContent>
+              </Card>
+            ))}
           </div>
         ) : posts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 dark:text-gray-400">No blog posts found.</p>
-          </div>
+          <Card>
+            <CardContent className="p-12 text-center">
+              <p className="text-muted-foreground">No blog posts found.</p>
+            </CardContent>
+          </Card>
         ) : (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
               {posts.map((post) => (
-                <Link
-                  key={post.id}
-                  href={`/blog/${post.slug}`}
-                  className="bg-white dark:bg-gray-800 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-                >
-                  {post.featuredImage && (
-                    <img
-                      src={post.featuredImage}
-                      alt={post.title}
-                      className="w-full h-48 object-cover"
-                    />
-                  )}
-                  <div className="p-6">
-                    {post.category && (
-                      <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400">
-                        {post.category}
-                      </span>
+                <Link key={post.id} href={`/blog/${post.slug}`}>
+                  <Card className="h-full hover:shadow-md transition-shadow overflow-hidden">
+                    {post.featuredImage && (
+                      <div className="w-full h-48 overflow-hidden">
+                        <img
+                          src={post.featuredImage}
+                          alt={post.title}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
                     )}
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mt-2 mb-2">
-                      {post.title}
-                    </h2>
-                    {post.excerpt && (
-                      <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
-                        {post.excerpt}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-                      <span>{formatDate(post.publishedAt || post.createdAt)}</span>
-                      <span>{post.views} views</span>
-                    </div>
-                  </div>
+                    <CardContent className="p-6">
+                      {post.category && (
+                        <Badge variant="secondary" className="mb-2">
+                          {post.category}
+                        </Badge>
+                      )}
+                      <h2 className="text-xl font-semibold mb-2 line-clamp-2">
+                        {post.title}
+                      </h2>
+                      {post.excerpt && (
+                        <p className="text-muted-foreground text-sm mb-4 line-clamp-3">
+                          {post.excerpt}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Calendar className="w-4 h-4" />
+                          <span>{formatDate(post.publishedAt || post.createdAt)}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Eye className="w-4 h-4" />
+                          <span>{post.views || 0} views</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </Link>
               ))}
             </div>
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex justify-center gap-2">
-                <button
+              <div className="flex justify-center items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   disabled={page === 1}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
                   Previous
-                </button>
-                <span className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300">
+                </Button>
+                <span className="text-sm text-muted-foreground px-4">
                   Page {page} of {totalPages}
                 </span>
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={() => setPage((p) => p + 1)}
                   disabled={page >= totalPages}
-                  className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Next
-                </button>
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
               </div>
             )}
           </>
@@ -159,4 +187,3 @@ export default function BlogPage() {
     </div>
   );
 }
-

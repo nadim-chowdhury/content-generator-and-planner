@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { AnalyticsProvider } from "@/components/AnalyticsProvider";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,18 +15,18 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Content Generator & Planner - AI-Powered Content Creation Platform",
-  description: "Create engaging content ideas with AI, plan your content calendar, and optimize posts for all major social media platforms. Free, Pro, and Agency plans available.",
-  keywords: ["content generator", "AI content creation", "social media planner", "content calendar", "content marketing", "AI writing tool"],
+  title: "GenPlan - AI-Powered Content Generation & Planning Platform",
+  description: "Generate viral content ideas with AI, plan your content calendar, and auto-publish to all major platforms. The all-in-one platform for content creators.",
+  keywords: ["content generator", "AI content creation", "social media planner", "content calendar", "content marketing", "AI writing tool", "GenPlan"],
   openGraph: {
-    title: "Content Generator & Planner - AI-Powered Content Creation",
-    description: "Create engaging content ideas with AI, plan your content calendar, and optimize posts for all major social media platforms.",
+    title: "GenPlan - AI-Powered Content Generation & Planning",
+    description: "Generate viral content ideas with AI, plan your content calendar, and auto-publish to all major platforms.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Content Generator & Planner",
-    description: "AI-Powered Content Creation Platform",
+    title: "GenPlan",
+    description: "AI-Powered Content Generation & Planning Platform",
   },
 };
 
@@ -38,7 +40,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Suspense fallback={null}>
+          <AnalyticsProvider>
+            {children}
+          </AnalyticsProvider>
+        </Suspense>
       </body>
     </html>
   );

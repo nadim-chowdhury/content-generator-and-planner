@@ -1,21 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import OpenAI from 'openai';
+import { OpenAIService } from '../../common/openai/openai.service';
 
 @Injectable()
 export class AiTasksService {
   private readonly logger = new Logger(AiTasksService.name);
-  private openai: OpenAI;
 
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
-  ) {
-    this.openai = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
-    });
-  }
+    private openaiService: OpenAIService,
+  ) {}
 
   /**
    * Generate AI tasks for a card based on its content
@@ -53,12 +49,12 @@ Generate 5-10 specific, actionable tasks. Each task should be clear and actionab
 
 Focus on tasks relevant to the current stage and content type.`;
 
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: 'You are a productivity assistant. Generate actionable tasks for content creation workflows. Always return valid JSON.',
+            content: 'I need help breaking down this content creation task into actionable steps. Give me real tasks that a creator would actually do, not generic productivity advice. Make them specific and useful.',
           },
           {
             role: 'user',
@@ -66,7 +62,7 @@ Focus on tasks relevant to the current stage and content type.`;
           },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.7,
+        temperature: 0.85,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -124,5 +120,6 @@ Focus on tasks relevant to the current stage and content type.`;
     return stageTasks[stage] || [];
   }
 }
+
 
 

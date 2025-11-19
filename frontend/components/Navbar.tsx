@@ -1,13 +1,27 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuthStore } from '@/store/auth-store';
 import { authApi } from '@/lib/auth';
 import WorkspaceSwitcher from './WorkspaceSwitcher';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Sparkles, LogOut, User, Settings, LayoutDashboard } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, clearAuth } = useAuthStore();
 
   const handleLogout = async () => {
@@ -21,162 +35,123 @@ export default function Navbar() {
     }
   };
 
+  const isActive = (path: string) => pathname === path || pathname?.startsWith(path + '/');
+
+  const navLinks = user ? [
+    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { href: '/ideas', label: 'Ideas' },
+    { href: '/planner', label: 'Planner' },
+    { href: '/kanban', label: 'Kanban' },
+    { href: '/analytics', label: 'Analytics' },
+    { href: '/ai-tools', label: 'AI Tools' },
+  ] : [];
+
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-sm">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex">
-            <Link href="/dashboard" className="flex items-center">
-              <span className="text-xl font-bold text-indigo-600 dark:text-indigo-400">
-                Content Generator
-              </span>
+        <div className="flex h-16 items-center justify-between">
+          <div className="flex items-center gap-8">
+            <Link href={user ? '/dashboard' : '/'} className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+                <Sparkles className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <span className="text-xl font-semibold">GenPlan</span>
             </Link>
+            
             {user && (
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link
-                  href="/dashboard"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Dashboard
-                </Link>
-                <Link
-                  href="/ideas"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Ideas
-                </Link>
-                <Link
-                  href="/search"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Search
-                </Link>
-                <Link
-                  href="/planner"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Planner
-                </Link>
-                <Link
-                  href="/platforms"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Platforms
-                </Link>
-                <Link
-                  href="/languages"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Languages
-                </Link>
-                <Link
-                  href="/ai-tools"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  AI Tools
-                </Link>
-                <Link
-                  href="/pricing"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="/billing"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Billing
-                </Link>
-                <Link
-                  href="/referrals"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Referrals
-                </Link>
-                <Link
-                  href="/affiliates"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Affiliates
-                </Link>
-                <Link
-                  href="/settings/preferences"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Preferences
-                </Link>
-                <Link
-                  href="/export-import"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Export/Import
-                </Link>
-                <Link
-                  href="/settings/security"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Security
-                </Link>
-                <Link
-                  href="/settings/profile"
-                  className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Profile
-                </Link>
-                {user?.plan === 'AGENCY' && (
-                  <Link
-                    href="/teams"
-                    className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                  >
-                    Teams
-                  </Link>
-                )}
-                {user?.role === 'ADMIN' && (
-                  <Link
-                    href="/admin/dashboard"
-                    className="border-transparent text-gray-500 dark:text-gray-300 hover:border-gray-300 hover:text-gray-700 dark:hover:text-gray-100 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                  >
-                    Admin
-                  </Link>
-                )}
+              <div className="hidden md:flex items-center gap-1">
+                {navLinks.map((link) => {
+                  const Icon = link.icon;
+                  return (
+                    <Button
+                      key={link.href}
+                      variant={isActive(link.href) ? 'secondary' : 'ghost'}
+                      size="sm"
+                      asChild
+                      className={cn(
+                        'gap-2',
+                        isActive(link.href) && 'bg-secondary'
+                      )}
+                    >
+                      <Link href={link.href}>
+                        {Icon && <Icon className="w-4 h-4" />}
+                        {link.label}
+                      </Link>
+                    </Button>
+                  );
+                })}
               </div>
             )}
           </div>
-          {user ? (
-            <div className="flex items-center space-x-4">
-              {user.plan === 'AGENCY' && <WorkspaceSwitcher />}
-              <span className="text-sm text-gray-700 dark:text-gray-300">
-                {user.email}
-              </span>
-              <span className="text-xs px-2 py-1 bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200 rounded">
-                {user.plan}
-              </span>
-              <button
-                onClick={handleLogout}
-                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              >
-                Logout
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/login"
-                className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className="text-sm bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
-              >
-                Sign Up
-              </Link>
-            </div>
-          )}
+
+          <div className="flex items-center gap-4">
+            {user ? (
+              <>
+                {user.plan === 'AGENCY' && <WorkspaceSwitcher />}
+                
+                <Badge variant="secondary" className="hidden sm:inline-flex">
+                  {user.plan}
+                </Badge>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                      <Avatar className="h-9 w-9">
+                        <AvatarFallback>
+                          {user.email?.charAt(0).toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{user.name || 'User'}</p>
+                        <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/profile" className="flex items-center">
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings/preferences" className="flex items-center">
+                        <Settings className="mr-2 h-4 w-4" />
+                        Settings
+                      </Link>
+                    </DropdownMenuItem>
+                    {user.role === 'ADMIN' && (
+                      <DropdownMenuItem asChild>
+                        <Link href="/admin/dashboard" className="flex items-center">
+                          <LayoutDashboard className="mr-2 h-4 w-4" />
+                          Admin Panel
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Button variant="ghost" asChild>
+                  <Link href="/login">Sign In</Link>
+                </Button>
+                <Button asChild>
+                  <Link href="/signup">Get Started</Link>
+                </Button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </nav>
   );
 }
-

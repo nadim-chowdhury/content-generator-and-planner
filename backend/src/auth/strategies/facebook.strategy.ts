@@ -10,9 +10,17 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
     private configService: ConfigService,
     private authService: AuthService,
   ) {
+    const clientID = configService.get<string>('FACEBOOK_APP_ID') || '';
+    const clientSecret = configService.get<string>('FACEBOOK_APP_SECRET') || '';
+    
+    if (!clientID || !clientSecret) {
+      console.warn('⚠️  Facebook OAuth credentials are not configured. Facebook login will not work.');
+      console.warn('   Please set FACEBOOK_APP_ID and FACEBOOK_APP_SECRET in your .env file');
+    }
+    
     super({
-      clientID: configService.get<string>('FACEBOOK_APP_ID') || '',
-      clientSecret: configService.get<string>('FACEBOOK_APP_SECRET') || '',
+      clientID,
+      clientSecret,
       callbackURL: configService.get<string>('FACEBOOK_CALLBACK_URL') || '/api/auth/facebook/callback',
       scope: 'email',
       profileFields: ['emails', 'name'],

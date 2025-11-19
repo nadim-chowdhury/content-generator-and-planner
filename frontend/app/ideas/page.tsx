@@ -10,6 +10,31 @@ import IdeaCard from '@/components/IdeaCard';
 import PlatformBadge from '@/components/PlatformBadge';
 import LanguageBadge from '@/components/LanguageBadge';
 import FolderManager from '@/components/FolderManager';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Separator } from '@/components/ui/separator';
+import { 
+  Search, 
+  Filter, 
+  Download, 
+  Archive, 
+  Trash2, 
+  FolderOpen, 
+  X,
+  Lightbulb,
+  Sparkles,
+  CheckSquare,
+  Square
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function IdeasPage() {
   const [ideas, setIdeas] = useState<Idea[]>([]);
@@ -255,21 +280,17 @@ export default function IdeasPage() {
 
   return (
     <ProtectedRoute>
-      {loading ? (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <Navbar />
-          <div className="flex items-center justify-center h-64">
-            <div className="text-gray-600 dark:text-gray-400">Loading...</div>
-          </div>
-        </div>
-      ) : (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <Navbar />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Sidebar */}
-              <div className="lg:col-span-1">
-                <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4 sticky top-4">
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <Card className="sticky top-4">
+                <CardHeader>
+                  <CardTitle className="text-lg">Filters</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
                   <FolderManager
                     onFolderSelect={(folderId) => setFolderFilter(folderId)}
                     selectedFolderId={folderFilter}
@@ -279,172 +300,200 @@ export default function IdeasPage() {
                     }}
                   />
                   
+                  <Separator />
+                  
                   {/* Tags Filter */}
-                  <div className="mt-6">
-                    <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">Tags</h3>
+                  <div>
+                    <Label className="mb-3">Tags</Label>
                     <div className="space-y-2 max-h-64 overflow-y-auto">
                       {allTags.map((tag) => (
-                        <label key={tag} className="flex items-center gap-2 cursor-pointer">
-                          <input
-                            type="checkbox"
+                        <label key={tag} className="flex items-center gap-2 cursor-pointer hover:bg-accent p-2 rounded-md transition-colors">
+                          <Checkbox
                             checked={tagFilter.includes(tag)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
+                            onCheckedChange={(checked) => {
+                              if (checked) {
                                 setTagFilter([...tagFilter, tag]);
                               } else {
                                 setTagFilter(tagFilter.filter(t => t !== tag));
                               }
                             }}
-                            className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{tag}</span>
+                          <span className="text-sm">{tag}</span>
                         </label>
                       ))}
                       {allTags.length === 0 && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400">No tags yet</p>
+                        <p className="text-xs text-muted-foreground">No tags yet</p>
                       )}
                     </div>
                   </div>
+                </CardContent>
+              </Card>
+              </div>
+
+            {/* Main Content */}
+            <div className="lg:col-span-3 space-y-6">
+              <div className="flex justify-between items-center">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">Ideas Library</h1>
+                  <p className="text-muted-foreground mt-1">
+                    {ideas.length} {ideas.length === 1 ? 'idea' : 'ideas'}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant={bulkMode ? 'default' : 'outline'}
+                    onClick={() => {
+                      setBulkMode(!bulkMode);
+                      if (bulkMode) {
+                        setSelectedIdeas(new Set());
+                      }
+                    }}
+                  >
+                    {bulkMode ? (
+                      <>
+                        <X className="w-4 h-4 mr-2" />
+                        Cancel Selection
+                      </>
+                    ) : (
+                      <>
+                        <CheckSquare className="w-4 h-4 mr-2" />
+                        Select Multiple
+                      </>
+                    )}
+                  </Button>
+                  {ideas.length > 0 && (
+                    <Button variant="outline" onClick={() => setShowExportModal(true)}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Export All
+                    </Button>
+                  )}
                 </div>
               </div>
 
-              {/* Main Content */}
-              <div className="lg:col-span-3">
-                <div className="mb-8">
-                  <div className="flex justify-between items-center mb-4">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Ideas Library</h1>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => {
-                          setBulkMode(!bulkMode);
-                          if (bulkMode) {
-                            setSelectedIdeas(new Set());
-                          }
-                        }}
-                        className={`px-4 py-2 rounded-md ${
-                          bulkMode
-                            ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-                        }`}
-                      >
-                        {bulkMode ? 'Cancel Selection' : 'Select Multiple'}
-                      </button>
-                      {ideas.length > 0 && (
-                        <button
-                          onClick={() => setShowExportModal(true)}
-                          className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+              {/* Bulk Operations Toolbar */}
+              {bulkMode && selectedIdeas.size > 0 && (
+                <Card className="border-primary/50 bg-primary/5">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <Badge variant="secondary" className="text-sm">
+                        {selectedIdeas.size} idea(s) selected
+                      </Badge>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleBulkOperation('ARCHIVE')}
                         >
-                          Export All
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Bulk Operations Toolbar */}
-                  {bulkMode && selectedIdeas.size > 0 && (
-                    <div className="mb-4 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-indigo-900 dark:text-indigo-200">
-                          {selectedIdeas.size} idea(s) selected
-                        </span>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleBulkOperation('ARCHIVE')}
-                            className="text-xs px-3 py-1 bg-yellow-600 text-white rounded hover:bg-yellow-700"
-                          >
-                            Archive
-                          </button>
-                          <button
-                            onClick={() => handleBulkOperation('UNARCHIVE')}
-                            className="text-xs px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700"
-                          >
-                            Unarchive
-                          </button>
-                          <button
-                            onClick={() => setShowBulkMoveModal(true)}
-                            className="text-xs px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                          >
-                            Move
-                          </button>
-                          <button
-                            onClick={() => {
-                              const format = prompt('Export format (json/csv/text):', 'json');
-                              if (format && ['json', 'csv', 'text'].includes(format)) {
-                                handleBulkOperation('EXPORT', undefined, format as 'json' | 'csv' | 'text');
-                              }
-                            }}
-                            className="text-xs px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700"
-                          >
-                            Export
-                          </button>
-                          <button
-                            onClick={() => handleBulkOperation('DELETE')}
-                            className="text-xs px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
-                          >
-                            Delete
-                          </button>
-                        </div>
+                          <Archive className="w-4 h-4 mr-2" />
+                          Archive
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleBulkOperation('UNARCHIVE')}
+                        >
+                          <Archive className="w-4 h-4 mr-2" />
+                          Unarchive
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setShowBulkMoveModal(true)}
+                        >
+                          <FolderOpen className="w-4 h-4 mr-2" />
+                          Move
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const format = prompt('Export format (json/csv/text):', 'json');
+                            if (format && ['json', 'csv', 'text'].includes(format)) {
+                              handleBulkOperation('EXPORT', undefined, format as 'json' | 'csv' | 'text');
+                            }
+                          }}
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Export
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => handleBulkOperation('DELETE')}
+                        >
+                          <Trash2 className="w-4 h-4 mr-2" />
+                          Delete
+                        </Button>
                       </div>
                     </div>
-                  )}
+                  </CardContent>
+                </Card>
+              )}
 
                   {/* Filters */}
                   <div className="space-y-4 mb-4">
                     {/* Basic Filters Row */}
                     <div className="flex flex-wrap gap-4">
-                      <div className="flex-1 min-w-[200px]">
-                        <input
+                    <div className="flex-1 min-w-[200px]">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
                           type="text"
                           placeholder="Search ideas..."
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                          className="pl-10"
                         />
                       </div>
-                      <select
-                        value={filter}
-                        onChange={(e) => setFilter(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      >
-                        <option value="">All Status</option>
-                        <option value="DRAFT">Draft</option>
-                        <option value="SCHEDULED">Scheduled</option>
-                        <option value="POSTED">Posted</option>
-                        <option value="ARCHIVED">Archived</option>
-                      </select>
-                      <select
-                        value={platformFilter}
-                        onChange={(e) => setPlatformFilter(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      >
-                        <option value="">All Platforms</option>
-                        <option value="YouTube">YouTube</option>
-                        <option value="YouTube Shorts">YouTube Shorts</option>
-                        <option value="TikTok">TikTok</option>
-                        <option value="Instagram Reels">Instagram Reels</option>
-                        <option value="Facebook Reels">Facebook Reels</option>
-                        <option value="Twitter">Twitter/X</option>
-                        <option value="LinkedIn">LinkedIn</option>
-                      </select>
-                      <select
-                        value={languageFilter}
-                        onChange={(e) => setLanguageFilter(e.target.value)}
-                        className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-                      >
-                        <option value="">All Languages</option>
-                        <option value="en">English</option>
-                        <option value="bn">Bengali</option>
-                        <option value="hi">Hindi</option>
-                        <option value="ar">Arabic</option>
-                        <option value="es">Spanish</option>
-                      </select>
-                      <button
-                        onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                        className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-                      >
-                        {showAdvancedFilters ? 'Hide' : 'Show'} Advanced Filters
-                      </button>
                     </div>
+                    <Select value={filter} onValueChange={setFilter}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="All Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Status</SelectItem>
+                        <SelectItem value="DRAFT">Draft</SelectItem>
+                        <SelectItem value="SCHEDULED">Scheduled</SelectItem>
+                        <SelectItem value="POSTED">Posted</SelectItem>
+                        <SelectItem value="ARCHIVED">Archived</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={platformFilter} onValueChange={setPlatformFilter}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="All Platforms" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Platforms</SelectItem>
+                        <SelectItem value="YouTube">YouTube</SelectItem>
+                        <SelectItem value="YouTube Shorts">YouTube Shorts</SelectItem>
+                        <SelectItem value="TikTok">TikTok</SelectItem>
+                        <SelectItem value="Instagram Reels">Instagram Reels</SelectItem>
+                        <SelectItem value="Facebook Reels">Facebook Reels</SelectItem>
+                        <SelectItem value="Twitter">Twitter/X</SelectItem>
+                        <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={languageFilter} onValueChange={setLanguageFilter}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="All Languages" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">All Languages</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="bn">Bengali</SelectItem>
+                        <SelectItem value="hi">Hindi</SelectItem>
+                        <SelectItem value="ar">Arabic</SelectItem>
+                        <SelectItem value="es">Spanish</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                    >
+                      <Filter className="w-4 h-4 mr-2" />
+                      {showAdvancedFilters ? 'Hide' : 'Show'} Advanced
+                    </Button>
+                  </div>
 
                     {/* Advanced Filters */}
                     {showAdvancedFilters && (

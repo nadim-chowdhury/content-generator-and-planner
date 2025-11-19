@@ -8,6 +8,7 @@ import { BatchGenerationProcessor } from './processors/batch-generation.processo
 import { AnalyticsAggregationProcessor } from './processors/analytics-aggregation.processor';
 import { EmailProcessor } from './processors/email.processor';
 import { TrialExpirationProcessor } from './processors/trial-expiration.processor';
+import { AutoPostProcessor } from './processors/auto-post.processor';
 import { QueueScheduler } from './queue.scheduler';
 import { QueueController } from './queue.controller';
 import { PrismaModule } from '../prisma/prisma.module';
@@ -16,6 +17,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { IdeasModule } from '../ideas/ideas.module';
 import { BillingModule } from '../billing/billing.module';
 import { EmailModule } from '../email/email.module';
+import { SocialModule } from '../social/social.module';
 
 @Module({
   imports: [
@@ -44,12 +46,14 @@ import { EmailModule } from '../email/email.module';
       { name: 'analytics-aggregation' },
       { name: 'email' },
       { name: 'trial-expiration' },
+      { name: 'auto-posts' },
     ),
     PrismaModule,
     NotificationsModule,
     IdeasModule,
     BillingModule,
     EmailModule,
+    SocialModule,
   ],
   providers: [
     QueueService,
@@ -59,6 +63,7 @@ import { EmailModule } from '../email/email.module';
     AnalyticsAggregationProcessor,
     EmailProcessor,
     TrialExpirationProcessor,
+    AutoPostProcessor,
     QueueScheduler,
   ],
   controllers: [QueueController],

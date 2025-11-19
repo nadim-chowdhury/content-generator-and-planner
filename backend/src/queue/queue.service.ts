@@ -25,6 +25,13 @@ export interface EmailJob {
   data?: Record<string, any>;
 }
 
+export interface AutoPostJob {
+  userId: string;
+  ideaId: string;
+  connectionId: string;
+  scheduledAt: string;
+}
+
 @Injectable()
 export class QueueService {
   private readonly logger = new Logger(QueueService.name);
@@ -36,6 +43,7 @@ export class QueueService {
     @InjectQueue('analytics-aggregation') private analyticsQueue: Queue,
     @InjectQueue('email') private emailQueue: Queue,
     @InjectQueue('trial-expiration') private trialExpirationQueue: Queue,
+    @InjectQueue('auto-posts') private autoPostsQueue: Queue,
   ) {}
 
   /**
@@ -144,10 +152,48 @@ export class QueueService {
   }
 
   /**
+   * Schedule auto-post job
+   */
+  async scheduleAutoPost(
+    job: AutoPostJob,
+    scheduledDate: Date,
+  ): Promise<string> {
+    const delay = Math.max(0, scheduledDate.getTime() - Date.now());
+    
+    const jobId = await this.autoPostsQueue.add(
+      'post-scheduled',
+      job,
+      {
+        delay,
+        attempts: 3,
+        backoff: {
+          type: 'exponential',
+          delay: 5000, // 5 seconds, 25 seconds, 125 seconds
+        },
+        jobId: `auto-post-${job.userId}-${job.ideaId}-${job.connectionId}`,
+      },
+    );
+    this.logger.log(`Scheduled auto-post: ${jobId.id} for ${scheduledDate.toISOString()}`);
+    return jobId.id!;
+  }
+
+  /**
+   * Cancel auto-post job
+   */
+  async cancelAutoPost(userId: string, ideaId: string, connectionId: string): Promise<void> {
+    const jobId = `auto-post-${userId}-${ideaId}-${connectionId}`;
+    const job = await this.autoPostsQueue.getJob(jobId);
+    if (job) {
+      await job.remove();
+      this.logger.log(`Cancelled auto-post: ${jobId}`);
+    }
+  }
+
+  /**
    * Get queue statistics
    */
   async getQueueStats() {
-    const [postingReminders, quotaReset, batchGenerations, analytics, email, trialExpiration] =
+    const [postingReminders, quotaReset, batchGenerations, analytics, email, trialExpiration, autoPosts] =
       await Promise.all([
         this.postingRemindersQueue.getJobCounts(),
         this.quotaResetQueue.getJobCounts(),
@@ -155,6 +201,7 @@ export class QueueService {
         this.analyticsQueue.getJobCounts(),
         this.emailQueue.getJobCounts(),
         this.trialExpirationQueue.getJobCounts(),
+        this.autoPostsQueue.getJobCounts(),
       ]);
 
     return {
@@ -164,6 +211,7 @@ export class QueueService {
       analytics,
       email,
       trialExpiration,
+      autoPosts,
     };
   }
 }

@@ -61,3 +61,4 @@ export class UpdateWorkspaceSettingsDto {
   autoScheduleEnabled?: boolean;
 }
 
+

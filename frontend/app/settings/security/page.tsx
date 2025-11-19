@@ -6,6 +6,23 @@ import { authApi } from '@/lib/auth';
 import Navbar from '@/components/Navbar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import TwoFactorSetup from '@/components/TwoFactorSetup';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { 
+  Shield, 
+  Smartphone, 
+  Monitor, 
+  LogIn, 
+  CheckCircle2, 
+  XCircle,
+  AlertTriangle,
+  Trash2
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 export default function SecuritySettingsPage() {
   const { user, updateUser } = useAuthStore();
@@ -81,7 +98,6 @@ export default function SecuritySettingsPage() {
       return session.deviceInfo;
     }
     if (session.userAgent) {
-      // Simple device detection from user agent
       const ua = session.userAgent.toLowerCase();
       if (ua.includes('mobile')) return 'Mobile Device';
       if (ua.includes('tablet')) return 'Tablet';
@@ -92,195 +108,212 @@ export default function SecuritySettingsPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-background">
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-            Security Settings
-          </h1>
-
-          {/* Two-Factor Authentication */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Two-Factor Authentication
-            </h2>
-
-            {twoFactorEnabled ? (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">
-                      2FA is enabled
-                    </p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
-                      Your account is protected with two-factor authentication
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleDisable2FA}
-                    className="px-4 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                  >
-                    Disable
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  Add an extra layer of security to your account
-                </p>
-                {show2FASetup ? (
-                  <TwoFactorSetup
-                    onComplete={() => {
-                      setShow2FASetup(false);
-                      setTwoFactorEnabled(true);
-                      updateUser({ twoFactorEnabled: true });
-                      loadData();
-                    }}
-                  />
-                ) : (
-                  <button
-                    onClick={() => setShow2FASetup(true)}
-                    className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-md"
-                  >
-                    Enable 2FA
-                  </button>
-                )}
-              </div>
-            )}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">Security Settings</h1>
+            <p className="text-muted-foreground mt-1">
+              Manage your account security and active sessions
+            </p>
           </div>
 
-          {/* Active Sessions */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 mb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Active Sessions
-              </h2>
-              {sessions.length > 1 && (
-                <button
-                  onClick={handleRevokeAllSessions}
-                  className="text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                >
-                  Revoke All Other Sessions
-                </button>
-              )}
-            </div>
-
-            {loading ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                Loading sessions...
-              </div>
-            ) : sessions.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                No active sessions
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {sessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className="flex items-center justify-between p-4 border border-gray-200 dark:border-gray-700 rounded-lg"
-                  >
-                    <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {getDeviceInfo(session)}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {session.ipAddress && `IP: ${session.ipAddress}`}
-                        {session.ipAddress && session.userAgent && ' • '}
-                        {session.userAgent && session.userAgent.substring(0, 50)}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        Last active: {new Date(session.lastActivity || session.createdAt).toLocaleString()}
-                      </p>
-                    </div>
-                    {sessions.length > 1 && (
-                      <button
-                        onClick={() => handleRevokeSession(session.id)}
-                        className="ml-4 px-3 py-1 text-sm text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
-                      >
-                        Revoke
-                      </button>
+          <div className="space-y-6">
+            {/* Two-Factor Authentication */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Shield className="w-5 h-5 text-primary" />
+                  Two-Factor Authentication
+                </CardTitle>
+                <CardDescription>
+                  Add an extra layer of security to your account
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {twoFactorEnabled ? (
+                  <div className="space-y-4">
+                    <Alert className="border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20">
+                      <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+                      <AlertDescription className="text-green-800 dark:text-green-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="font-medium">2FA is enabled</div>
+                            <div className="text-sm">Your account is protected with two-factor authentication</div>
+                          </div>
+                          <Button variant="destructive" size="sm" onClick={handleDisable2FA}>
+                            Disable
+                          </Button>
+                        </div>
+                      </AlertDescription>
+                    </Alert>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {show2FASetup ? (
+                      <TwoFactorSetup
+                        onComplete={() => {
+                          setShow2FASetup(false);
+                          setTwoFactorEnabled(true);
+                          updateUser({ twoFactorEnabled: true });
+                          loadData();
+                        }}
+                      />
+                    ) : (
+                      <Button onClick={() => setShow2FASetup(true)}>
+                        <Shield className="w-4 h-4 mr-2" />
+                        Enable 2FA
+                      </Button>
                     )}
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* Login Activity */}
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-              Login Activity
-            </h2>
-
-            {loading ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                Loading activity...
-              </div>
-            ) : activities.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                No login activity
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                  <thead className="bg-gray-50 dark:bg-gray-900">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Date
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Type
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        Device
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                        IP Address
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                    {activities.map((activity) => (
-                      <tr key={activity.id}>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                          {new Date(activity.createdAt).toLocaleString()}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                          {activity.loginType}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          {activity.success ? (
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                              Success
-                            </span>
-                          ) : (
-                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
-                              Failed
-                            </span>
+            {/* Active Sessions */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Monitor className="w-5 h-5 text-primary" />
+                      Active Sessions
+                    </CardTitle>
+                    <CardDescription>
+                      Manage devices that are currently signed in
+                    </CardDescription>
+                  </div>
+                  {sessions.length > 1 && (
+                    <Button variant="destructive" size="sm" onClick={handleRevokeAllSessions}>
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Revoke All Other Sessions
+                    </Button>
+                  )}
+                </div>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-20 w-full" />
+                    <Skeleton className="h-20 w-full" />
+                  </div>
+                ) : sessions.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No active sessions
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {sessions.map((session) => (
+                      <Card key={session.id} className="p-4">
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Monitor className="w-4 h-4 text-muted-foreground" />
+                              <span className="font-medium">{getDeviceInfo(session)}</span>
+                              {session.id === sessions[0]?.id && (
+                                <Badge variant="secondary" className="text-xs">Current</Badge>
+                              )}
+                            </div>
+                            <div className="text-sm text-muted-foreground space-y-1">
+                              {session.ipAddress && <div>IP: {session.ipAddress}</div>}
+                              {session.userAgent && (
+                                <div className="truncate max-w-md">
+                                  {session.userAgent.substring(0, 80)}...
+                                </div>
+                              )}
+                              <div>
+                                Last active: {new Date(session.lastActivity || session.createdAt).toLocaleString()}
+                              </div>
+                            </div>
+                          </div>
+                          {sessions.length > 1 && session.id !== sessions[0]?.id && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRevokeSession(session.id)}
+                            >
+                              <Trash2 className="w-4 h-4 mr-2" />
+                              Revoke
+                            </Button>
                           )}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                          {activity.deviceInfo || 'Unknown'}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                          {activity.ipAddress || '-'}
-                        </td>
-                      </tr>
+                        </div>
+                      </Card>
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Login Activity */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <LogIn className="w-5 h-5 text-primary" />
+                  Login Activity
+                </CardTitle>
+                <CardDescription>
+                  Recent login attempts and authentication events
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="space-y-2">
+                    <Skeleton className="h-12 w-full" />
+                    <Skeleton className="h-12 w-full" />
+                  </div>
+                ) : activities.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    No login activity
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Device</TableHead>
+                        <TableHead>IP Address</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {activities.map((activity) => (
+                        <TableRow key={activity.id}>
+                          <TableCell>
+                            {new Date(activity.createdAt).toLocaleString()}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {activity.loginType}
+                          </TableCell>
+                          <TableCell>
+                            {activity.success ? (
+                              <Badge variant="default" className="gap-1">
+                                <CheckCircle2 className="w-3 h-3" />
+                                Success
+                              </Badge>
+                            ) : (
+                              <Badge variant="destructive" className="gap-1">
+                                <XCircle className="w-3 h-3" />
+                                Failed
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {activity.deviceInfo || 'Unknown'}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {activity.ipAddress || '-'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
     </ProtectedRoute>
   );
 }
-
-

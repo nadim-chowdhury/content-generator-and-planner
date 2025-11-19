@@ -28,12 +28,20 @@ import { QueueModule } from './queue/queue.module';
 import { SettingsModule } from './settings/settings.module';
 import { ExportImportModule } from './export-import/export-import.module';
 import { SearchModule } from './search/search.module';
+import { LoggerModule } from './common/logger/logger.module';
+import { SentryModule } from './common/sentry/sentry.module';
+import { AnalyticsModule as CommonAnalyticsModule } from './common/analytics/analytics.module';
+import { OpenAIModule } from './common/openai/openai.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    LoggerModule,
+    SentryModule,
+    CommonAnalyticsModule,
+    OpenAIModule,
     ThrottlerModule.forRoot([
       {
         name: 'default',

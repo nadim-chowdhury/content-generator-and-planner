@@ -1,21 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import OpenAI from 'openai';
+import { OpenAIService } from '../../common/openai/openai.service';
 
 @Injectable()
 export class PredictionService {
   private readonly logger = new Logger(PredictionService.name);
-  private openai: OpenAI;
 
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
-  ) {
-    this.openai = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
-    });
-  }
+    private openaiService: OpenAIService,
+  ) {}
 
   /**
    * Predict reach potential for an idea
@@ -63,12 +59,12 @@ Predict the potential reach (number of people who will see this content) and pro
 
 Return a JSON object with: reach (number), score (0-100), reasoning (string).`;
 
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert social media analytics predictor. Always return valid JSON with realistic predictions based on content quality, platform algorithms, and historical performance.',
+            content: 'I need realistic predictions about how this content will perform. Be honest - not everything goes viral. Give me numbers that make sense based on what actually happens, not inflated estimates.',
           },
           {
             role: 'user',
@@ -149,12 +145,12 @@ Predict the potential engagement (likes, comments, shares, saves combined) and p
 
 Return a JSON object with: engagement (number), score (0-100), reasoning (string).`;
 
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert social media engagement predictor. Always return valid JSON with realistic predictions based on content quality, hooks, hashtags, and historical performance.',
+            content: 'I need realistic predictions about how this content will perform. Be honest - not everything goes viral. Give me numbers that make sense based on what actually happens, not inflated estimates.',
           },
           {
             role: 'user',
@@ -222,5 +218,6 @@ Return a JSON object with: engagement (number), score (0-100), reasoning (string
     return platformDefaults[platform] || 50;
   }
 }
+
 
 

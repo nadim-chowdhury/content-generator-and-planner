@@ -1,0 +1,68 @@
+# ============================================
+# QUICK REFERENCE - Essential Environment Variables
+# ============================================
+# Copy these to your .env file and fill in values
+
+# REQUIRED - Database
+DATABASE_URL="postgresql://user:password@localhost:5432/content_generator"
+
+# REQUIRED - Application
+NODE_ENV="development"
+PORT=3000
+FRONTEND_URL="http://localhost:3001"
+API_URL="http://localhost:3000"
+
+# REQUIRED - JWT Authentication
+JWT_SECRET="your-super-secret-jwt-key-minimum-32-characters-long"
+JWT_EXPIRES_IN="15m"
+JWT_REFRESH_SECRET="your-refresh-token-secret-minimum-32-characters-long"
+JWT_REFRESH_EXPIRES_IN="7d"
+
+# REQUIRED - OpenAI (AI Features)
+OPENAI_API_KEY="sk-proj-..."
+OPENAI_API_KEYS="sk-proj-...,sk-proj-..."  # Optional: Multiple keys for load balancing
+OPENAI_MODEL="gpt-4o"
+
+# REQUIRED - Encryption
+ENCRYPTION_KEY="your-32-character-encryption-key-here"
+
+# RECOMMENDED - Stripe (Billing)
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PUBLISHABLE_KEY="pk_test_..."
+STRIPE_WEBHOOK_SECRET="whsec_..."
+
+# RECOMMENDED - Email (SMTP)
+SMTP_HOST="smtp.gmail.com"
+SMTP_PORT=587
+SMTP_USER="your-email@gmail.com"
+SMTP_PASS="your-app-password"
+SMTP_FROM="noreply@contentgenerator.com"
+
+# RECOMMENDED - Redis (Queue & Caching)
+REDIS_HOST="localhost"
+REDIS_PORT=6379
+REDIS_URL="redis://localhost:6379"
+
+# OPTIONAL - Social Authentication
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+FACEBOOK_APP_ID="..."
+FACEBOOK_APP_SECRET="..."
+GITHUB_CLIENT_ID="..."
+GITHUB_CLIENT_SECRET="..."
+
+# OPTIONAL - Social Media APIs (Auto-Posting)
+TWITTER_CLIENT_ID="..."
+TWITTER_CLIENT_SECRET="..."
+LINKEDIN_CLIENT_ID="..."
+LINKEDIN_CLIENT_SECRET="..."
+
+# OPTIONAL - Monitoring & Analytics
+SENTRY_DSN="https://xxx@xxx.ingest.sentry.io/xxx"
+POSTHOG_API_KEY="..."
+POSTHOG_HOST="https://app.posthog.com"
+
+# OPTIONAL - Logging & Documentation
+LOG_LEVEL="info"
+ENABLE_SWAGGER=false
+

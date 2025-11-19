@@ -11,7 +11,7 @@ import { CreateIdeaDto } from './dto/create-idea.dto';
 import { UpdateIdeaDto } from './dto/update-idea.dto';
 import { PlatformOptimizerService } from './services/platform-optimizer.service';
 import { LanguageService } from './services/language.service';
-import OpenAI from 'openai';
+import { OpenAIService } from '../common/openai/openai.service';
 
 enum UserPlan {
   FREE = 'FREE',
@@ -28,18 +28,13 @@ enum IdeaStatus {
 
 @Injectable()
 export class IdeasService {
-  private openai: OpenAI;
-
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
     private platformOptimizer: PlatformOptimizerService,
     private languageService: LanguageService,
-  ) {
-    this.openai = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
-    });
-  }
+    private openaiService: OpenAIService,
+  ) {}
 
   async checkQuota(userId: string, userPlan: UserPlan): Promise<boolean> {
     if (userPlan === UserPlan.PRO || userPlan === UserPlan.AGENCY) {
@@ -129,32 +124,34 @@ export class IdeasService {
       ? dto.language 
       : this.languageService.getDefaultLanguage();
 
-    // Build AI prompt
+    // Build human-like AI prompt
     const prompt = this.buildPrompt(dto, count, language);
 
     try {
-      // Call OpenAI API
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      // Call OpenAI API with human-like prompts
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: `You are an expert content idea generator for social media creators. Generate exactly ${count} comprehensive content ideas in JSON format. Each idea must include ALL of the following fields:
-- title: Engaging, attention-grabbing title
-- description: Short description (15-30 words)
-- hook: Attention-grabbing opening hook (1-2 sentences)
-- script: Detailed script or content outline (3-8 lines for video, or structured format for posts)
-- caption: Platform-optimized caption with engagement elements
-- hashtags: Array of 5-15 relevant, trending hashtags
-- categoryTags: Array of 3-7 category/topic tags (e.g., ["tutorial", "lifestyle", "tips"])
-- viralScore: Number 0-100 indicating potential virality
-- estimatedDuration: Duration in seconds (for video platforms like TikTok, YouTube Shorts)
-- thumbnailSuggestion: Detailed description for thumbnail/image generation
-- platformOptimization: Platform-specific optimization notes and best practices
+            content: `I'm a content creator working on ${dto.platform} in the ${dto.niche} niche. I need ${count} fresh, creative content ideas that will really connect with my audience.
+
+Each idea should feel authentic and natural - like it came from a real person, not AI. Here's what I need for each idea:
+- title: Something catchy that makes people want to click (but not clickbait-y)
+- description: A quick summary in 15-30 words that gets people interested
+- hook: The opening line that grabs attention right away (1-2 sentences max)
+- script: The actual content outline or script (3-8 lines for videos, structured format for posts)
+- caption: A caption that feels real and engaging, not robotic
+- hashtags: 5-15 hashtags that actually make sense and are trending
+- categoryTags: 3-7 tags that help organize this (like ["tutorial", "lifestyle", "tips"])
+- viralScore: How likely this is to go viral (0-100, be realistic)
+- estimatedDuration: How long the content should be in seconds
+- thumbnailSuggestion: What the thumbnail should look like (be specific)
+- platformOptimization: Tips specific to ${dto.platform} that will help this perform
 
 ${this.languageService.getLanguageInstruction(language)}
 
-Ensure all ideas are unique, engaging, and optimized for the specified platform.`,
+Write everything naturally - like you're a real creator brainstorming ideas, not an AI generating content. Make it feel authentic and human.`,
           },
           {
             role: 'user',
@@ -162,7 +159,7 @@ Ensure all ideas are unique, engaging, and optimized for the specified platform.
           },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.8,
+        temperature: 0.9, // Higher temperature for more human-like, creative responses
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -262,31 +259,29 @@ Ensure all ideas are unique, engaging, and optimized for the specified platform.
     const recommendedHashtags = platformSpecs?.hashtagCount.recommended || 5;
     const bestPractices = platformSpecs?.bestPractices.join(', ') || '';
     
-    let prompt = `Generate ${count} comprehensive, creative content ideas for ${dto.platform} in the "${dto.niche}" niche with a ${dto.tone} tone.
+    let prompt = `I'm looking for ${count} really solid content ideas for ${dto.platform}. My niche is ${dto.niche}, and I want the tone to be ${dto.tone} - like I'm talking to friends, not giving a formal presentation.
 
 ${platformSpecific}
 
-Platform Specifications:
-- Optimal Duration: ${optimalDuration} seconds (range: ${platformSpecs?.optimalDuration.min || 15}-${platformSpecs?.optimalDuration.max || 60}s)
-- Aspect Ratio: ${platformSpecs?.aspectRatio || '9:16'}
-- Recommended Hashtags: ${recommendedHashtags} hashtags
-- Best Practices: ${bestPractices}
+Here's what I know about ${dto.platform}:
+- Best video length: around ${optimalDuration} seconds (but anywhere from ${platformSpecs?.optimalDuration.min || 15} to ${platformSpecs?.optimalDuration.max || 60} works)
+- Format: ${platformSpecs?.aspectRatio || '9:16'} aspect ratio
+- Hashtags: I usually use around ${recommendedHashtags} hashtags
+- What works: ${bestPractices}
 
-Requirements:
-- Each idea must be unique, engaging, and optimized for ${dto.platform}
-- Titles should be attention-grabbing and click-worthy
-- Descriptions should be concise (15-30 words) and compelling
-- Hooks should immediately capture attention (1-2 sentences)
-- Scripts should be detailed and actionable (3-8 lines for video content)
-- Captions should be platform-optimized with engagement elements (questions, CTAs, etc.)
-- Hashtags should be relevant, trending, and platform-appropriate (5-15 hashtags)
-- Category tags should accurately categorize the content (3-7 tags)
-- Viral scores should be realistic based on content quality and trend potential (0-100)
-- Duration should be appropriate for ${dto.platform} (in seconds)
-- Thumbnail suggestions should be detailed and visually descriptive
-- Platform optimization notes should include best practices specific to ${dto.platform}
+When you create these ideas, make them feel real and authentic. Don't make them sound like they came from a content factory. I want:
+- Titles that make people curious, not clickbait
+- Descriptions that actually tell people what they'll get
+- Hooks that feel natural, not forced
+- Scripts that sound like how I actually talk
+- Captions that feel genuine and engaging
+- Hashtags that make sense for my niche
+- Realistic viral scores (not everything is going to go viral)
+- Duration that fits ${dto.platform}
+- Thumbnail ideas that are actually doable
+- Tips that are specific to ${dto.platform}
 
-${dto.additionalContext ? `Additional Context: ${dto.additionalContext}\n` : ''}Return the response as a JSON object with an "ideas" array containing exactly ${count} idea objects. Each idea object must include ALL fields as specified in the system prompt.`;
+${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalContext}\n` : ''}Give me a JSON object with an "ideas" array that has exactly ${count} ideas. Make each one feel like a real person came up with it, not an AI.`;
 
     return prompt;
   }

@@ -1,6 +1,5 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import OpenAI from 'openai';
 import { ScriptGeneratorDto, ScriptType } from './dto/script-generator.dto';
 import { RewriteDto } from './dto/rewrite.dto';
 import { ElaborateIdeaDto } from './dto/elaborate-idea.dto';
@@ -12,19 +11,15 @@ import { TrendingTopicsDto } from './dto/trending-topics.dto';
 import { AudiencePersonaDto } from './dto/audience-persona.dto';
 import { ViralScoreDto } from './dto/viral-score.dto';
 import { LanguageService } from '../ideas/services/language.service';
+import { OpenAIService } from '../common/openai/openai.service';
 
 @Injectable()
 export class AiToolsService {
-  private openai: OpenAI;
-
   constructor(
     private configService: ConfigService,
     private languageService: LanguageService,
-  ) {
-    this.openai = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
-    });
-  }
+    private openaiService: OpenAIService,
+  ) {}
 
   /**
    * Generate script (short or long form)
@@ -61,14 +56,17 @@ Return a JSON object with:
 - cta: Call-to-action text`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert video script writer for social media content creators.' },
+          { 
+            role: 'system', 
+            content: `I'm a content creator who needs help writing ${scriptType} video scripts. Write naturally, like you're helping a friend brainstorm ideas. Make the scripts sound authentic and conversational, not robotic or overly formal.` 
+          },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.8,
+        temperature: 0.9,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -109,14 +107,14 @@ Return a JSON object with:
 - wordCount: Word count of rewritten content`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert content writer and editor.' },
+          { role: 'system', content: 'I need help rewriting some content to make it sound more natural and engaging. Write it like a real person would, not like a corporate robot. Keep it authentic and conversational.' },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.7,
+        temperature: 0.9,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -157,14 +155,14 @@ Return a JSON object with:
 - estimatedDuration: Estimated duration in seconds (if applicable)`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert content strategist and idea developer.' },
+          { role: 'system', content: 'I\'m brainstorming content ideas and need help expanding on this one. Think like a real creator would - what would make this idea actually interesting and relatable? Make it feel authentic.' },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.8,
+        temperature: 0.9,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -205,14 +203,14 @@ Generate ${variations} optimized title variations. Return a JSON object with:
 - recommendations: Best practices for this platform/niche`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert in SEO and content optimization for social media.' },
+          { role: 'system', content: 'I need help making this title better. Give me variations that sound natural and click-worthy, not clickbait. Think about what would make a real person want to click, not what an algorithm wants.' },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.8,
+        temperature: 0.9,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -262,14 +260,14 @@ Return a JSON object with:
 - themes: Weekly or monthly themes`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert content strategist and social media planner.' },
+          { role: 'system', content: 'I\'m planning my content calendar and need ideas that feel authentic and varied. Don\'t make everything sound the same - mix it up like a real creator would. Make it feel natural.' },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.8,
+        temperature: 0.9,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -311,14 +309,14 @@ Return a JSON object with:
 - gaps: Content gaps in the niche`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert social media analyst and competitive intelligence specialist.' },
+          { role: 'system', content: 'I want to understand what my competitors are doing, but analyze it like a real person would - what\'s actually working, what feels authentic, what\'s just noise. Give me insights that matter.' },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.7,
+        temperature: 0.85,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -361,14 +359,14 @@ Return a JSON object with:
 - monetization: Monetization opportunities`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert market researcher and niche analyst for social media.' },
+          { role: 'system', content: 'I\'m researching this niche and need real insights, not generic market research. Tell me what\'s actually happening, what real creators are doing, and what opportunities exist. Be specific and authentic.' },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.7,
+        temperature: 0.85,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -411,14 +409,14 @@ Return a JSON object with:
 - overallTrends: Overall trend patterns in this niche`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert trend analyst and social media intelligence specialist.' },
+          { role: 'system', content: 'I want to know what\'s actually trending right now, not what some algorithm says. Give me real trends that real people are talking about. Make it feel current and authentic.' },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.8,
+        temperature: 0.9,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -467,14 +465,14 @@ Return a JSON object with:
 - messaging: Recommended messaging approach`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert in audience research and persona development for social media marketing.' },
+          { role: 'system', content: 'I need to understand my audience better. Create a persona that feels like a real person, not a marketing stereotype. What would this person actually care about? How do they really behave? Be authentic.' },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.7,
+        temperature: 0.85,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -525,14 +523,14 @@ Return a JSON object with:
 - engagementPotential: Estimated engagement potential (0-100)`;
 
     try {
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
-          { role: 'system', content: 'You are an expert viral content analyst with deep understanding of social media algorithms and engagement patterns.' },
+          { role: 'system', content: 'I want an honest assessment of whether this content could go viral. Be realistic - not everything goes viral. Tell me what would actually work and what wouldn\'t, like a real creator would analyze it.' },
           { role: 'user', content: prompt },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.6, // Lower temperature for more consistent scoring
+        temperature: 0.85, // Balanced temperature for realistic scoring
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -547,5 +545,6 @@ Return a JSON object with:
     }
   }
 }
+
 
 

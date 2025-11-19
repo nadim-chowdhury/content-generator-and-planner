@@ -1,0 +1,31 @@
+# ============================================
+# QUICK REFERENCE - Essential Frontend Environment Variables
+# ============================================
+# Copy these to your .env.local file and fill in values
+
+# REQUIRED - API Configuration
+NEXT_PUBLIC_API_URL="http://localhost:3000"
+
+# RECOMMENDED - Error Monitoring (Sentry)
+NEXT_PUBLIC_SENTRY_DSN="https://xxx@xxx.ingest.sentry.io/xxx"
+NEXT_PUBLIC_SENTRY_ENABLE_DEV=false
+SENTRY_ORG="your-org"
+SENTRY_PROJECT="your-project"
+
+# RECOMMENDED - Analytics (PostHog)
+NEXT_PUBLIC_POSTHOG_API_KEY="phc_..."
+NEXT_PUBLIC_POSTHOG_HOST="https://app.posthog.com"
+
+# RECOMMENDED - Stripe (Billing)
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_..."
+
+# OPTIONAL - Application
+NEXT_PUBLIC_APP_NAME="Content Generator & Planner"
+NEXT_PUBLIC_APP_URL="http://localhost:3001"
+NEXT_PUBLIC_DEBUG=false
+
+# OPTIONAL - Feature Flags
+NEXT_PUBLIC_ENABLE_ANALYTICS=true
+NEXT_PUBLIC_ENABLE_ERROR_MONITORING=true
+NEXT_PUBLIC_ENABLE_SOCIAL_LOGIN=true
+

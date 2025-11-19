@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import OpenAI from 'openai';
+import { OpenAIService } from '../../common/openai/openai.service';
 
 export interface PostingTimeSuggestion {
   date: string; // ISO date string
@@ -14,13 +14,11 @@ export interface PostingTimeSuggestion {
 @Injectable()
 export class PostingTimeSuggestionsService {
   private readonly logger = new Logger(PostingTimeSuggestionsService.name);
-  private openai: OpenAI;
 
-  constructor(private configService: ConfigService) {
-    this.openai = new OpenAI({
-      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
-    });
-  }
+  constructor(
+    private configService: ConfigService,
+    private openaiService: OpenAIService,
+  ) {}
 
   /**
    * Get optimal posting times based on platform, niche, and audience
@@ -56,12 +54,12 @@ Return a JSON object with a "suggestions" array. Each suggestion should have:
 
 Provide 3-5 suggestions per day, focusing on the most optimal times.`;
 
-      const completion = await this.openai.chat.completions.create({
-        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o-mini',
+      const completion = await this.openaiService.createChatCompletion({
+        model: this.configService.get<string>('OPENAI_MODEL') || 'gpt-4o',
         messages: [
           {
             role: 'system',
-            content: 'You are an expert social media strategist specializing in optimal posting times. Always return valid JSON.',
+            content: 'I need help figuring out the best times to post. Give me realistic suggestions based on what actually works, not generic advice. Think about when real people in this niche are actually active.',
           },
           {
             role: 'user',
@@ -69,7 +67,7 @@ Provide 3-5 suggestions per day, focusing on the most optimal times.`;
           },
         ],
         response_format: { type: 'json_object' },
-        temperature: 0.7,
+        temperature: 0.8,
       });
 
       const content = completion.choices[0]?.message?.content;
@@ -151,5 +149,6 @@ Provide 3-5 suggestions per day, focusing on the most optimal times.`;
     return suggestions[0];
   }
 }
+
 
 

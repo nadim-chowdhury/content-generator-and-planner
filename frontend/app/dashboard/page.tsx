@@ -8,6 +8,14 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import IdeaCard from '@/components/IdeaCard';
 import PlatformSelector from '@/components/PlatformSelector';
 import LanguageSelector from '@/components/LanguageSelector';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Sparkles, Lightbulb, Calendar, Clock, X } from 'lucide-react';
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -55,7 +63,7 @@ export default function DashboardPage() {
       };
       const ideas = await ideasApi.generate(generateDto);
       setGeneratedIdeas(ideas);
-      await loadStats(); // Refresh stats
+      await loadStats();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to generate ideas');
     } finally {
@@ -75,152 +83,199 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      {loading ? (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <Navbar />
-          <div className="flex items-center justify-center h-64">
-            <div className="text-gray-600 dark:text-gray-400">Loading...</div>
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+            <p className="text-muted-foreground mt-2">
+              Generate and manage your content ideas
+            </p>
           </div>
-        </div>
-      ) : (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-          <Navbar />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
-              Dashboard
-            </h1>
 
-            {/* Stats */}
-            {stats && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Total Ideas</div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats.total}
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Saved</div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats.saved}
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Scheduled</div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats.scheduled}
-                  </div>
-                </div>
-                <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">Today</div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">
-                    {stats.todayGenerated}
-                  </div>
-                </div>
+          {/* Stats */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              {[1, 2, 3, 4].map((i) => (
+                <Card key={i}>
+                  <CardHeader className="pb-2">
+                    <Skeleton className="h-4 w-24" />
+                  </CardHeader>
+                  <CardContent>
+                    <Skeleton className="h-8 w-16" />
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : stats ? (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Total Ideas</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.total}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Saved</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.saved}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Scheduled</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.scheduled}</div>
+                </CardContent>
+              </Card>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardDescription>Today Generated</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.todayGenerated}</div>
+                </CardContent>
+              </Card>
+            </div>
+          ) : null}
+
+          {/* Idea Generator Form */}
+          <Card className="mb-8">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-primary" />
+                <CardTitle>Generate Content Ideas</CardTitle>
               </div>
-            )}
-
-            {/* Idea Generator Form */}
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                Generate Content Ideas
-              </h2>
+              <CardDescription>
+                Create AI-powered content ideas tailored to your niche and platform
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
               <form onSubmit={handleGenerate} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Niche
-                  </label>
-                  <input
+                <div className="space-y-2">
+                  <Label htmlFor="niche">Niche</Label>
+                  <Input
+                    id="niche"
                     type="text"
                     value={formData.niche}
                     onChange={(e) => setFormData({ ...formData, niche: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     placeholder="e.g., Fitness, Cooking, Tech Reviews"
                     required
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <PlatformSelector
-                    value={formData.platform}
-                    onChange={(platform) => setFormData({ ...formData, platform })}
-                    showInfo={true}
-                  />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Tone
-                    </label>
-                    <select
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Platform</Label>
+                    <PlatformSelector
+                      value={formData.platform}
+                      onChange={(platform) => setFormData({ ...formData, platform })}
+                      showInfo={true}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="tone">Tone</Label>
+                    <Select
                       value={formData.tone}
-                      onChange={(e) => setFormData({ ...formData, tone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      onValueChange={(value) => setFormData({ ...formData, tone: value })}
                     >
-                      <option value="motivational">Motivational</option>
-                      <option value="humorous">Humorous</option>
-                      <option value="educational">Educational</option>
-                      <option value="entertaining">Entertaining</option>
-                      <option value="inspirational">Inspirational</option>
-                      <option value="casual">Casual</option>
-                      <option value="professional">Professional</option>
-                      <option value="trendy">Trendy</option>
-                    </select>
+                      <SelectTrigger id="tone">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="motivational">Motivational</SelectItem>
+                        <SelectItem value="humorous">Humorous</SelectItem>
+                        <SelectItem value="educational">Educational</SelectItem>
+                        <SelectItem value="entertaining">Entertaining</SelectItem>
+                        <SelectItem value="inspirational">Inspirational</SelectItem>
+                        <SelectItem value="casual">Casual</SelectItem>
+                        <SelectItem value="professional">Professional</SelectItem>
+                        <SelectItem value="trendy">Trendy</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                      Number of Ideas (10-30)
-                    </label>
-                    <input
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="count">Number of Ideas (10-30)</Label>
+                    <Input
+                      id="count"
                       type="number"
                       min="10"
                       max="30"
                       value={formData.count}
                       onChange={(e) => setFormData({ ...formData, count: parseInt(e.target.value) || 10 })}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
-                  <LanguageSelector
-                    value={formData.language}
-                    onChange={(language) => setFormData({ ...formData, language })}
-                    showPopular={true}
-                  />
+                  <div className="space-y-2">
+                    <Label>Language</Label>
+                    <LanguageSelector
+                      value={formData.language}
+                      onChange={(language) => setFormData({ ...formData, language })}
+                      showPopular={true}
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Additional Context (Optional)
-                  </label>
-                  <textarea
+
+                <div className="space-y-2">
+                  <Label htmlFor="context">Additional Context (Optional)</Label>
+                  <Textarea
+                    id="context"
                     value={formData.additionalContext}
                     onChange={(e) => setFormData({ ...formData, additionalContext: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     rows={3}
                     placeholder="Any specific requirements, target audience, or additional context..."
                   />
                 </div>
-                <button
-                  type="submit"
-                  disabled={generating}
-                  className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50"
-                >
-                  {generating ? `Generating ${formData.count} Ideas...` : `Generate ${formData.count} Ideas`}
-                </button>
-              </form>
-            </div>
 
-            {/* Generated Ideas */}
-            {generatedIdeas.length > 0 && (
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                    Generated Ideas ({generatedIdeas.length})
-                  </h2>
-                  <button
+                <Button type="submit" className="w-full" disabled={generating} size="lg">
+                  {generating ? (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4 animate-spin" />
+                      Generating {formData.count} Ideas...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      Generate {formData.count} Ideas
+                    </>
+                  )}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Generated Ideas */}
+          {generatedIdeas.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <Lightbulb className="w-5 h-5 text-primary" />
+                      Generated Ideas ({generatedIdeas.length})
+                    </CardTitle>
+                    <CardDescription className="mt-1">
+                      Review and save your favorite ideas
+                    </CardDescription>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setGeneratedIdeas([])}
-                    className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
                   >
+                    <X className="w-4 h-4 mr-2" />
                     Clear All
-                  </button>
+                  </Button>
                 </div>
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {generatedIdeas.map((idea, idx) => (
                     <IdeaCard
@@ -231,11 +286,11 @@ export default function DashboardPage() {
                     />
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
-      )}
+      </div>
     </ProtectedRoute>
   );
 }

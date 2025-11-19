@@ -10,9 +10,17 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     private configService: ConfigService,
     private authService: AuthService,
   ) {
+    const clientID = configService.get<string>('GOOGLE_CLIENT_ID') || '';
+    const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET') || '';
+    
+    if (!clientID || !clientSecret) {
+      console.warn('⚠️  Google OAuth credentials are not configured. Google login will not work.');
+      console.warn('   Please set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in your .env file');
+    }
+    
     super({
-      clientID: configService.get<string>('GOOGLE_CLIENT_ID') || '',
-      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') || '',
+      clientID,
+      clientSecret,
       callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL') || '/api/auth/google/callback',
       scope: ['email', 'profile'],
     });
