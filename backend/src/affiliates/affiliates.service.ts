@@ -1,4 +1,9 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
@@ -85,7 +90,9 @@ export class AffiliatesService {
   /**
    * Get affiliate code and link
    */
-  async getAffiliateLink(userId: string): Promise<{ code: string; link: string }> {
+  async getAffiliateLink(
+    userId: string,
+  ): Promise<{ code: string; link: string }> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -107,7 +114,8 @@ export class AffiliatesService {
       throw new BadRequestException('Affiliate application pending approval');
     }
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
     const link = `${frontendUrl}/?aff=${user.affiliateCode}`;
 
     return {
@@ -134,7 +142,8 @@ export class AffiliatesService {
       throw new BadRequestException('Invalid or unapproved affiliate');
     }
 
-    const commissionPercentage = percentage || this.DEFAULT_COMMISSION_PERCENTAGE;
+    const commissionPercentage =
+      percentage || this.DEFAULT_COMMISSION_PERCENTAGE;
     const commissionAmount = (amount * commissionPercentage) / 100;
 
     await this.prisma.affiliateCommission.create({
@@ -148,7 +157,9 @@ export class AffiliatesService {
       },
     });
 
-    this.logger.log(`Commission created for affiliate ${affiliateId}: $${commissionAmount}`);
+    this.logger.log(
+      `Commission created for affiliate ${affiliateId}: $${commissionAmount}`,
+    );
   }
 
   /**
@@ -246,15 +257,17 @@ export class AffiliatesService {
     }
 
     // Get pending and approved commissions
-    const availableCommissions = await this.prisma.affiliateCommission.findMany({
-      where: {
-        affiliateId,
-        status: {
-          in: ['PENDING', 'APPROVED'],
+    const availableCommissions = await this.prisma.affiliateCommission.findMany(
+      {
+        where: {
+          affiliateId,
+          status: {
+            in: ['PENDING', 'APPROVED'],
+          },
+          payoutId: null,
         },
-        payoutId: null,
       },
-    });
+    );
 
     if (availableCommissions.length === 0) {
       throw new BadRequestException('No available commissions for payout');
@@ -289,7 +302,9 @@ export class AffiliatesService {
       },
     });
 
-    this.logger.log(`Payout requested by affiliate ${affiliateId}: $${totalAmount}`);
+    this.logger.log(
+      `Payout requested by affiliate ${affiliateId}: $${totalAmount}`,
+    );
     return {
       payoutId: payout.id,
       amount: totalAmount,
@@ -299,7 +314,11 @@ export class AffiliatesService {
   /**
    * Process payout (admin only)
    */
-  async processPayout(payoutId: string, status: 'COMPLETED' | 'FAILED', notes?: string): Promise<void> {
+  async processPayout(
+    payoutId: string,
+    status: 'COMPLETED' | 'FAILED',
+    notes?: string,
+  ): Promise<void> {
     const payout = await this.prisma.affiliatePayout.findUnique({
       where: { id: payoutId },
       include: {
@@ -399,4 +418,3 @@ export class AffiliatesService {
     });
   }
 }
-

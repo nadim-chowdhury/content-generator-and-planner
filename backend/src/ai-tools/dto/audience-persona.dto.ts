@@ -17,6 +17,3 @@ export class AudiencePersonaDto {
   @IsOptional()
   additionalContext?: string;
 }
-
-
-

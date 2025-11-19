@@ -31,7 +31,7 @@ export class BatchGenerationProcessor extends WorkerHost {
 
       for (let i = 0; i < count; i += batchSize) {
         const currentBatch = Math.min(batchSize, count - i);
-        
+
         // Get user to check plan
         const user = await this.prisma.user.findUnique({
           where: { id: userId },
@@ -47,22 +47,18 @@ export class BatchGenerationProcessor extends WorkerHost {
         const batchPromises: Promise<any>[] = [];
         for (let j = 0; j < currentBatch; j++) {
           batchPromises.push(
-            this.ideasService.generateIdeas(
-              user.plan as any,
-              userId,
-              {
-                niche,
-                platform,
-                tone: tone || 'PROFESSIONAL',
-                language: language || 'en',
-                count: 1, // Generate 1 idea per call for batch processing
-              },
-            ),
+            this.ideasService.generateIdeas(user.plan as any, userId, {
+              niche,
+              platform,
+              tone: tone || 'PROFESSIONAL',
+              language: language || 'en',
+              count: 1, // Generate 1 idea per call for batch processing
+            }),
           );
         }
 
         const results = await Promise.allSettled(batchPromises);
-        
+
         for (const result of results) {
           if (result.status === 'fulfilled') {
             // result.value is an array of created ideas
@@ -90,12 +86,16 @@ export class BatchGenerationProcessor extends WorkerHost {
         },
       });
 
-      this.logger.log(`Completed batch generation: ${generatedIdeas.length} ideas created`);
+      this.logger.log(
+        `Completed batch generation: ${generatedIdeas.length} ideas created`,
+      );
       return { generatedCount: generatedIdeas.length };
     } catch (error: any) {
-      this.logger.error(`Failed to process batch generation: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to process batch generation: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
 }
-

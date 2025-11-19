@@ -1,4 +1,9 @@
-import { Injectable, CanActivate, ExecutionContext, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PLANS_KEY } from '../decorators/plans.decorator';
 
@@ -7,10 +12,10 @@ export class PlansGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const requiredPlans = this.reflector.getAllAndOverride<string[]>(PLANS_KEY, [
-      context.getHandler(),
-      context.getClass(),
-    ]);
+    const requiredPlans = this.reflector.getAllAndOverride<string[]>(
+      PLANS_KEY,
+      [context.getHandler(), context.getClass()],
+    );
 
     if (!requiredPlans) {
       return true; // No plan requirements
@@ -26,12 +31,11 @@ export class PlansGuard implements CanActivate {
     const hasPlan = requiredPlans.includes(user.plan);
 
     if (!hasPlan) {
-      throw new ForbiddenException(`This feature requires ${requiredPlans.join(' or ')} plan`);
+      throw new ForbiddenException(
+        `This feature requires ${requiredPlans.join(' or ')} plan`,
+      );
     }
 
     return true;
   }
 }
-
-
-

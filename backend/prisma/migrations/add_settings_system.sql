@@ -59,3 +59,4 @@ ALTER TABLE "user_settings" ADD CONSTRAINT "user_settings_userId_fkey" FOREIGN K
 ALTER TABLE "workspace_settings" ADD CONSTRAINT "workspace_settings_teamId_fkey" FOREIGN KEY ("teamId") REFERENCES "teams"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 
+

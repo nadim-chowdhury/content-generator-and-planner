@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { SocialPlatform } from '@prisma/client';
 import { UpdateUserSettingsDto } from './dto/update-user-settings.dto';
@@ -43,7 +47,8 @@ export class SettingsService {
 
     // Cast preferredPlatforms to SocialPlatform[] if provided
     if (updateDto.preferredPlatforms) {
-      updateData.preferredPlatforms = updateDto.preferredPlatforms as SocialPlatform[];
+      updateData.preferredPlatforms =
+        updateDto.preferredPlatforms as SocialPlatform[];
     }
 
     const updated = await this.prisma.userSettings.update({
@@ -120,7 +125,9 @@ export class SettingsService {
       });
 
       if (!team || team.ownerId !== userId) {
-        throw new ForbiddenException('Only managers and admins can update workspace settings');
+        throw new ForbiddenException(
+          'Only managers and admins can update workspace settings',
+        );
       }
     }
 
@@ -174,4 +181,3 @@ export class SettingsService {
     };
   }
 }
-

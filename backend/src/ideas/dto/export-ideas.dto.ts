@@ -1,4 +1,10 @@
-import { IsArray, IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsArray,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
 
 export enum ExportFormat {
   CSV = 'csv',
@@ -26,6 +32,3 @@ export class ExportIdeasDto {
   @IsOptional()
   notionDatabaseId?: string; // For Notion export
 }
-
-
-

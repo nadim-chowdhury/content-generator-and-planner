@@ -1,6 +1,16 @@
-import api from './api';
+import api from "./api";
 // import { SocialPlatform } from './kanban';
-export type SocialPlatform = 'FACEBOOK' | 'TWITTER' | 'INSTAGRAM' | 'THREADS' | 'LINKEDIN' | 'REDDIT' | 'QUORA' | 'PINTEREST' | 'TIKTOK' | 'YOUTUBE';
+export type SocialPlatform =
+  | "FACEBOOK"
+  | "TWITTER"
+  | "INSTAGRAM"
+  | "THREADS"
+  | "LINKEDIN"
+  | "REDDIT"
+  | "QUORA"
+  | "PINTEREST"
+  | "TIKTOK"
+  | "YOUTUBE";
 
 export interface UserSettings {
   id: string;
@@ -8,16 +18,16 @@ export interface UserSettings {
   language: string;
   timezone: string;
   dateFormat: string;
-  timeFormat: '12h' | '24h';
+  timeFormat: "12h" | "24h";
   preferredPlatforms: SocialPlatform[];
   contentTemplates?: any;
-  aiTone: 'professional' | 'casual' | 'friendly' | 'formal' | 'creative';
-  aiStyle: 'balanced' | 'concise' | 'detailed' | 'engaging';
+  aiTone: "professional" | "casual" | "friendly" | "formal" | "creative";
+  aiStyle: "balanced" | "concise" | "detailed" | "engaging";
   aiPersonality?: string;
   aiMaxLength: number;
   aiIncludeHashtags: boolean;
   aiIncludeEmojis: boolean;
-  theme: 'light' | 'dark' | 'auto';
+  theme: "light" | "dark" | "auto";
   createdAt: string;
   updatedAt: string;
 }
@@ -53,16 +63,16 @@ export interface UpdateUserSettingsDto {
   language?: string;
   timezone?: string;
   dateFormat?: string;
-  timeFormat?: '12h' | '24h';
+  timeFormat?: "12h" | "24h";
   preferredPlatforms?: SocialPlatform[];
   contentTemplates?: any;
-  aiTone?: 'professional' | 'casual' | 'friendly' | 'formal' | 'creative';
-  aiStyle?: 'balanced' | 'concise' | 'detailed' | 'engaging';
+  aiTone?: "professional" | "casual" | "friendly" | "formal" | "creative";
+  aiStyle?: "balanced" | "concise" | "detailed" | "engaging";
   aiPersonality?: string;
   aiMaxLength?: number;
   aiIncludeHashtags?: boolean;
   aiIncludeEmojis?: boolean;
-  theme?: 'light' | 'dark' | 'auto';
+  theme?: "light" | "dark" | "auto";
 }
 
 export interface UpdateWorkspaceSettingsDto {
@@ -90,35 +100,42 @@ export interface UpdateWorkspaceSettingsDto {
 
 export const settingsApi = {
   getUserSettings: async (): Promise<UserSettings> => {
-    const { data } = await api.get<UserSettings>('/api/settings/user');
+    const { data } = await api.get<UserSettings>("/api/settings/user");
     return data;
   },
 
-  updateUserSettings: async (updates: UpdateUserSettingsDto): Promise<UserSettings> => {
-    const { data } = await api.put<UserSettings>('/api/settings/user', updates);
+  updateUserSettings: async (
+    updates: UpdateUserSettingsDto
+  ): Promise<UserSettings> => {
+    const { data } = await api.put<UserSettings>("/api/settings/user", updates);
     return data;
   },
 
   getWorkspaceSettings: async (teamId: string): Promise<WorkspaceSettings> => {
-    const { data } = await api.get<WorkspaceSettings>(`/api/settings/workspace/${teamId}`);
+    const { data } = await api.get<WorkspaceSettings>(
+      `/api/settings/workspace/${teamId}`
+    );
     return data;
   },
 
   updateWorkspaceSettings: async (
     teamId: string,
-    updates: UpdateWorkspaceSettingsDto,
+    updates: UpdateWorkspaceSettingsDto
   ): Promise<WorkspaceSettings> => {
-    const { data } = await api.put<WorkspaceSettings>(`/api/settings/workspace/${teamId}`, updates);
+    const { data } = await api.put<WorkspaceSettings>(
+      `/api/settings/workspace/${teamId}`,
+      updates
+    );
     return data;
   },
 
   getAISettings: async () => {
-    const { data } = await api.get('/api/settings/ai');
+    const { data } = await api.get("/api/settings/ai");
     return data;
   },
 
   getPreferredPlatforms: async (): Promise<SocialPlatform[]> => {
-    const { data } = await api.get<SocialPlatform[]>('/api/settings/platforms');
+    const { data } = await api.get<SocialPlatform[]>("/api/settings/platforms");
     return data;
   },
 
@@ -127,4 +144,3 @@ export const settingsApi = {
     return data;
   },
 };
-

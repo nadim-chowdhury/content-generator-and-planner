@@ -35,14 +35,17 @@ export class MagicLinkService {
       },
     });
 
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
     return `${frontendUrl}/auth/magic-link?token=${token}`;
   }
 
   /**
    * Verify magic link token
    */
-  async verifyMagicLink(token: string): Promise<{ userId: string; email: string } | null> {
+  async verifyMagicLink(
+    token: string,
+  ): Promise<{ userId: string; email: string } | null> {
     const user = await this.prisma.user.findFirst({
       where: {
         magicLinkToken: token,
@@ -71,4 +74,3 @@ export class MagicLinkService {
     };
   }
 }
-

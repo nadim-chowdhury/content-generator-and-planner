@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
@@ -37,7 +42,9 @@ export class AdminUserManagementService {
       where: { userId },
     });
 
-    this.logger.log(`User ${userId} has been banned. Reason: ${reason || 'No reason provided'}`);
+    this.logger.log(
+      `User ${userId} has been banned. Reason: ${reason || 'No reason provided'}`,
+    );
   }
 
   /**
@@ -147,5 +154,3 @@ export class AdminUserManagementService {
     return user;
   }
 }
-
-

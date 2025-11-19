@@ -10,7 +10,12 @@ export class EmailService {
   /**
    * Send email (placeholder - integrate with email service like SendGrid, AWS SES, etc.)
    */
-  async sendEmail(to: string, subject: string, html: string, text?: string): Promise<boolean> {
+  sendEmail(
+    to: string,
+    subject: string,
+    html: string,
+    text?: string,
+  ): Promise<boolean> {
     try {
       // TODO: Integrate with actual email service
       // For now, just log the email
@@ -29,10 +34,10 @@ export class EmailService {
       // });
       // await transporter.sendMail({ to, subject, html, text });
 
-      return true;
+      return Promise.resolve(true);
     } catch (error) {
       this.logger.error(`Failed to send email to ${to}:`, error);
-      return false;
+      return Promise.resolve(false);
     }
   }
 
@@ -45,7 +50,7 @@ export class EmailService {
     content: Array<{ title: string; scheduledAt: string; platform: string }>,
   ): Promise<boolean> {
     const subject = `Upcoming Content Reminder - ${content.length} item(s) scheduled`;
-    
+
     const contentList = content
       .map(
         (item) => `
@@ -117,7 +122,7 @@ export class EmailService {
     task: { title: string; deadline: string; description?: string },
   ): Promise<boolean> {
     const subject = `Task Reminder: ${task.title}`;
-    
+
     const html = `
       <!DOCTYPE html>
       <html>
@@ -168,6 +173,3 @@ export class EmailService {
     return this.sendEmail(to, subject, html, text);
   }
 }
-
-
-

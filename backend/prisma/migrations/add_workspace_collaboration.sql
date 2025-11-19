@@ -42,3 +42,4 @@ ALTER TABLE "team_activities" ADD CONSTRAINT "team_activities_teamId_fkey" FOREI
 ALTER TABLE "team_activities" ADD CONSTRAINT "team_activities_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 
+

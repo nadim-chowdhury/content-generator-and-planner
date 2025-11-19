@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import Stripe from 'stripe';
@@ -12,9 +17,12 @@ export class AdminBillingService {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2025-10-29.clover',
-    });
+    this.stripe = new Stripe(
+      this.configService.get<string>('STRIPE_SECRET_KEY') || '',
+      {
+        apiVersion: '2025-10-29.clover',
+      },
+    );
   }
 
   /**
@@ -72,8 +80,12 @@ export class AdminBillingService {
             subscription: {
               id: subscription.id,
               status: subscription.status,
-              currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
-              currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+              currentPeriodStart: new Date(
+                (subscription as any).current_period_start * 1000,
+              ),
+              currentPeriodEnd: new Date(
+                (subscription as any).current_period_end * 1000,
+              ),
               cancelAtPeriodEnd: subscription.cancel_at_period_end,
               canceledAt: subscription.canceled_at
                 ? new Date(subscription.canceled_at * 1000)
@@ -86,7 +98,10 @@ export class AdminBillingService {
             },
           };
         } catch (error) {
-          this.logger.error(`Failed to fetch subscription for user ${user.id}:`, error);
+          this.logger.error(
+            `Failed to fetch subscription for user ${user.id}:`,
+            error,
+          );
           return {
             user: {
               id: user.id,
@@ -148,7 +163,9 @@ export class AdminBillingService {
             status: invoice.status,
             paid: (invoice as any).paid,
             created: new Date(invoice.created * 1000),
-            dueDate: invoice.due_date ? new Date(invoice.due_date * 1000) : null,
+            dueDate: invoice.due_date
+              ? new Date(invoice.due_date * 1000)
+              : null,
             user: user || null,
             subscriptionId: ((invoice as any).subscription as string) || null,
             invoicePdf: invoice.invoice_pdf,
@@ -176,7 +193,11 @@ export class AdminBillingService {
   /**
    * Process a refund for a payment
    */
-  async processRefund(paymentIntentId: string, amount?: number, reason?: string): Promise<any> {
+  async processRefund(
+    paymentIntentId: string,
+    amount?: number,
+    reason?: string,
+  ): Promise<any> {
     try {
       const refundParams: Stripe.RefundCreateParams = {
         payment_intent: paymentIntentId,
@@ -192,7 +213,9 @@ export class AdminBillingService {
 
       const refund = await this.stripe.refunds.create(refundParams);
 
-      this.logger.log(`Refund processed: ${refund.id} for payment ${paymentIntentId}`);
+      this.logger.log(
+        `Refund processed: ${refund.id} for payment ${paymentIntentId}`,
+      );
 
       return {
         id: refund.id,
@@ -204,14 +227,19 @@ export class AdminBillingService {
       };
     } catch (error: any) {
       this.logger.error(`Failed to process refund: ${error.message}`);
-      throw new BadRequestException(`Failed to process refund: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to process refund: ${error.message}`,
+      );
     }
   }
 
   /**
    * Cancel a user's subscription
    */
-  async cancelUserSubscription(userId: string, immediately: boolean = false): Promise<void> {
+  async cancelUserSubscription(
+    userId: string,
+    immediately: boolean = false,
+  ): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -227,7 +255,9 @@ export class AdminBillingService {
     }
 
     if (!user.stripeSubscriptionId) {
-      throw new BadRequestException('User does not have an active subscription');
+      throw new BadRequestException(
+        'User does not have an active subscription',
+      );
     }
 
     try {
@@ -257,7 +287,9 @@ export class AdminBillingService {
       );
     } catch (error: any) {
       this.logger.error(`Failed to cancel subscription: ${error.message}`);
-      throw new BadRequestException(`Failed to cancel subscription: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to cancel subscription: ${error.message}`,
+      );
     }
   }
 
@@ -309,8 +341,12 @@ export class AdminBillingService {
         subscription: {
           id: subscription.id,
           status: subscription.status,
-          currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
-          currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+          currentPeriodStart: new Date(
+            (subscription as any).current_period_start * 1000,
+          ),
+          currentPeriodEnd: new Date(
+            (subscription as any).current_period_end * 1000,
+          ),
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
           canceledAt: subscription.canceled_at
             ? new Date(subscription.canceled_at * 1000)
@@ -324,7 +360,9 @@ export class AdminBillingService {
       };
     } catch (error: any) {
       this.logger.error(`Failed to fetch subscription: ${error.message}`);
-      throw new BadRequestException(`Failed to fetch subscription: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to fetch subscription: ${error.message}`,
+      );
     }
   }
 
@@ -383,8 +421,9 @@ export class AdminBillingService {
       };
     } catch (error: any) {
       this.logger.error(`Failed to fetch invoices: ${error.message}`);
-      throw new BadRequestException(`Failed to fetch invoices: ${error.message}`);
+      throw new BadRequestException(
+        `Failed to fetch invoices: ${error.message}`,
+      );
     }
   }
 }
-

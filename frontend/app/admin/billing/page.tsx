@@ -1,24 +1,28 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { adminApi, SubscriptionWithUser, Invoice } from '@/lib/admin';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import RoleGuard from '@/components/RoleGuard';
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/auth-store";
+import { adminApi, SubscriptionWithUser, Invoice } from "@/lib/admin";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import RoleGuard from "@/components/RoleGuard";
 
 export default function AdminBillingPage() {
   const { user } = useAuthStore();
-  const [activeTab, setActiveTab] = useState<'subscriptions' | 'invoices' | 'refunds'>('subscriptions');
-  const [subscriptions, setSubscriptions] = useState<SubscriptionWithUser[]>([]);
+  const [activeTab, setActiveTab] = useState<
+    "subscriptions" | "invoices" | "refunds"
+  >("subscriptions");
+  const [subscriptions, setSubscriptions] = useState<SubscriptionWithUser[]>(
+    []
+  );
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [refundPaymentIntentId, setRefundPaymentIntentId] = useState('');
-  const [refundAmount, setRefundAmount] = useState('');
-  const [refundReason, setRefundReason] = useState('');
+  const [refundPaymentIntentId, setRefundPaymentIntentId] = useState("");
+  const [refundAmount, setRefundAmount] = useState("");
+  const [refundReason, setRefundReason] = useState("");
   const [cancelingUserId, setCancelingUserId] = useState<string | null>(null);
   const [cancelImmediately, setCancelImmediately] = useState(false);
 
@@ -29,18 +33,18 @@ export default function AdminBillingPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      setError('');
+      setError("");
 
-      if (activeTab === 'subscriptions') {
+      if (activeTab === "subscriptions") {
         const data = await adminApi.getAllSubscriptions(page, 20);
         setSubscriptions(data.subscriptions);
         setTotal(data.pagination.total);
-      } else if (activeTab === 'invoices') {
+      } else if (activeTab === "invoices") {
         const data = await adminApi.getAllInvoices(page, 20);
         setInvoices(data.invoices);
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load data');
+      setError(err.response?.data?.message || "Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -48,55 +52,65 @@ export default function AdminBillingPage() {
 
   const handleProcessRefund = async () => {
     if (!refundPaymentIntentId) {
-      alert('Please enter a payment intent ID');
+      alert("Please enter a payment intent ID");
       return;
     }
 
     try {
       const amount = refundAmount ? parseFloat(refundAmount) : undefined;
-      const result = await adminApi.processRefund(refundPaymentIntentId, amount, refundReason || undefined);
+      const result = await adminApi.processRefund(
+        refundPaymentIntentId,
+        amount,
+        refundReason || undefined
+      );
       alert(`Refund processed successfully! Refund ID: ${result.id}`);
-      setRefundPaymentIntentId('');
-      setRefundAmount('');
-      setRefundReason('');
+      setRefundPaymentIntentId("");
+      setRefundAmount("");
+      setRefundReason("");
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to process refund');
+      alert(err.response?.data?.message || "Failed to process refund");
     }
   };
 
   const handleCancelSubscription = async (userId: string) => {
-    if (!confirm(`Are you sure you want to ${cancelImmediately ? 'immediately cancel' : 'cancel at period end'} this subscription?`)) {
+    if (
+      !confirm(
+        `Are you sure you want to ${
+          cancelImmediately ? "immediately cancel" : "cancel at period end"
+        } this subscription?`
+      )
+    ) {
       return;
     }
 
     try {
       await adminApi.cancelUserSubscription(userId, cancelImmediately);
-      alert('Subscription canceled successfully');
+      alert("Subscription canceled successfully");
       setCancelingUserId(null);
       await loadData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to cancel subscription');
+      alert(err.response?.data?.message || "Failed to cancel subscription");
     }
   };
 
-  const formatCurrency = (amount: number, currency: string = 'usd') => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
+  const formatCurrency = (amount: number, currency: string = "usd") => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
       currency: currency.toUpperCase(),
     }).format(amount);
   };
 
   const formatDate = (date: string | Date) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   return (
     <ProtectedRoute>
-      <RoleGuard allowedRoles={['ADMIN']}>
+      <RoleGuard allowedRoles={["ADMIN"]}>
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <Navbar />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -117,39 +131,39 @@ export default function AdminBillingPage() {
               <nav className="-mb-px flex space-x-8">
                 <button
                   onClick={() => {
-                    setActiveTab('subscriptions');
+                    setActiveTab("subscriptions");
                     setPage(1);
                   }}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'subscriptions'
-                      ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                    activeTab === "subscriptions"
+                      ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
                   }`}
                 >
                   Subscriptions
                 </button>
                 <button
                   onClick={() => {
-                    setActiveTab('invoices');
+                    setActiveTab("invoices");
                     setPage(1);
                   }}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'invoices'
-                      ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                    activeTab === "invoices"
+                      ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
                   }`}
                 >
                   Invoices
                 </button>
                 <button
                   onClick={() => {
-                    setActiveTab('refunds');
+                    setActiveTab("refunds");
                     setPage(1);
                   }}
                   className={`py-4 px-1 border-b-2 font-medium text-sm ${
-                    activeTab === 'refunds'
-                      ? 'border-indigo-500 text-indigo-600 dark:text-indigo-400'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300'
+                    activeTab === "refunds"
+                      ? "border-indigo-500 text-indigo-600 dark:text-indigo-400"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300"
                   }`}
                 >
                   Refunds
@@ -166,12 +180,14 @@ export default function AdminBillingPage() {
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-400">Loading...</p>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">
+                  Loading...
+                </p>
               </div>
             ) : (
               <>
                 {/* Subscriptions Tab */}
-                {activeTab === 'subscriptions' && (
+                {activeTab === "subscriptions" && (
                   <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead className="bg-gray-50 dark:bg-gray-900">
@@ -202,7 +218,7 @@ export default function AdminBillingPage() {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div>
                                 <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {item.user.name || 'No name'}
+                                  {item.user.name || "No name"}
                                 </div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
                                   {item.user.email}
@@ -210,52 +226,77 @@ export default function AdminBillingPage() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                item.subscription?.plan === 'AGENCY' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
-                                item.subscription?.plan === 'PRO' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                                'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                              }`}>
-                                {item.subscription?.plan || 'N/A'}
+                              <span
+                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  item.subscription?.plan === "AGENCY"
+                                    ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                                    : item.subscription?.plan === "PRO"
+                                    ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                    : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                                }`}
+                              >
+                                {item.subscription?.plan || "N/A"}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               {item.subscription ? (
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  item.subscription.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                  item.subscription.status === 'canceled' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                                  'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                }`}>
+                                <span
+                                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                    item.subscription.status === "active"
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                      : item.subscription.status === "canceled"
+                                      ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                      : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                  }`}
+                                >
                                   {item.subscription.status}
                                 </span>
                               ) : (
-                                <span className="text-gray-400">No subscription</span>
+                                <span className="text-gray-400">
+                                  No subscription
+                                </span>
                               )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                              {item.subscription ? formatCurrency(item.subscription.amount, item.subscription.currency) : 'N/A'}
+                              {item.subscription
+                                ? formatCurrency(
+                                    item.subscription.amount,
+                                    item.subscription.currency
+                                  )
+                                : "N/A"}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                               {item.subscription ? (
                                 <div>
-                                  <div>{formatDate(item.subscription.currentPeriodStart)}</div>
-                                  <div className="text-xs">to {formatDate(item.subscription.currentPeriodEnd)}</div>
+                                  <div>
+                                    {formatDate(
+                                      item.subscription.currentPeriodStart
+                                    )}
+                                  </div>
+                                  <div className="text-xs">
+                                    to{" "}
+                                    {formatDate(
+                                      item.subscription.currentPeriodEnd
+                                    )}
+                                  </div>
                                 </div>
                               ) : (
-                                'N/A'
+                                "N/A"
                               )}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              {item.subscription && item.subscription.status === 'active' && (
-                                <button
-                                  onClick={() => {
-                                    setCancelingUserId(item.user.id);
-                                    setCancelImmediately(false);
-                                  }}
-                                  className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                                >
-                                  Cancel
-                                </button>
-                              )}
+                              {item.subscription &&
+                                item.subscription.status === "active" && (
+                                  <button
+                                    onClick={() => {
+                                      setCancelingUserId(item.user.id);
+                                      setCancelImmediately(false);
+                                    }}
+                                    className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                                  >
+                                    Cancel
+                                  </button>
+                                )}
                             </td>
                           </tr>
                         ))}
@@ -266,18 +307,19 @@ export default function AdminBillingPage() {
                     {total > 0 && (
                       <div className="px-6 py-4 flex justify-between items-center border-t border-gray-200 dark:border-gray-700">
                         <div className="text-sm text-gray-700 dark:text-gray-300">
-                          Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, total)} of {total} subscriptions
+                          Showing {(page - 1) * 20 + 1} to{" "}
+                          {Math.min(page * 20, total)} of {total} subscriptions
                         </div>
                         <div className="flex space-x-2">
                           <button
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
                             disabled={page === 1}
                             className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Previous
                           </button>
                           <button
-                            onClick={() => setPage(p => p + 1)}
+                            onClick={() => setPage((p) => p + 1)}
                             disabled={page * 20 >= total}
                             className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
@@ -290,7 +332,7 @@ export default function AdminBillingPage() {
                 )}
 
                 {/* Invoices Tab */}
-                {activeTab === 'invoices' && (
+                {activeTab === "invoices" && (
                   <div className="bg-white dark:bg-gray-800 rounded-lg shadow overflow-hidden">
                     <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                       <thead className="bg-gray-50 dark:bg-gray-900">
@@ -325,7 +367,7 @@ export default function AdminBillingPage() {
                               {invoice.user ? (
                                 <div>
                                   <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {invoice.user.name || 'No name'}
+                                    {invoice.user.name || "No name"}
                                   </div>
                                   <div className="text-sm text-gray-500 dark:text-gray-400">
                                     {invoice.user.email}
@@ -339,11 +381,15 @@ export default function AdminBillingPage() {
                               {formatCurrency(invoice.amount, invoice.currency)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                invoice.paid ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                invoice.status === 'open' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200' :
-                                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
-                              }`}>
+                              <span
+                                className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                  invoice.paid
+                                    ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                    : invoice.status === "open"
+                                    ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                                    : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                }`}
+                              >
                                 {invoice.status}
                               </span>
                             </td>
@@ -370,7 +416,7 @@ export default function AdminBillingPage() {
                 )}
 
                 {/* Refunds Tab */}
-                {activeTab === 'refunds' && (
+                {activeTab === "refunds" && (
                   <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                     <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                       Process Refund
@@ -383,7 +429,9 @@ export default function AdminBillingPage() {
                         <input
                           type="text"
                           value={refundPaymentIntentId}
-                          onChange={(e) => setRefundPaymentIntentId(e.target.value)}
+                          onChange={(e) =>
+                            setRefundPaymentIntentId(e.target.value)
+                          }
                           placeholder="pi_..."
                           className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
                         />
@@ -413,7 +461,9 @@ export default function AdminBillingPage() {
                           <option value="">Select reason</option>
                           <option value="duplicate">Duplicate</option>
                           <option value="fraudulent">Fraudulent</option>
-                          <option value="requested_by_customer">Requested by Customer</option>
+                          <option value="requested_by_customer">
+                            Requested by Customer
+                          </option>
                         </select>
                       </div>
                       <button
@@ -441,7 +491,9 @@ export default function AdminBillingPage() {
                         <input
                           type="checkbox"
                           checked={cancelImmediately}
-                          onChange={(e) => setCancelImmediately(e.target.checked)}
+                          onChange={(e) =>
+                            setCancelImmediately(e.target.checked)
+                          }
                           className="mr-2"
                         />
                         <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -476,5 +528,3 @@ export default function AdminBillingPage() {
     </ProtectedRoute>
   );
 }
-
-

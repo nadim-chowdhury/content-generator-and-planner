@@ -11,7 +11,7 @@ const execAsync = promisify(exec);
 
 /**
  * Automated Backup Service
- * 
+ *
  * Handles automated database backups with:
  * - Scheduled backups (daily, weekly, monthly)
  * - Backup retention policies
@@ -31,11 +31,21 @@ export class BackupService {
     private configService: ConfigService,
     private prisma: PrismaService,
   ) {
-    this.backupDir = this.configService.get<string>('BACKUP_DIR') || './backups';
+    this.backupDir =
+      this.configService.get<string>('BACKUP_DIR') || './backups';
     this.databaseUrl = this.configService.get<string>('DATABASE_URL') || '';
-    this.retentionDays = parseInt(this.configService.get<string>('BACKUP_RETENTION_DAILY') || '7', 10);
-    this.retentionWeeks = parseInt(this.configService.get<string>('BACKUP_RETENTION_WEEKLY') || '4', 10);
-    this.retentionMonths = parseInt(this.configService.get<string>('BACKUP_RETENTION_MONTHLY') || '12', 10);
+    this.retentionDays = parseInt(
+      this.configService.get<string>('BACKUP_RETENTION_DAILY') || '7',
+      10,
+    );
+    this.retentionWeeks = parseInt(
+      this.configService.get<string>('BACKUP_RETENTION_WEEKLY') || '4',
+      10,
+    );
+    this.retentionMonths = parseInt(
+      this.configService.get<string>('BACKUP_RETENTION_MONTHLY') || '12',
+      10,
+    );
 
     // Ensure backup directory exists
     this.ensureBackupDirectory();
@@ -44,7 +54,9 @@ export class BackupService {
   /**
    * Create a database backup
    */
-  async createBackup(type: 'daily' | 'weekly' | 'monthly' | 'manual' = 'manual'): Promise<{
+  async createBackup(
+    type: 'daily' | 'weekly' | 'monthly' | 'manual' = 'manual',
+  ): Promise<{
     success: boolean;
     filename: string;
     path: string;
@@ -55,7 +67,10 @@ export class BackupService {
       await this.ensureBackupDirectory();
 
       const timestamp = new Date();
-      const dateStr = timestamp.toISOString().replace(/[:.]/g, '-').split('T')[0];
+      const dateStr = timestamp
+        .toISOString()
+        .replace(/[:.]/g, '-')
+        .split('T')[0];
       const timeStr = timestamp.toTimeString().split(' ')[0].replace(/:/g, '-');
       const filename = `backup-${type}-${dateStr}-${timeStr}.sql`;
       const filepath = join(this.backupDir, filename);
@@ -85,7 +100,9 @@ export class BackupService {
         throw new Error('Backup file is empty');
       }
 
-      this.logger.log(`Backup created successfully: ${filename} (${this.formatBytes(size)})`);
+      this.logger.log(
+        `Backup created successfully: ${filename} (${this.formatBytes(size)})`,
+      );
 
       return {
         success: true,
@@ -95,7 +112,10 @@ export class BackupService {
         timestamp,
       };
     } catch (error) {
-      this.logger.error(`Failed to create backup: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create backup: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -103,7 +123,9 @@ export class BackupService {
   /**
    * Restore database from backup
    */
-  async restoreBackup(filepath: string): Promise<{ success: boolean; message: string }> {
+  async restoreBackup(
+    filepath: string,
+  ): Promise<{ success: boolean; message: string }> {
     try {
       // Verify backup file exists
       const stats = await stat(filepath);
@@ -131,7 +153,10 @@ export class BackupService {
         message: 'Database restored successfully',
       };
     } catch (error) {
-      this.logger.error(`Failed to restore backup: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to restore backup: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -139,17 +164,25 @@ export class BackupService {
   /**
    * List all backups
    */
-  async listBackups(): Promise<Array<{
-    filename: string;
-    path: string;
-    size: number;
-    createdAt: Date;
-    type: string;
-  }>> {
+  async listBackups(): Promise<
+    Array<{
+      filename: string;
+      path: string;
+      size: number;
+      createdAt: Date;
+      type: string;
+    }>
+  > {
     try {
       await this.ensureBackupDirectory();
       const files = await readdir(this.backupDir);
-      const backups: Array<{ filename: string; path: string; size: number; createdAt: Date; type: string }> = [];
+      const backups: Array<{
+        filename: string;
+        path: string;
+        size: number;
+        createdAt: Date;
+        type: string;
+      }> = [];
 
       for (const file of files) {
         if (file.endsWith('.sql')) {
@@ -172,7 +205,10 @@ export class BackupService {
 
       return backups;
     } catch (error) {
-      this.logger.error(`Failed to list backups: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to list backups: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -196,9 +232,15 @@ export class BackupService {
 
         if (backup.type === 'daily' && ageDays > this.retentionDays) {
           shouldDelete = true;
-        } else if (backup.type === 'weekly' && ageDays > this.retentionWeeks * 7) {
+        } else if (
+          backup.type === 'weekly' &&
+          ageDays > this.retentionWeeks * 7
+        ) {
           shouldDelete = true;
-        } else if (backup.type === 'monthly' && ageDays > this.retentionMonths * 30) {
+        } else if (
+          backup.type === 'monthly' &&
+          ageDays > this.retentionMonths * 30
+        ) {
           shouldDelete = true;
         } else if (backup.type === 'manual' && ageDays > this.retentionDays) {
           // Manual backups follow daily retention
@@ -212,9 +254,14 @@ export class BackupService {
         }
       }
 
-      this.logger.log(`Backup cleanup completed. Deleted ${deletedCount} old backups.`);
+      this.logger.log(
+        `Backup cleanup completed. Deleted ${deletedCount} old backups.`,
+      );
     } catch (error) {
-      this.logger.error(`Failed to cleanup backups: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to cleanup backups: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -227,7 +274,10 @@ export class BackupService {
       this.logger.log('Starting scheduled daily backup...');
       await this.createBackup('daily');
     } catch (error) {
-      this.logger.error(`Scheduled daily backup failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Scheduled daily backup failed: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -240,7 +290,10 @@ export class BackupService {
       this.logger.log('Starting scheduled weekly backup...');
       await this.createBackup('weekly');
     } catch (error) {
-      this.logger.error(`Scheduled weekly backup failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Scheduled weekly backup failed: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -253,7 +306,10 @@ export class BackupService {
       this.logger.log('Starting scheduled monthly backup...');
       await this.createBackup('monthly');
     } catch (error) {
-      this.logger.error(`Scheduled monthly backup failed: ${error.message}`, error.stack);
+      this.logger.error(
+        `Scheduled monthly backup failed: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -278,7 +334,8 @@ export class BackupService {
       weeklyBackups: backups.filter((b) => b.type === 'weekly').length,
       monthlyBackups: backups.filter((b) => b.type === 'monthly').length,
       manualBackups: backups.filter((b) => b.type === 'manual').length,
-      oldestBackup: backups.length > 0 ? backups[backups.length - 1].createdAt : undefined,
+      oldestBackup:
+        backups.length > 0 ? backups[backups.length - 1].createdAt : undefined,
       newestBackup: backups.length > 0 ? backups[0].createdAt : undefined,
     };
 
@@ -314,7 +371,6 @@ export class BackupService {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
   }
 }
-

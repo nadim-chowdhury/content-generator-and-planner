@@ -1,31 +1,37 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Idea } from '@/lib/ideas';
-import { ideasApi } from '@/lib/ideas';
-import { analyticsApi } from '@/lib/analytics';
-import { sharingApi } from '@/lib/sharing';
-import PlatformBadge from './PlatformBadge';
-import LanguageBadge from './LanguageBadge';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Separator } from '@/components/ui/separator';
-import { 
-  Save, 
-  Edit, 
-  Trash2, 
-  Copy, 
-  Archive, 
-  Calendar, 
-  Share2, 
+import { useState } from "react";
+import { Idea } from "@/lib/ideas";
+import { ideasApi } from "@/lib/ideas";
+import { analyticsApi } from "@/lib/analytics";
+import { sharingApi } from "@/lib/sharing";
+import PlatformBadge from "./PlatformBadge";
+import LanguageBadge from "./LanguageBadge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
+import {
+  Save,
+  Edit,
+  Trash2,
+  Copy,
+  Archive,
+  Calendar,
+  Share2,
   BarChart3,
   ChevronDown,
   ChevronUp,
-  Sparkles
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  Sparkles,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface IdeaCardProps {
   idea: Idea;
@@ -41,11 +47,11 @@ interface IdeaCardProps {
   showCheckbox?: boolean;
 }
 
-export default function IdeaCard({ 
-  idea, 
-  onSave, 
-  onEdit, 
-  onDelete, 
+export default function IdeaCard({
+  idea,
+  onSave,
+  onEdit,
+  onDelete,
   onDuplicate,
   onArchive,
   onUnarchive,
@@ -57,7 +63,11 @@ export default function IdeaCard({
   const [expanded, setExpanded] = useState(false);
   const [saving, setSaving] = useState(false);
   const [predicting, setPredicting] = useState(false);
-  const [prediction, setPrediction] = useState<{ reach?: number; engagement?: number; reasoning?: string } | null>(null);
+  const [prediction, setPrediction] = useState<{
+    reach?: number;
+    engagement?: number;
+    reasoning?: string;
+  } | null>(null);
   const [sharing, setSharing] = useState(false);
 
   const handleSave = async () => {
@@ -79,28 +89,30 @@ export default function IdeaCard({
   };
 
   const getViralScoreColor = (score?: number) => {
-    if (!score) return 'secondary';
-    if (score >= 80) return 'default';
-    if (score >= 60) return 'secondary';
-    return 'destructive';
+    if (!score) return "secondary";
+    if (score >= 80) return "default";
+    if (score >= 60) return "secondary";
+    return "destructive";
   };
 
-  const isRTL = idea.language === 'ar';
+  const isRTL = idea.language === "ar";
 
   return (
-    <Card 
+    <Card
       className={cn(
-        'transition-all hover:shadow-md',
-        selected && 'ring-2 ring-primary'
+        "transition-all hover:shadow-md",
+        selected && "ring-2 ring-primary"
       )}
-      dir={isRTL ? 'rtl' : 'ltr'}
+      dir={isRTL ? "rtl" : "ltr"}
     >
       <CardHeader>
         <div className="flex items-start justify-between gap-4">
           {showCheckbox && onSelect && (
             <Checkbox
               checked={selected}
-              onCheckedChange={(checked) => onSelect(idea.id, checked as boolean)}
+              onCheckedChange={(checked) =>
+                onSelect(idea.id, checked as boolean)
+              }
               className="mt-1"
             />
           )}
@@ -108,7 +120,7 @@ export default function IdeaCard({
             <CardTitle className="mb-2 line-clamp-2">{idea.title}</CardTitle>
             {idea.folder && (
               <div className="flex items-center gap-2 mb-2">
-                <Badge 
+                <Badge
                   variant="outline"
                   style={{
                     borderColor: idea.folder.color || undefined,
@@ -121,7 +133,7 @@ export default function IdeaCard({
             )}
             <div className="flex flex-wrap items-center gap-2">
               <PlatformBadge platform={idea.platform} />
-              <LanguageBadge language={idea.language} />
+              <LanguageBadge languageCode={idea.language || "en"} />
               {idea.viralScore !== undefined && (
                 <Badge variant={getViralScoreColor(idea.viralScore)}>
                   <Sparkles className="w-3 h-3 mr-1" />
@@ -129,18 +141,16 @@ export default function IdeaCard({
                 </Badge>
               )}
               {idea.duration && (
-                <Badge variant="outline">
-                  {formatDuration(idea.duration)}
-                </Badge>
+                <Badge variant="outline">{formatDuration(idea.duration)}</Badge>
               )}
             </div>
           </div>
         </div>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {idea.description && (
-          <CardDescription className={cn(!expanded && 'line-clamp-2')}>
+          <CardDescription className={cn(!expanded && "line-clamp-2")}>
             {idea.description}
           </CardDescription>
         )}
@@ -157,9 +167,12 @@ export default function IdeaCard({
               <div>
                 <div className="font-medium mb-1">Script:</div>
                 <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                  {idea.script.map((line, idx) => (
-                    <li key={idx}>{line}</li>
-                  ))}
+                  {idea.script
+                    .split("\n")
+                    .filter((line) => line.trim())
+                    .map((line, idx) => (
+                      <li key={idx}>{line.trim()}</li>
+                    ))}
                 </ul>
               </div>
             )}
@@ -184,7 +197,9 @@ export default function IdeaCard({
             {idea.platformOptimization && (
               <div>
                 <div className="font-medium mb-1">Platform Tips:</div>
-                <div className="text-muted-foreground text-xs">{idea.platformOptimization}</div>
+                <div className="text-muted-foreground text-xs">
+                  {idea.platformOptimization}
+                </div>
               </div>
             )}
           </div>
@@ -222,11 +237,7 @@ export default function IdeaCard({
                 </Button>
               )}
               {onEdit && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(idea)}
-                >
+                <Button variant="ghost" size="sm" onClick={() => onEdit(idea)}>
                   <Edit className="w-4 h-4" />
                 </Button>
               )}
@@ -239,33 +250,31 @@ export default function IdeaCard({
                   <Copy className="w-4 h-4" />
                 </Button>
               )}
-              {idea.status === 'ARCHIVED' ? (
-                onUnarchive && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onUnarchive(idea.id)}
-                  >
-                    <Archive className="w-4 h-4" />
-                  </Button>
-                )
-              ) : (
-                onArchive && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onArchive(idea.id)}
-                  >
-                    <Archive className="w-4 h-4" />
-                  </Button>
-                )
-              )}
+              {idea.status === "ARCHIVED"
+                ? onUnarchive && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onUnarchive(idea.id)}
+                    >
+                      <Archive className="w-4 h-4" />
+                    </Button>
+                  )
+                : onArchive && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onArchive(idea.id)}
+                    >
+                      <Archive className="w-4 h-4" />
+                    </Button>
+                  )}
               {onDelete && (
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    if (confirm('Are you sure you want to delete this idea?')) {
+                    if (confirm("Are you sure you want to delete this idea?")) {
                       onDelete(idea.id);
                     }
                   }}

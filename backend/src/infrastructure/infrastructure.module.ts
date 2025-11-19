@@ -9,27 +9,13 @@ import { PitrService } from './services/pitr.service';
 import { InfrastructureController } from './infrastructure.controller';
 
 @Module({
-  imports: [
-    ScheduleModule.forRoot(),
-    ConfigModule,
-    PrismaModule,
-  ],
-  providers: [
-    DdosProtectionService,
-    BackupService,
-    PitrService,
-  ],
+  imports: [ScheduleModule.forRoot(), ConfigModule, PrismaModule],
+  providers: [DdosProtectionService, BackupService, PitrService],
   controllers: [InfrastructureController],
-  exports: [
-    DdosProtectionService,
-    BackupService,
-    PitrService,
-  ],
+  exports: [DdosProtectionService, BackupService, PitrService],
 })
 export class InfrastructureModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(DdosProtectionMiddleware)
-      .forRoutes('*'); // Apply to all routes
+    consumer.apply(DdosProtectionMiddleware).forRoutes('*'); // Apply to all routes
   }
 }

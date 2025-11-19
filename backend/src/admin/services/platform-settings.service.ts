@@ -58,7 +58,9 @@ export class PlatformSettingsService {
 
     // Estimate: ~1000 tokens per generation on average
     const estimatedTokensPerGeneration = 1000;
-    const totalUsed = (totalGenerations._sum.dailyAiGenerations || 0) * estimatedTokensPerGeneration;
+    const totalUsed =
+      (totalGenerations._sum.dailyAiGenerations || 0) *
+      estimatedTokensPerGeneration;
 
     // Get current month usage
     const startOfMonth = new Date();
@@ -76,11 +78,19 @@ export class PlatformSettingsService {
       },
     });
 
-    const currentMonth = (currentMonthGenerations._sum.dailyAiGenerations || 0) * estimatedTokensPerGeneration;
+    const currentMonth =
+      (currentMonthGenerations._sum.dailyAiGenerations || 0) *
+      estimatedTokensPerGeneration;
 
     // Get limits from config or defaults
-    const totalLimit = parseInt(this.configService.get<string>('AI_TOKEN_TOTAL_LIMIT') || '10000000', 10);
-    const monthlyLimit = parseInt(this.configService.get<string>('AI_TOKEN_MONTHLY_LIMIT') || '1000000', 10);
+    const totalLimit = parseInt(
+      this.configService.get<string>('AI_TOKEN_TOTAL_LIMIT') || '10000000',
+      10,
+    );
+    const monthlyLimit = parseInt(
+      this.configService.get<string>('AI_TOKEN_MONTHLY_LIMIT') || '1000000',
+      10,
+    );
 
     return {
       totalUsed,
@@ -98,16 +108,34 @@ export class PlatformSettingsService {
   async getQuotaSettings() {
     return {
       free: {
-        dailyGenerations: parseInt(this.configService.get<string>('QUOTA_FREE_DAILY') || '5', 10),
-        monthlyGenerations: parseInt(this.configService.get<string>('QUOTA_FREE_MONTHLY') || '150', 10),
+        dailyGenerations: parseInt(
+          this.configService.get<string>('QUOTA_FREE_DAILY') || '5',
+          10,
+        ),
+        monthlyGenerations: parseInt(
+          this.configService.get<string>('QUOTA_FREE_MONTHLY') || '150',
+          10,
+        ),
       },
       pro: {
-        dailyGenerations: parseInt(this.configService.get<string>('QUOTA_PRO_DAILY') || '-1', 10), // -1 = unlimited
-        monthlyGenerations: parseInt(this.configService.get<string>('QUOTA_PRO_MONTHLY') || '-1', 10),
+        dailyGenerations: parseInt(
+          this.configService.get<string>('QUOTA_PRO_DAILY') || '-1',
+          10,
+        ), // -1 = unlimited
+        monthlyGenerations: parseInt(
+          this.configService.get<string>('QUOTA_PRO_MONTHLY') || '-1',
+          10,
+        ),
       },
       agency: {
-        dailyGenerations: parseInt(this.configService.get<string>('QUOTA_AGENCY_DAILY') || '-1', 10),
-        monthlyGenerations: parseInt(this.configService.get<string>('QUOTA_AGENCY_MONTHLY') || '-1', 10),
+        dailyGenerations: parseInt(
+          this.configService.get<string>('QUOTA_AGENCY_DAILY') || '-1',
+          10,
+        ),
+        monthlyGenerations: parseInt(
+          this.configService.get<string>('QUOTA_AGENCY_MONTHLY') || '-1',
+          10,
+        ),
       },
     };
   }
@@ -115,19 +143,34 @@ export class PlatformSettingsService {
   /**
    * Update quota settings
    */
-  async updateQuotaSettings(plan: 'free' | 'pro' | 'agency', settings: { dailyGenerations?: number; monthlyGenerations?: number }) {
+  async updateQuotaSettings(
+    plan: 'free' | 'pro' | 'agency',
+    settings: { dailyGenerations?: number; monthlyGenerations?: number },
+  ) {
     // In a real implementation, you'd store these in a database table
     // For now, we'll just validate and return
-    if (settings.dailyGenerations !== undefined && settings.dailyGenerations < -1) {
-      throw new BadRequestException('Daily generations must be -1 (unlimited) or a positive number');
+    if (
+      settings.dailyGenerations !== undefined &&
+      settings.dailyGenerations < -1
+    ) {
+      throw new BadRequestException(
+        'Daily generations must be -1 (unlimited) or a positive number',
+      );
     }
-    if (settings.monthlyGenerations !== undefined && settings.monthlyGenerations < -1) {
-      throw new BadRequestException('Monthly generations must be -1 (unlimited) or a positive number');
+    if (
+      settings.monthlyGenerations !== undefined &&
+      settings.monthlyGenerations < -1
+    ) {
+      throw new BadRequestException(
+        'Monthly generations must be -1 (unlimited) or a positive number',
+      );
     }
 
     this.logger.log(`Quota settings updated for ${plan}:`, settings);
     // Note: In production, you'd save these to a settings table or config file
-    return { message: 'Quota settings updated (requires environment variable update)' };
+    return {
+      message: 'Quota settings updated (requires environment variable update)',
+    };
   }
 
   /**
@@ -135,9 +178,15 @@ export class PlatformSettingsService {
    */
   async getStripeProductIds() {
     return {
-      proMonthlyPriceId: this.configService.get<string>('STRIPE_PRO_MONTHLY_PRICE_ID') || 'Not configured',
-      proYearlyPriceId: this.configService.get<string>('STRIPE_PRO_YEARLY_PRICE_ID') || 'Not configured',
-      agencyPriceId: this.configService.get<string>('STRIPE_AGENCY_PRICE_ID') || 'Not configured',
+      proMonthlyPriceId:
+        this.configService.get<string>('STRIPE_PRO_MONTHLY_PRICE_ID') ||
+        'Not configured',
+      proYearlyPriceId:
+        this.configService.get<string>('STRIPE_PRO_YEARLY_PRICE_ID') ||
+        'Not configured',
+      agencyPriceId:
+        this.configService.get<string>('STRIPE_AGENCY_PRICE_ID') ||
+        'Not configured',
     };
   }
 
@@ -151,7 +200,10 @@ export class PlatformSettingsService {
   }) {
     // In a real implementation, you'd store these in a database table
     this.logger.log('Stripe product IDs updated:', settings);
-    return { message: 'Stripe product IDs updated (requires environment variable update)' };
+    return {
+      message:
+        'Stripe product IDs updated (requires environment variable update)',
+    };
   }
 
   /**
@@ -201,5 +253,3 @@ export class PlatformSettingsService {
     };
   }
 }
-
-

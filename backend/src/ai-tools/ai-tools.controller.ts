@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { AiToolsService } from './ai-tools.service';
 import { ScriptGeneratorDto } from './dto/script-generator.dto';
 import { RewriteDto } from './dto/rewrite.dto';
@@ -72,6 +67,3 @@ export class AiToolsController {
     return this.aiToolsService.predictViralScore(dto);
   }
 }
-
-
-

@@ -1,4 +1,10 @@
-import { IsString, IsEmail, IsOptional, MinLength, MaxLength } from 'class-validator';
+import {
+  IsString,
+  IsEmail,
+  IsOptional,
+  MinLength,
+  MaxLength,
+} from 'class-validator';
 
 export class UpdateProfileDto {
   @IsOptional()
@@ -15,6 +21,3 @@ export class UpdateProfileDto {
   @IsString()
   profileImage?: string;
 }
-
-
-

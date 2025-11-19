@@ -1,5 +1,5 @@
-import api from './api';
-import { Idea } from './ideas';
+import api from "./api";
+import { Idea } from "./ideas";
 
 export interface SearchResult {
   ideas: Idea[];
@@ -47,27 +47,38 @@ export interface SearchOptions {
 export const searchApi = {
   search: async (options: SearchOptions): Promise<SearchResult> => {
     const params = new URLSearchParams();
-    if (options.query) params.append('q', options.query);
-    if (options.teamId) params.append('teamId', options.teamId);
-    if (options.platforms?.length) params.append('platforms', options.platforms.join(','));
-    if (options.tags?.length) params.append('tags', options.tags.join(','));
-    if (options.status?.length) params.append('status', options.status.join(','));
-    if (options.limit) params.append('limit', options.limit.toString());
-    if (options.offset) params.append('offset', options.offset.toString());
+    if (options.query) params.append("q", options.query);
+    if (options.teamId) params.append("teamId", options.teamId);
+    if (options.platforms?.length)
+      params.append("platforms", options.platforms.join(","));
+    if (options.tags?.length) params.append("tags", options.tags.join(","));
+    if (options.status?.length)
+      params.append("status", options.status.join(","));
+    if (options.limit) params.append("limit", options.limit.toString());
+    if (options.offset) params.append("offset", options.offset.toString());
 
-    const { data } = await api.get<SearchResult>(`/api/search?${params.toString()}`);
+    const { data } = await api.get<SearchResult>(
+      `/api/search?${params.toString()}`
+    );
     return data;
   },
 
   getFilters: async (teamId?: string): Promise<SearchFilters> => {
     const params = new URLSearchParams();
-    if (teamId) params.append('teamId', teamId);
-    const { data } = await api.get<SearchFilters>(`/api/search/filters?${params.toString()}`);
+    if (teamId) params.append("teamId", teamId);
+    const { data } = await api.get<SearchFilters>(
+      `/api/search/filters?${params.toString()}`
+    );
     return data;
   },
 
-  saveSearch: async (name: string, query?: string, filters?: any, teamId?: string): Promise<SavedSearch> => {
-    const { data } = await api.post<SavedSearch>('/api/search/save', {
+  saveSearch: async (
+    name: string,
+    query?: string,
+    filters?: any,
+    teamId?: string
+  ): Promise<SavedSearch> => {
+    const { data } = await api.post<SavedSearch>("/api/search/save", {
       name,
       query,
       filters,
@@ -78,8 +89,10 @@ export const searchApi = {
 
   getSavedSearches: async (teamId?: string): Promise<SavedSearch[]> => {
     const params = new URLSearchParams();
-    if (teamId) params.append('teamId', teamId);
-    const { data } = await api.get<SavedSearch[]>(`/api/search/saved?${params.toString()}`);
+    if (teamId) params.append("teamId", teamId);
+    const { data } = await api.get<SavedSearch[]>(
+      `/api/search/saved?${params.toString()}`
+    );
     return data;
   },
 
@@ -87,5 +100,3 @@ export const searchApi = {
     await api.delete(`/api/search/saved/${searchId}`);
   },
 };
-
-

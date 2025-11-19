@@ -16,18 +16,18 @@ export class LinkedInService {
     try {
       // Build text
       let text = content.caption || '';
-      
+
       // Add hashtags if provided
       if (content.hashtags && content.hashtags.length > 0) {
         const hashtagsText = content.hashtags
-          .map(tag => tag.startsWith('#') ? tag : `#${tag}`)
+          .map((tag) => (tag.startsWith('#') ? tag : `#${tag}`))
           .join(' ');
         text = `${text} ${hashtagsText}`.trim();
       }
 
       // LinkedIn API v2 for posts
       const url = 'https://api.linkedin.com/v2/ugcPosts';
-      
+
       const postData = {
         author: `urn:li:person:${personUrn}`,
         lifecycleState: 'PUBLISHED',
@@ -46,7 +46,7 @@ export class LinkedInService {
 
       const response = await axios.post(url, postData, {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
           'X-Restli-Protocol-Version': '2.0.0',
         },
@@ -58,7 +58,10 @@ export class LinkedInService {
       this.logger.log(`Successfully posted to LinkedIn: ${postId}`);
       return { success: true, postId };
     } catch (error: any) {
-      this.logger.error(`Failed to post to LinkedIn: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to post to LinkedIn: ${error.message}`,
+        error.stack,
+      );
       const errorMessage = error.response?.data?.message || error.message;
       return { success: false, error: errorMessage };
     }
@@ -71,7 +74,7 @@ export class LinkedInService {
     try {
       const response = await axios.get('https://api.linkedin.com/v2/me', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
       return !!response.data.id;
@@ -87,7 +90,7 @@ export class LinkedInService {
     try {
       const response = await axios.get('https://api.linkedin.com/v2/me', {
         headers: {
-          'Authorization': `Bearer ${accessToken}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
       return response.data.id || null;
@@ -96,4 +99,3 @@ export class LinkedInService {
     }
   }
 }
-

@@ -57,7 +57,10 @@ export class QueueScheduler implements OnModuleInit {
 
       this.logger.log(`Scheduled quota resets for ${users.length} users`);
     } catch (error: any) {
-      this.logger.error(`Failed to schedule quota resets: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to schedule quota resets: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -70,7 +73,9 @@ export class QueueScheduler implements OnModuleInit {
 
     try {
       const now = new Date();
-      const threeDaysFromNow = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
+      const threeDaysFromNow = new Date(
+        now.getTime() + 3 * 24 * 60 * 60 * 1000,
+      );
 
       // Find users with trials expiring in the next 3 days
       const users = await this.prisma.user.findMany({
@@ -97,9 +102,14 @@ export class QueueScheduler implements OnModuleInit {
         }
       }
 
-      this.logger.log(`Scheduled trial expiration checks for ${users.length} users`);
+      this.logger.log(
+        `Scheduled trial expiration checks for ${users.length} users`,
+      );
     } catch (error: any) {
-      this.logger.error(`Failed to schedule trial expiration checks: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to schedule trial expiration checks: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -115,7 +125,10 @@ export class QueueScheduler implements OnModuleInit {
       yesterday.setDate(yesterday.getDate() - 1);
       await this.queueService.queueAnalyticsAggregation(yesterday);
     } catch (error: any) {
-      this.logger.error(`Failed to schedule analytics aggregation: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to schedule analytics aggregation: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -150,7 +163,9 @@ export class QueueScheduler implements OnModuleInit {
 
       for (const idea of ideas) {
         if (idea.scheduledAt) {
-          const reminderTime = new Date(idea.scheduledAt.getTime() - 60 * 60 * 1000); // 1 hour before
+          const reminderTime = new Date(
+            idea.scheduledAt.getTime() - 60 * 60 * 1000,
+          ); // 1 hour before
           await this.queueService.schedulePostingReminder(
             {
               userId: idea.userId,
@@ -165,7 +180,10 @@ export class QueueScheduler implements OnModuleInit {
 
       this.logger.log(`Scheduled posting reminders for ${ideas.length} ideas`);
     } catch (error: any) {
-      this.logger.error(`Failed to schedule posting reminders: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to schedule posting reminders: ${error.message}`,
+        error.stack,
+      );
     }
   }
 
@@ -211,14 +229,17 @@ export class QueueScheduler implements OnModuleInit {
         });
 
         if (connections.length === 0) {
-          this.logger.warn(`No active connections found for idea ${idea.id} on platform ${idea.platform}`);
+          this.logger.warn(
+            `No active connections found for idea ${idea.id} on platform ${idea.platform}`,
+          );
           continue;
         }
 
         // Schedule auto-post for each connection (or just default connection)
-        const connectionsToUse = connections.filter(c => c.isDefault).length > 0
-          ? connections.filter(c => c.isDefault)
-          : connections.slice(0, 1); // Use first connection if no default
+        const connectionsToUse =
+          connections.filter((c) => c.isDefault).length > 0
+            ? connections.filter((c) => c.isDefault)
+            : connections.slice(0, 1); // Use first connection if no default
 
         for (const connection of connectionsToUse) {
           try {
@@ -231,22 +252,30 @@ export class QueueScheduler implements OnModuleInit {
               },
               idea.scheduledAt,
             );
-            this.logger.log(`Scheduled auto-post for idea ${idea.id} to ${connection.platform}`);
+            this.logger.log(
+              `Scheduled auto-post for idea ${idea.id} to ${connection.platform}`,
+            );
           } catch (error: any) {
             // Job might already exist, which is fine
             if (!error.message?.includes('already exists')) {
-              this.logger.warn(`Failed to schedule auto-post for idea ${idea.id}: ${error.message}`);
+              this.logger.warn(
+                `Failed to schedule auto-post for idea ${idea.id}: ${error.message}`,
+              );
             }
           }
         }
       }
 
       if (ideas.length > 0) {
-        this.logger.log(`Processed ${ideas.length} scheduled ideas for auto-posting`);
+        this.logger.log(
+          `Processed ${ideas.length} scheduled ideas for auto-posting`,
+        );
       }
     } catch (error: any) {
-      this.logger.error(`Failed to check scheduled posts: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to check scheduled posts: ${error.message}`,
+        error.stack,
+      );
     }
   }
 }
-

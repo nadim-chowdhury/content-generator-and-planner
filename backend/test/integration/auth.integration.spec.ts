@@ -72,13 +72,11 @@ describe('Auth Integration (e2e)', () => {
   describe('/api/auth/login (POST)', () => {
     it('should login with valid credentials', async () => {
       // Create user first
-      await request(app.getHttpServer())
-        .post('/api/auth/signup')
-        .send({
-          email: 'login@example.com',
-          password: 'Password123!',
-          name: 'Login Test',
-        });
+      await request(app.getHttpServer()).post('/api/auth/signup').send({
+        email: 'login@example.com',
+        password: 'Password123!',
+        name: 'Login Test',
+      });
 
       return request(app.getHttpServer())
         .post('/api/auth/login')
@@ -104,4 +102,3 @@ describe('Auth Integration (e2e)', () => {
     });
   });
 });
-

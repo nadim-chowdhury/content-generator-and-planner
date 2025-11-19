@@ -1,11 +1,4 @@
-import {
-  Controller,
-  Get,
-  Put,
-  Param,
-  Body,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Put, Param, Body, UseGuards } from '@nestjs/common';
 import { SettingsService } from './settings.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
@@ -56,7 +49,11 @@ export class SettingsController {
     @Param('teamId') teamId: string,
     @Body() updateDto: UpdateWorkspaceSettingsDto,
   ) {
-    return this.settingsService.updateWorkspaceSettings(teamId, user.id, updateDto);
+    return this.settingsService.updateWorkspaceSettings(
+      teamId,
+      user.id,
+      updateDto,
+    );
   }
 
   /**
@@ -79,12 +76,7 @@ export class SettingsController {
    * Get workspace brand settings
    */
   @Get('workspace/:teamId/brand')
-  getWorkspaceBrand(
-    @CurrentUser() user: any,
-    @Param('teamId') teamId: string,
-  ) {
+  getWorkspaceBrand(@CurrentUser() user: any, @Param('teamId') teamId: string) {
     return this.settingsService.getWorkspaceBrand(teamId, user.id);
   }
 }
-
-

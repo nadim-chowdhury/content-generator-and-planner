@@ -21,6 +21,3 @@ export class ElaborateIdeaDto {
   @IsOptional()
   additionalContext?: string;
 }
-
-
-

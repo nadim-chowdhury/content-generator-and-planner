@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class TrendingTopicsDto {
   @IsString()
@@ -23,6 +30,3 @@ export class TrendingTopicsDto {
   @IsOptional()
   timeFrame?: string; // 'daily', 'weekly', 'monthly'
 }
-
-
-

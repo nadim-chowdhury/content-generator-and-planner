@@ -4,7 +4,7 @@ import { EncryptionService } from './encryption.service';
 
 /**
  * GDPR-compliant user deletion service
- * 
+ *
  * Implements GDPR Article 17 (Right to erasure / "Right to be forgotten")
  * - Anonymizes personal data instead of hard deletion (for audit/legal requirements)
  * - Deletes or anonymizes all related user data
@@ -21,7 +21,10 @@ export class GdprDeletionService {
    * GDPR-compliant user account deletion
    * Anonymizes personal data while preserving business records
    */
-  async deleteUserAccount(userId: string, hardDelete: boolean = false): Promise<void> {
+  async deleteUserAccount(
+    userId: string,
+    hardDelete: boolean = false,
+  ): Promise<void> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -105,7 +108,7 @@ export class GdprDeletionService {
       // Ideas, tasks, and other content can be kept but anonymized
       // Or deleted based on business requirements
       // For now, we'll keep them but remove any personal identifiers
-      
+
       // Delete notifications (personal data)
       await tx.notification.deleteMany({
         where: { userId },
@@ -121,7 +124,9 @@ export class GdprDeletionService {
     });
 
     // Log deletion for audit purposes
-    console.log(`User ${userId} anonymized for GDPR compliance at ${new Date().toISOString()}`);
+    console.log(
+      `User ${userId} anonymized for GDPR compliance at ${new Date().toISOString()}`,
+    );
   }
 
   /**
@@ -205,10 +210,10 @@ export class GdprDeletionService {
     }
 
     // Decrypt sensitive fields if encrypted
-    const decryptedUser = await this.encryptionService.decryptFields(
-      user,
-      ['email', 'name'] as any,
-    );
+    const decryptedUser = await this.encryptionService.decryptFields(user, [
+      'email',
+      'name',
+    ] as any);
 
     return {
       exportDate: new Date().toISOString(),
@@ -239,7 +244,9 @@ export class GdprDeletionService {
   /**
    * Check if user data can be deleted (check for legal/business constraints)
    */
-  async canDeleteUser(userId: string): Promise<{ canDelete: boolean; reason?: string }> {
+  async canDeleteUser(
+    userId: string,
+  ): Promise<{ canDelete: boolean; reason?: string }> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       include: {
@@ -255,7 +262,8 @@ export class GdprDeletionService {
     if (user.stripeSubscriptionId) {
       return {
         canDelete: false,
-        reason: 'User has an active subscription. Please cancel subscription first.',
+        reason:
+          'User has an active subscription. Please cancel subscription first.',
       };
     }
 
@@ -263,12 +271,11 @@ export class GdprDeletionService {
     if (user.ownedTeams && user.ownedTeams.length > 0) {
       return {
         canDelete: false,
-        reason: 'User owns teams. Please transfer ownership or delete teams first.',
+        reason:
+          'User owns teams. Please transfer ownership or delete teams first.',
       };
     }
 
     return { canDelete: true };
   }
 }
-
-

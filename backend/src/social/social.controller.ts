@@ -77,7 +77,11 @@ export class SocialController {
     @Param('connectionId') connectionId: string,
     @Body() content: { caption?: string; hashtags?: string[] },
   ) {
-    return this.socialService.postToPlatform(user.id, ideaId, connectionId, content);
+    return this.socialService.postToPlatform(
+      user.id,
+      ideaId,
+      connectionId,
+      content,
+    );
   }
 }
-

@@ -25,7 +25,7 @@ export class AnalyticsService implements OnModuleInit {
 
   identify(userId: string, properties?: Record<string, any>) {
     if (!this.client) return;
-    
+
     this.client.identify({
       distinctId: userId,
       properties: {
@@ -64,4 +64,3 @@ export class AnalyticsService implements OnModuleInit {
     }
   }
 }
-

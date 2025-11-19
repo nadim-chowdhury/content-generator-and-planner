@@ -17,6 +17,3 @@ export class NicheResearchDto {
   @IsOptional()
   additionalContext?: string;
 }
-
-
-

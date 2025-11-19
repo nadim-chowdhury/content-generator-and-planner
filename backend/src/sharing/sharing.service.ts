@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 
@@ -26,7 +31,9 @@ export class SharingService {
    */
   async generateIdeaImage(ideaId: string): Promise<Buffer> {
     if (!canvas) {
-      throw new ServiceUnavailableException('Image generation service is not available. Please install canvas package.');
+      throw new ServiceUnavailableException(
+        'Image generation service is not available. Please install canvas package.',
+      );
     }
 
     const idea = await this.prisma.idea.findUnique({
@@ -46,11 +53,19 @@ export class SharingService {
     }
 
     // Create canvas
-    const canvasInstance = canvas.createCanvas(this.imageWidth, this.imageHeight);
+    const canvasInstance = canvas.createCanvas(
+      this.imageWidth,
+      this.imageHeight,
+    );
     const ctx = canvasInstance.getContext('2d');
 
     // Background gradient
-    const gradient = ctx.createLinearGradient(0, 0, this.imageWidth, this.imageHeight);
+    const gradient = ctx.createLinearGradient(
+      0,
+      0,
+      this.imageWidth,
+      this.imageHeight,
+    );
     gradient.addColorStop(0, '#667eea');
     gradient.addColorStop(1, '#764ba2');
     ctx.fillStyle = gradient;
@@ -89,7 +104,11 @@ export class SharingService {
 
     // Branding
     ctx.font = '20px Arial';
-    ctx.fillText('Content Generator & Planner', this.imageWidth / 2, this.imageHeight - 50);
+    ctx.fillText(
+      'Content Generator & Planner',
+      this.imageWidth / 2,
+      this.imageHeight - 50,
+    );
 
     // Convert to buffer
     return canvasInstance.toBuffer('image/png');
@@ -105,14 +124,24 @@ export class SharingService {
     author?: string;
   }): Promise<Buffer> {
     if (!canvas) {
-      throw new ServiceUnavailableException('Image generation service is not available. Please install canvas package.');
+      throw new ServiceUnavailableException(
+        'Image generation service is not available. Please install canvas package.',
+      );
     }
 
-    const canvasInstance = canvas.createCanvas(this.imageWidth, this.imageHeight);
+    const canvasInstance = canvas.createCanvas(
+      this.imageWidth,
+      this.imageHeight,
+    );
     const ctx = canvasInstance.getContext('2d');
 
     // Background
-    const gradient = ctx.createLinearGradient(0, 0, this.imageWidth, this.imageHeight);
+    const gradient = ctx.createLinearGradient(
+      0,
+      0,
+      this.imageWidth,
+      this.imageHeight,
+    );
     gradient.addColorStop(0, '#f093fb');
     gradient.addColorStop(1, '#4facfe');
     ctx.fillStyle = gradient;
@@ -206,4 +235,3 @@ export class SharingService {
     return text.substring(0, maxLength - 3) + '...';
   }
 }
-

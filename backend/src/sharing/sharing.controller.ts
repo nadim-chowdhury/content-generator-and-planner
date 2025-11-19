@@ -21,7 +21,10 @@ export class SharingController {
     try {
       const imageBuffer = await this.sharingService.generateIdeaImage(ideaId);
       res.setHeader('Content-Type', 'image/png');
-      res.setHeader('Content-Disposition', `inline; filename="idea-${ideaId}.png"`);
+      res.setHeader(
+        'Content-Disposition',
+        `inline; filename="idea-${ideaId}.png"`,
+      );
       res.send(imageBuffer);
     } catch (error) {
       res.status(404).json({ message: 'Idea not found' });
@@ -32,7 +35,8 @@ export class SharingController {
   @UseGuards(JwtAuthGuard)
   async generateContentCard(
     @CurrentUser() user: any,
-    @Body() data: {
+    @Body()
+    data: {
       title: string;
       content: string;
       platform?: string;
@@ -46,11 +50,13 @@ export class SharingController {
         author: data.author || user.name || user.email,
       });
       res.setHeader('Content-Type', 'image/png');
-      res.setHeader('Content-Disposition', 'inline; filename="content-card.png"');
+      res.setHeader(
+        'Content-Disposition',
+        'inline; filename="content-card.png"',
+      );
       res.send(imageBuffer);
     } catch (error) {
       res.status(500).json({ message: 'Failed to generate image' });
     }
   }
 }
-

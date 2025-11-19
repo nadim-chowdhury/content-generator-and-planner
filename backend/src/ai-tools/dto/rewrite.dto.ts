@@ -34,6 +34,3 @@ export class RewriteDto {
   @IsOptional()
   additionalInstructions?: string;
 }
-
-
-

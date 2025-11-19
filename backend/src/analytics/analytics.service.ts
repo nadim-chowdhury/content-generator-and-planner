@@ -23,9 +23,16 @@ export class AnalyticsService {
     if (dto.reach && dto.engagement) {
       // Calculate platform score if we have enough data
       if (dto.source === 'API' || dto.source === 'MANUAL') {
-        platformScore = await this.performanceCalculator.calculatePlatformScore(userId, dto.platform);
+        platformScore = await this.performanceCalculator.calculatePlatformScore(
+          userId,
+          dto.platform,
+        );
         if (dto.category) {
-          categoryScore = await this.performanceCalculator.calculateCategoryScore(userId, dto.category);
+          categoryScore =
+            await this.performanceCalculator.calculateCategoryScore(
+              userId,
+              dto.category,
+            );
         }
       }
     }
@@ -149,10 +156,11 @@ export class AnalyticsService {
     });
 
     const performances = await Promise.all(
-      platforms.map(p => 
-        this.performanceCalculator.getPlatformPerformance(userId, p.platform)
-          .then(perf => ({ platform: p.platform, ...perf }))
-      )
+      platforms.map((p) =>
+        this.performanceCalculator
+          .getPlatformPerformance(userId, p.platform)
+          .then((perf) => ({ platform: p.platform, ...perf })),
+      ),
     );
 
     return performances;
@@ -170,7 +178,7 @@ export class AnalyticsService {
    */
   async getAllCategoriesPerformance(userId: string) {
     const categories = await this.prisma.contentAnalytics.findMany({
-      where: { 
+      where: {
         userId,
         category: { not: null },
       },
@@ -180,11 +188,12 @@ export class AnalyticsService {
 
     const performances = await Promise.all(
       categories
-        .filter(c => c.category)
-        .map(c => 
-          this.performanceCalculator.getCategoryPerformance(userId, c.category!)
-            .then(perf => ({ category: c.category, ...perf }))
-        )
+        .filter((c) => c.category)
+        .map((c) =>
+          this.performanceCalculator
+            .getCategoryPerformance(userId, c.category!)
+            .then((perf) => ({ category: c.category, ...perf })),
+        ),
     );
 
     return performances;
@@ -221,7 +230,10 @@ export class AnalyticsService {
 
     const totalPosts = analytics.length;
     const totalReach = analytics.reduce((sum, a) => sum + (a.reach || 0), 0);
-    const totalEngagement = analytics.reduce((sum, a) => sum + (a.engagement || 0), 0);
+    const totalEngagement = analytics.reduce(
+      (sum, a) => sum + (a.engagement || 0),
+      0,
+    );
     const avgReach = totalPosts > 0 ? totalReach / totalPosts : 0;
     const avgEngagement = totalPosts > 0 ? totalEngagement / totalPosts : 0;
 
@@ -242,7 +254,11 @@ export class AnalyticsService {
   /**
    * Update analytics record
    */
-  async updateAnalytics(userId: string, analyticsId: string, dto: Partial<CreateAnalyticsDto>) {
+  async updateAnalytics(
+    userId: string,
+    analyticsId: string,
+    dto: Partial<CreateAnalyticsDto>,
+  ) {
     const analytics = await this.prisma.contentAnalytics.findFirst({
       where: { id: analyticsId, userId },
     });
@@ -267,11 +283,19 @@ export class AnalyticsService {
     if (updateData.reach || updateData.engagement) {
       const finalReach = updateData.reach || analytics.reach;
       const finalEngagement = updateData.engagement || analytics.engagement;
-      
+
       if (finalReach && finalEngagement) {
-        updateData.platformScore = await this.performanceCalculator.calculatePlatformScore(userId, analytics.platform);
+        updateData.platformScore =
+          await this.performanceCalculator.calculatePlatformScore(
+            userId,
+            analytics.platform,
+          );
         if (analytics.category) {
-          updateData.categoryScore = await this.performanceCalculator.calculateCategoryScore(userId, analytics.category);
+          updateData.categoryScore =
+            await this.performanceCalculator.calculateCategoryScore(
+              userId,
+              analytics.category,
+            );
         }
       }
     }
@@ -308,4 +332,3 @@ export class AnalyticsService {
     });
   }
 }
-

@@ -1,4 +1,10 @@
-import { IsArray, IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsArray,
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
 
 export enum BulkOperation {
   DELETE = 'DELETE',
@@ -33,4 +39,3 @@ export class BulkOperationsDto {
   @IsOptional()
   notionDatabaseId?: string; // For Notion export
 }
-

@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { teamsApi, Team } from '@/lib/teams';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import RoleGuard from '@/components/RoleGuard';
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/auth-store";
+import { teamsApi, Team } from "@/lib/teams";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import RoleGuard from "@/components/RoleGuard";
 
 export default function TeamsPage() {
   const { user } = useAuthStore();
   const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newTeamName, setNewTeamName] = useState('');
+  const [newTeamName, setNewTeamName] = useState("");
 
   useEffect(() => {
     loadTeams();
@@ -25,7 +25,7 @@ export default function TeamsPage() {
       const data = await teamsApi.getTeams();
       setTeams([...data.owned, ...data.memberOf]);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load teams');
+      setError(err.response?.data?.message || "Failed to load teams");
     } finally {
       setLoading(false);
     }
@@ -35,17 +35,17 @@ export default function TeamsPage() {
     e.preventDefault();
     try {
       await teamsApi.createTeam(newTeamName);
-      setNewTeamName('');
+      setNewTeamName("");
       setShowCreateModal(false);
       await loadTeams();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to create team');
+      alert(err.response?.data?.message || "Failed to create team");
     }
   };
 
   return (
     <ProtectedRoute>
-      <RoleGuard allowedPlans={['AGENCY']} redirectTo="/billing">
+      <RoleGuard allowedPlans={["AGENCY"]} redirectTo="/billing">
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <Navbar />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -70,11 +70,15 @@ export default function TeamsPage() {
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-400">Loading teams...</p>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">
+                  Loading teams...
+                </p>
               </div>
             ) : teams.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-600 dark:text-gray-400 mb-4">No teams yet. Create your first team!</p>
+                <p className="text-gray-600 dark:text-gray-400 mb-4">
+                  No teams yet. Create your first team!
+                </p>
                 <button
                   onClick={() => setShowCreateModal(true)}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -85,7 +89,10 @@ export default function TeamsPage() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {teams.map((team) => (
-                  <div key={team.id} className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
+                  <div
+                    key={team.id}
+                    className="bg-white dark:bg-gray-800 rounded-lg shadow p-6"
+                  >
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
                       {team.name}
                     </h3>
@@ -132,7 +139,7 @@ export default function TeamsPage() {
                         type="button"
                         onClick={() => {
                           setShowCreateModal(false);
-                          setNewTeamName('');
+                          setNewTeamName("");
                         }}
                         className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
                       >
@@ -155,5 +162,3 @@ export default function TeamsPage() {
     </ProtectedRoute>
   );
 }
-
-

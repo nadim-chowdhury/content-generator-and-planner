@@ -1,6 +1,6 @@
-import api from './api';
+import api from "./api";
 
-export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+export type TaskStatus = "TODO" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
 
 export interface Task {
   id: string;
@@ -41,7 +41,7 @@ export const tasksApi = {
     tags?: string,
     search?: string,
     deadlineFrom?: string,
-    deadlineTo?: string,
+    deadlineTo?: string
   ): Promise<Task[]> => {
     const params: any = {};
     if (status) params.status = status;
@@ -50,7 +50,7 @@ export const tasksApi = {
     if (search) params.search = search;
     if (deadlineFrom) params.deadlineFrom = deadlineFrom;
     if (deadlineTo) params.deadlineTo = deadlineTo;
-    const { data } = await api.get<Task[]>('/api/tasks', { params });
+    const { data } = await api.get<Task[]>("/api/tasks", { params });
     return data;
   },
 
@@ -60,7 +60,7 @@ export const tasksApi = {
   },
 
   create: async (dto: CreateTaskDto): Promise<Task> => {
-    const { data } = await api.post<Task>('/api/tasks', dto);
+    const { data } = await api.post<Task>("/api/tasks", dto);
     return data;
   },
 
@@ -74,15 +74,18 @@ export const tasksApi = {
   },
 
   bulkDelete: async (taskIds: string[]): Promise<{ message: string }> => {
-    const { data } = await api.post('/api/tasks/bulk-delete', { taskIds });
+    const { data } = await api.post("/api/tasks/bulk-delete", { taskIds });
     return data;
   },
 
-  bulkUpdateStatus: async (taskIds: string[], status: TaskStatus): Promise<{ message: string }> => {
-    const { data } = await api.post('/api/tasks/bulk-update-status', { taskIds, status });
+  bulkUpdateStatus: async (
+    taskIds: string[],
+    status: TaskStatus
+  ): Promise<{ message: string }> => {
+    const { data } = await api.post("/api/tasks/bulk-update-status", {
+      taskIds,
+      status,
+    });
     return data;
   },
 };
-
-
-

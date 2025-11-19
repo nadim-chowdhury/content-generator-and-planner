@@ -47,19 +47,22 @@ export class NotificationsService {
   /**
    * Update notification preferences
    */
-  async updatePreferences(userId: string, data: {
-    emailEnabled?: boolean;
-    pushEnabled?: boolean;
-    inAppEnabled?: boolean;
-    upcomingContentAlerts?: boolean;
-    taskReminders?: boolean;
-    deadlineAlerts?: boolean;
-    systemNotifications?: boolean;
-    achievementAlerts?: boolean;
-    emailReminderHours?: number[];
-  }) {
+  async updatePreferences(
+    userId: string,
+    data: {
+      emailEnabled?: boolean;
+      pushEnabled?: boolean;
+      inAppEnabled?: boolean;
+      upcomingContentAlerts?: boolean;
+      taskReminders?: boolean;
+      deadlineAlerts?: boolean;
+      systemNotifications?: boolean;
+      achievementAlerts?: boolean;
+      emailReminderHours?: number[];
+    },
+  ) {
     await this.getOrCreatePreferences(userId);
-    
+
     return this.prisma.notificationPreference.update({
       where: { userId },
       data,
@@ -91,7 +94,10 @@ export class NotificationsService {
   /**
    * Send upcoming content alert
    */
-  async sendUpcomingContentAlert(userId: string, content: Array<{ title: string; scheduledAt: string; platform: string }>) {
+  async sendUpcomingContentAlert(
+    userId: string,
+    content: Array<{ title: string; scheduledAt: string; platform: string }>,
+  ) {
     const preferences = await this.getOrCreatePreferences(userId);
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -134,7 +140,10 @@ export class NotificationsService {
   /**
    * Send task reminder
    */
-  async sendTaskReminder(userId: string, task: { title: string; deadline: string; description?: string }) {
+  async sendTaskReminder(
+    userId: string,
+    task: { title: string; deadline: string; description?: string },
+  ) {
     const preferences = await this.getOrCreatePreferences(userId);
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -351,6 +360,3 @@ export class NotificationsService {
     this.logger.log(`Checked task reminders for ${users.length} users`);
   }
 }
-
-
-

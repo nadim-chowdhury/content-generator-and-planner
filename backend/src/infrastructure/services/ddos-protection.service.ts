@@ -4,7 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * Enhanced DDOS Protection Service
- * 
+ *
  * Implements multiple layers of protection:
  * - Request rate limiting per IP
  * - Request size limits
@@ -22,8 +22,10 @@ export class DdosProtectionService {
   private readonly suspiciousThreshold: number;
 
   // In-memory tracking for fast lookups (can be moved to Redis for distributed systems)
-  private requestCounts: Map<string, { count: number; resetAt: number }> = new Map();
-  private hourlyCounts: Map<string, { count: number; resetAt: number }> = new Map();
+  private requestCounts: Map<string, { count: number; resetAt: number }> =
+    new Map();
+  private hourlyCounts: Map<string, { count: number; resetAt: number }> =
+    new Map();
   private blockedIPs: Map<string, number> = new Map(); // IP -> unblock timestamp
   private suspiciousIPs: Map<string, number> = new Map(); // IP -> suspicious score
 
@@ -66,7 +68,11 @@ export class DdosProtectionService {
       where: { ipAddress },
     });
 
-    if (throttle?.blocked && throttle.blockedUntil && throttle.blockedUntil > new Date()) {
+    if (
+      throttle?.blocked &&
+      throttle.blockedUntil &&
+      throttle.blockedUntil > new Date()
+    ) {
       return true;
     }
 
@@ -81,7 +87,9 @@ export class DdosProtectionService {
   /**
    * Check request rate limits
    */
-  async checkRateLimit(ipAddress: string): Promise<{ allowed: boolean; remaining: number }> {
+  async checkRateLimit(
+    ipAddress: string,
+  ): Promise<{ allowed: boolean; remaining: number }> {
     if (await this.isBlocked(ipAddress)) {
       return { allowed: false, remaining: 0 };
     }
@@ -138,7 +146,10 @@ export class DdosProtectionService {
   /**
    * Check request size
    */
-  checkRequestSize(contentLength: number): { allowed: boolean; reason?: string } {
+  checkRequestSize(contentLength: number): {
+    allowed: boolean;
+    reason?: string;
+  } {
     if (contentLength > this.maxRequestSize) {
       return {
         allowed: false,
@@ -158,7 +169,9 @@ export class DdosProtectionService {
 
     if (newScore >= this.suspiciousThreshold) {
       await this.blockIP(ipAddress, 'Suspicious activity detected');
-      this.logger.warn(`IP ${ipAddress} blocked due to suspicious activity (score: ${newScore})`);
+      this.logger.warn(
+        `IP ${ipAddress} blocked due to suspicious activity (score: ${newScore})`,
+      );
     }
   }
 
@@ -167,7 +180,9 @@ export class DdosProtectionService {
    */
   async blockIP(ipAddress: string, reason: string): Promise<void> {
     const blockedUntil = new Date();
-    blockedUntil.setMinutes(blockedUntil.getMinutes() + this.blockDurationMinutes);
+    blockedUntil.setMinutes(
+      blockedUntil.getMinutes() + this.blockDurationMinutes,
+    );
 
     // Update in-memory block list
     this.blockedIPs.set(ipAddress, blockedUntil.getTime());
@@ -187,7 +202,9 @@ export class DdosProtectionService {
       },
     });
 
-    this.logger.warn(`IP ${ipAddress} blocked until ${blockedUntil.toISOString()}. Reason: ${reason}`);
+    this.logger.warn(
+      `IP ${ipAddress} blocked until ${blockedUntil.toISOString()}. Reason: ${reason}`,
+    );
   }
 
   /**
@@ -283,5 +300,3 @@ export class DdosProtectionService {
     };
   }
 }
-
-

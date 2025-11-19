@@ -109,10 +109,11 @@ export class AnalyticsAggregationProcessor extends WorkerHost {
         ideasByNiche,
       };
     } catch (error: any) {
-      this.logger.error(`Failed to aggregate analytics: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to aggregate analytics: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
 }
-
-

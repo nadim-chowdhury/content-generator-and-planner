@@ -40,7 +40,13 @@ export class AnalyticsController {
     @Query('from') from?: string,
     @Query('to') to?: string,
   ) {
-    return this.analyticsService.getAllAnalytics(user.id, platform, category, from, to);
+    return this.analyticsService.getAllAnalytics(
+      user.id,
+      platform,
+      category,
+      from,
+      to,
+    );
   }
 
   @Get('ideas/:ideaId')
@@ -54,7 +60,10 @@ export class AnalyticsController {
   }
 
   @Get('platforms/:platform')
-  getPlatformPerformance(@CurrentUser() user: any, @Param('platform') platform: string) {
+  getPlatformPerformance(
+    @CurrentUser() user: any,
+    @Param('platform') platform: string,
+  ) {
     return this.analyticsService.getPlatformPerformance(user.id, platform);
   }
 
@@ -64,7 +73,10 @@ export class AnalyticsController {
   }
 
   @Get('categories/:category')
-  getCategoryPerformance(@CurrentUser() user: any, @Param('category') category: string) {
+  getCategoryPerformance(
+    @CurrentUser() user: any,
+    @Param('category') category: string,
+  ) {
     return this.analyticsService.getCategoryPerformance(user.id, category);
   }
 
@@ -151,4 +163,3 @@ export class AnalyticsController {
     return this.userAnalyticsService.getIdeasByPlatform(user.id);
   }
 }
-

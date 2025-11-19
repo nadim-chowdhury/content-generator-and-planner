@@ -12,7 +12,10 @@ export class SpamPreventionService {
   /**
    * Check if identifier is blocked
    */
-  async isBlocked(identifier: string, type: SpamIdentifierType): Promise<boolean> {
+  async isBlocked(
+    identifier: string,
+    type: SpamIdentifierType,
+  ): Promise<boolean> {
     const spam = await this.prisma.spamPrevention.findUnique({
       where: {
         identifier_type: {
@@ -96,7 +99,9 @@ export class SpamPreventionService {
         },
       });
 
-      this.logger.warn(`${type} ${identifier} blocked for ${blockDurationMinutes} minutes after ${maxAttempts} spam attempts`);
+      this.logger.warn(
+        `${type} ${identifier} blocked for ${blockDurationMinutes} minutes after ${maxAttempts} spam attempts`,
+      );
     }
   }
 
@@ -127,7 +132,10 @@ export class SpamPreventionService {
   /**
    * Get current attempt count
    */
-  async getAttemptCount(identifier: string, type: SpamIdentifierType): Promise<number> {
+  async getAttemptCount(
+    identifier: string,
+    type: SpamIdentifierType,
+  ): Promise<number> {
     const spam = await this.prisma.spamPrevention.findUnique({
       where: {
         identifier_type: {
@@ -140,6 +148,3 @@ export class SpamPreventionService {
     return spam?.attempts || 0;
   }
 }
-
-
-

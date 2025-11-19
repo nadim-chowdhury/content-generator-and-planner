@@ -48,7 +48,10 @@ export class BillingController {
 
   @Post('activate-lifetime')
   @UseGuards(JwtAuthGuard)
-  async activateLifetime(@CurrentUser() user: any, @Body() dto: ActivateLifetimeDto) {
+  async activateLifetime(
+    @CurrentUser() user: any,
+    @Body() dto: ActivateLifetimeDto,
+  ) {
     return this.billingService.activateLifetimeDeal(user.id, dto.licenseKey);
   }
 
@@ -57,7 +60,9 @@ export class BillingController {
     @Req() req: RawBodyRequest<Request>,
     @Headers('stripe-signature') signature: string,
   ) {
-    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+    const webhookSecret = this.configService.get<string>(
+      'STRIPE_WEBHOOK_SECRET',
+    );
 
     if (!webhookSecret) {
       throw new Error('STRIPE_WEBHOOK_SECRET is not set');
@@ -70,9 +75,12 @@ export class BillingController {
     let event: Stripe.Event;
 
     try {
-      const stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY') || '', {
-        apiVersion: '2025-10-29.clover',
-      });
+      const stripe = new Stripe(
+        this.configService.get<string>('STRIPE_SECRET_KEY') || '',
+        {
+          apiVersion: '2025-10-29.clover',
+        },
+      );
 
       event = stripe.webhooks.constructEvent(
         req.rawBody as Buffer,
@@ -104,7 +112,10 @@ export class BillingController {
   @Get('invoices')
   @UseGuards(JwtAuthGuard)
   async getInvoices(@CurrentUser() user: any, @Query('limit') limit?: string) {
-    return this.billingService.getInvoices(user.id, limit ? parseInt(limit, 10) : 10);
+    return this.billingService.getInvoices(
+      user.id,
+      limit ? parseInt(limit, 10) : 10,
+    );
   }
 
   @Delete('subscription')
@@ -119,7 +130,10 @@ export class BillingController {
 
   @Post('upgrade-downgrade')
   @UseGuards(JwtAuthGuard)
-  async upgradeDowngrade(@CurrentUser() user: any, @Body() dto: UpgradeDowngradeDto) {
+  async upgradeDowngrade(
+    @CurrentUser() user: any,
+    @Body() dto: UpgradeDowngradeDto,
+  ) {
     return this.billingService.upgradeDowngrade(user.id, dto.planType);
   }
 
@@ -135,4 +149,3 @@ export class BillingController {
     return this.billingService.getUsageStats(user.id);
   }
 }
-

@@ -5,6 +5,3 @@ export class AddCommentDto {
   @IsNotEmpty()
   content: string;
 }
-
-
-

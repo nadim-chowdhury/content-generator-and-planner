@@ -16,11 +16,21 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "GenPlan - AI-Powered Content Generation & Planning Platform",
-  description: "Generate viral content ideas with AI, plan your content calendar, and auto-publish to all major platforms. The all-in-one platform for content creators.",
-  keywords: ["content generator", "AI content creation", "social media planner", "content calendar", "content marketing", "AI writing tool", "GenPlan"],
+  description:
+    "Generate viral content ideas with AI, plan your content calendar, and auto-publish to all major platforms. The all-in-one platform for content creators.",
+  keywords: [
+    "content generator",
+    "AI content creation",
+    "social media planner",
+    "content calendar",
+    "content marketing",
+    "AI writing tool",
+    "GenPlan",
+  ],
   openGraph: {
     title: "GenPlan - AI-Powered Content Generation & Planning",
-    description: "Generate viral content ideas with AI, plan your content calendar, and auto-publish to all major platforms.",
+    description:
+      "Generate viral content ideas with AI, plan your content calendar, and auto-publish to all major platforms.",
     type: "website",
   },
   twitter: {
@@ -41,9 +51,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Suspense fallback={null}>
-          <AnalyticsProvider>
-            {children}
-          </AnalyticsProvider>
+          <AnalyticsProvider>{children}</AnalyticsProvider>
         </Suspense>
       </body>
     </html>

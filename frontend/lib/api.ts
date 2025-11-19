@@ -1,12 +1,12 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios';
-import { authApi } from './auth';
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { authApi } from "./auth";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 export const api = axios.create({
   baseURL: API_URL,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
@@ -29,8 +29,8 @@ const processQueue = (error: any, token: string | null = null) => {
 
 // Add token to requests
 api.interceptors.request.use((config) => {
-  if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('token');
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("token");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -42,7 +42,9 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     // If 401 and not already retrying
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -65,35 +67,39 @@ api.interceptors.response.use(
       originalRequest._retry = true;
       isRefreshing = true;
 
-      const refreshToken = typeof window !== 'undefined' ? localStorage.getItem('refreshToken') : null;
+      const refreshToken =
+        typeof window !== "undefined"
+          ? localStorage.getItem("refreshToken")
+          : null;
 
       if (!refreshToken) {
         // No refresh token, redirect to login
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
         }
-        processQueue(new Error('No refresh token'), null);
+        processQueue(new Error("No refresh token"), null);
         isRefreshing = false;
         return Promise.reject(error);
       }
 
       try {
-        const { token: newToken, refreshToken: newRefreshToken } = await authApi.refreshToken(refreshToken);
+        const { token: newToken, refreshToken: newRefreshToken } =
+          await authApi.refreshToken(refreshToken);
 
         // Update tokens in storage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('token', newToken);
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", newToken);
           if (newRefreshToken) {
-            localStorage.setItem('refreshToken', newRefreshToken);
+            localStorage.setItem("refreshToken", newRefreshToken);
           }
         }
 
         // Update auth store
-        if (typeof window !== 'undefined') {
-          const { useAuthStore } = await import('@/store/auth-store');
+        if (typeof window !== "undefined") {
+          const { useAuthStore } = await import("@/store/auth-store");
           const store = useAuthStore.getState();
           store.setTokens(newToken, newRefreshToken || refreshToken);
         }
@@ -112,11 +118,11 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         isRefreshing = false;
 
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
-          window.location.href = '/login';
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
         }
 
         return Promise.reject(refreshError);
@@ -124,8 +130,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  },
+  }
 );
 
 export default api;
-

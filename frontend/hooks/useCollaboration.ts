@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
-import { collaborationClient } from '@/lib/collaboration';
-import { useAuthStore } from '@/store/auth-store';
-import { teamsApi } from '@/lib/teams';
+import { useEffect, useRef } from "react";
+import { collaborationClient } from "@/lib/collaboration";
+import { useAuthStore } from "@/store/auth-store";
+import { teamsApi } from "@/lib/teams";
 
 interface UseCollaborationOptions {
   workspaceId: string | null;
@@ -59,19 +59,19 @@ export function useCollaboration(options: UseCollaborationOptions) {
       return () => {
         // Cleanup
         if (options.onCardUpdated) {
-          collaborationClient.off('card-updated', options.onCardUpdated);
+          collaborationClient.off("card-updated", options.onCardUpdated);
         }
         if (options.onCommentAdded) {
-          collaborationClient.off('comment-added', options.onCommentAdded);
+          collaborationClient.off("comment-added", options.onCommentAdded);
         }
         if (options.onUserTyping) {
-          collaborationClient.off('user-typing', options.onUserTyping);
+          collaborationClient.off("user-typing", options.onUserTyping);
         }
         if (options.onUserJoined) {
-          collaborationClient.off('user-joined', options.onUserJoined);
+          collaborationClient.off("user-joined", options.onUserJoined);
         }
         if (options.onUserLeft) {
-          collaborationClient.off('user-left', options.onUserLeft);
+          collaborationClient.off("user-left", options.onUserLeft);
         }
         collaborationClient.leaveWorkspace();
         collaborationClient.disconnect();
@@ -94,7 +94,11 @@ export function useCollaboration(options: UseCollaborationOptions) {
   return {
     emitCardUpdate: (cardId: string, updates: any) => {
       if (options.workspaceId) {
-        collaborationClient.emitCardUpdate(options.workspaceId, cardId, updates);
+        collaborationClient.emitCardUpdate(
+          options.workspaceId,
+          cardId,
+          updates
+        );
       }
     },
     emitComment: (cardId: string, comment: any) => {
@@ -109,4 +113,3 @@ export function useCollaboration(options: UseCollaborationOptions) {
     },
   };
 }
-

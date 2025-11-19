@@ -1,8 +1,12 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { plannerApi, PostingTimeSuggestion, CalendarAutofillResult } from '@/lib/planner';
-import PlatformBadge from './PlatformBadge';
+import { useState } from "react";
+import {
+  plannerApi,
+  PostingTimeSuggestion,
+  CalendarAutofillResult,
+} from "@/lib/planner";
+import PlatformBadge from "./PlatformBadge";
 
 interface AutomatedSchedulingProps {
   platform?: string;
@@ -19,7 +23,9 @@ export default function AutomatedScheduling({
 }: AutomatedSchedulingProps) {
   const [suggestions, setSuggestions] = useState<PostingTimeSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
-  const [timezone, setTimezone] = useState(Intl.DateTimeFormat().resolvedOptions().timeZone);
+  const [timezone, setTimezone] = useState(
+    Intl.DateTimeFormat().resolvedOptions().timeZone
+  );
   const [daysAhead, setDaysAhead] = useState(7);
 
   const loadSuggestions = async () => {
@@ -27,11 +33,16 @@ export default function AutomatedScheduling({
 
     try {
       setLoading(true);
-      const data = await plannerApi.getOptimalPostingTimes(platform, niche, timezone, daysAhead);
+      const data = await plannerApi.getOptimalPostingTimes(
+        platform,
+        niche,
+        timezone,
+        daysAhead
+      );
       setSuggestions(data);
     } catch (err) {
-      console.error('Failed to load suggestions:', err);
-      alert('Failed to load posting time suggestions');
+      console.error("Failed to load suggestions:", err);
+      alert("Failed to load posting time suggestions");
     } finally {
       setLoading(false);
     }
@@ -47,8 +58,8 @@ export default function AutomatedScheduling({
         setSuggestions([suggestion]);
       }
     } catch (err) {
-      console.error('Failed to load best time:', err);
-      alert('Failed to load best posting time');
+      console.error("Failed to load best time:", err);
+      alert("Failed to load best posting time");
     } finally {
       setLoading(false);
     }
@@ -95,7 +106,11 @@ export default function AutomatedScheduling({
           disabled={loading || (!platform && !niche && !ideaId)}
           className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Loading...' : ideaId ? 'Get Best Time' : 'Get Suggestions'}
+          {loading
+            ? "Loading..."
+            : ideaId
+            ? "Get Best Time"
+            : "Get Suggestions"}
         </button>
       </div>
 
@@ -122,26 +137,32 @@ export default function AutomatedScheduling({
                       <span className="text-lg font-bold text-indigo-600 dark:text-indigo-400">
                         {suggestion.time}
                       </span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        suggestion.score >= 80
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : suggestion.score >= 60
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          suggestion.score >= 80
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : suggestion.score >= 60
+                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                        }`}
+                      >
                         Score: {suggestion.score}
                       </span>
-                      <span className={`px-2 py-1 rounded text-xs font-medium ${
-                        suggestion.expectedEngagement === 'High'
-                          ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                          : suggestion.expectedEngagement === 'Medium'
-                          ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                      }`}>
+                      <span
+                        className={`px-2 py-1 rounded text-xs font-medium ${
+                          suggestion.expectedEngagement === "High"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : suggestion.expectedEngagement === "Medium"
+                            ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
+                            : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                        }`}
+                      >
                         {suggestion.expectedEngagement} Engagement
                       </span>
                     </div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{suggestion.reason}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      {suggestion.reason}
+                    </p>
                   </div>
                   {onTimeSelected && (
                     <button
@@ -160,6 +181,3 @@ export default function AutomatedScheduling({
     </div>
   );
 }
-
-
-

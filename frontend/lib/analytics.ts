@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface AnalyticsSummary {
   totalPosts: number;
@@ -68,7 +68,9 @@ export const analyticsApi = {
     const params: any = {};
     if (from) params.from = from;
     if (to) params.to = to;
-    const { data } = await api.get<AnalyticsSummary>('/api/analytics/summary', { params });
+    const { data } = await api.get<AnalyticsSummary>("/api/analytics/summary", {
+      params,
+    });
     return data;
   },
 
@@ -76,59 +78,89 @@ export const analyticsApi = {
     platform?: string,
     category?: string,
     from?: string,
-    to?: string,
+    to?: string
   ): Promise<ContentAnalytics[]> => {
     const params: any = {};
     if (platform) params.platform = platform;
     if (category) params.category = category;
     if (from) params.from = from;
     if (to) params.to = to;
-    const { data } = await api.get<ContentAnalytics[]>('/api/analytics', { params });
+    const { data } = await api.get<ContentAnalytics[]>("/api/analytics", {
+      params,
+    });
     return data;
   },
 
   getIdeaAnalytics: async (ideaId: string): Promise<ContentAnalytics[]> => {
-    const { data } = await api.get<ContentAnalytics[]>(`/api/analytics/ideas/${ideaId}`);
+    const { data } = await api.get<ContentAnalytics[]>(
+      `/api/analytics/ideas/${ideaId}`
+    );
     return data;
   },
 
   getAllPlatformsPerformance: async (): Promise<PlatformPerformance[]> => {
-    const { data } = await api.get<PlatformPerformance[]>('/api/analytics/platforms');
+    const { data } = await api.get<PlatformPerformance[]>(
+      "/api/analytics/platforms"
+    );
     return data;
   },
 
-  getPlatformPerformance: async (platform: string): Promise<PlatformPerformance> => {
-    const { data } = await api.get<PlatformPerformance>(`/api/analytics/platforms/${platform}`);
+  getPlatformPerformance: async (
+    platform: string
+  ): Promise<PlatformPerformance> => {
+    const { data } = await api.get<PlatformPerformance>(
+      `/api/analytics/platforms/${platform}`
+    );
     return data;
   },
 
   getAllCategoriesPerformance: async (): Promise<CategoryPerformance[]> => {
-    const { data } = await api.get<CategoryPerformance[]>('/api/analytics/categories');
+    const { data } = await api.get<CategoryPerformance[]>(
+      "/api/analytics/categories"
+    );
     return data;
   },
 
-  getCategoryPerformance: async (category: string): Promise<CategoryPerformance> => {
-    const { data } = await api.get<CategoryPerformance>(`/api/analytics/categories/${category}`);
+  getCategoryPerformance: async (
+    category: string
+  ): Promise<CategoryPerformance> => {
+    const { data } = await api.get<CategoryPerformance>(
+      `/api/analytics/categories/${category}`
+    );
     return data;
   },
 
-  predictReach: async (ideaId: string): Promise<{ reach: number; score: number; reasoning: string }> => {
-    const { data } = await api.get(`/api/analytics/predictions/reach/${ideaId}`);
+  predictReach: async (
+    ideaId: string
+  ): Promise<{ reach: number; score: number; reasoning: string }> => {
+    const { data } = await api.get(
+      `/api/analytics/predictions/reach/${ideaId}`
+    );
     return data;
   },
 
-  predictEngagement: async (ideaId: string): Promise<{ engagement: number; score: number; reasoning: string }> => {
-    const { data } = await api.get(`/api/analytics/predictions/engagement/${ideaId}`);
+  predictEngagement: async (
+    ideaId: string
+  ): Promise<{ engagement: number; score: number; reasoning: string }> => {
+    const { data } = await api.get(
+      `/api/analytics/predictions/engagement/${ideaId}`
+    );
     return data;
   },
 
   create: async (dto: CreateAnalyticsDto): Promise<ContentAnalytics> => {
-    const { data } = await api.post<ContentAnalytics>('/api/analytics', dto);
+    const { data } = await api.post<ContentAnalytics>("/api/analytics", dto);
     return data;
   },
 
-  update: async (id: string, dto: Partial<CreateAnalyticsDto>): Promise<ContentAnalytics> => {
-    const { data } = await api.put<ContentAnalytics>(`/api/analytics/${id}`, dto);
+  update: async (
+    id: string,
+    dto: Partial<CreateAnalyticsDto>
+  ): Promise<ContentAnalytics> => {
+    const { data } = await api.put<ContentAnalytics>(
+      `/api/analytics/${id}`,
+      dto
+    );
     return data;
   },
 

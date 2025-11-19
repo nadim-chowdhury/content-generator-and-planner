@@ -13,4 +13,3 @@ import { TeamsModule } from '../teams/teams.module';
   exports: [KanbanService],
 })
 export class KanbanModule {}
-

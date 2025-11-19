@@ -208,9 +208,12 @@ export class UserAnalyticsService {
     ]);
 
     const scores = ideasWithScores.map((i) => i.viralScore!);
-    const avgViralScore = scores.length > 0
-      ? Math.round((scores.reduce((a, b) => a + b, 0) / scores.length) * 100) / 100
-      : 0;
+    const avgViralScore =
+      scores.length > 0
+        ? Math.round(
+            (scores.reduce((a, b) => a + b, 0) / scores.length) * 100,
+          ) / 100
+        : 0;
     const maxViralScore = scores.length > 0 ? Math.max(...scores) : 0;
     const minViralScore = scores.length > 0 ? Math.min(...scores) : 0;
 
@@ -265,6 +268,3 @@ export class UserAnalyticsService {
     }));
   }
 }
-
-
-

@@ -39,7 +39,11 @@ export class IpThrottleService {
   /**
    * Record failed attempt
    */
-  async recordFailedAttempt(ipAddress: string, maxAttempts: number = 5, blockDurationMinutes: number = 15) {
+  async recordFailedAttempt(
+    ipAddress: string,
+    maxAttempts: number = 5,
+    blockDurationMinutes: number = 15,
+  ) {
     const throttle = await this.prisma.ipThrottle.upsert({
       where: { ipAddress },
       create: {
@@ -68,7 +72,9 @@ export class IpThrottleService {
         },
       });
 
-      this.logger.warn(`IP ${ipAddress} blocked for ${blockDurationMinutes} minutes after ${maxAttempts} failed attempts`);
+      this.logger.warn(
+        `IP ${ipAddress} blocked for ${blockDurationMinutes} minutes after ${maxAttempts} failed attempts`,
+      );
     }
   }
 
@@ -101,6 +107,3 @@ export class IpThrottleService {
     return throttle?.attempts || 0;
   }
 }
-
-
-

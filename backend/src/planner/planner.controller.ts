@@ -88,7 +88,11 @@ export class PlannerController {
     @CurrentUser() user: any,
     @Body() dto: { ideaIds: string[]; scheduledAt: string },
   ) {
-    return this.plannerService.bulkReschedule(user.id, dto.ideaIds, dto.scheduledAt);
+    return this.plannerService.bulkReschedule(
+      user.id,
+      dto.ideaIds,
+      dto.scheduledAt,
+    );
   }
 
   @Get('posting-times')
@@ -114,7 +118,10 @@ export class PlannerController {
     @Query('timezone') timezone?: string,
   ) {
     // Get idea details first
-    const idea = await this.plannerService.getIdeaForScheduling(user.id, ideaId);
+    const idea = await this.plannerService.getIdeaForScheduling(
+      user.id,
+      ideaId,
+    );
     if (!idea) {
       throw new NotFoundException('Idea not found');
     }
@@ -129,7 +136,8 @@ export class PlannerController {
   @Post('autofill')
   autofillCalendar(
     @CurrentUser() user: any,
-    @Body() dto: {
+    @Body()
+    dto: {
       month: number;
       year: number;
       minViralScore?: number;
@@ -154,7 +162,8 @@ export class PlannerController {
   @Post('autofill/preview')
   previewAutofill(
     @CurrentUser() user: any,
-    @Body() dto: {
+    @Body()
+    dto: {
       month: number;
       year: number;
       minViralScore?: number;
@@ -163,17 +172,11 @@ export class PlannerController {
       timezone?: string;
     },
   ) {
-    return this.autofillService.previewAutofill(
-      user.id,
-      dto.month,
-      dto.year,
-      {
-        minViralScore: dto.minViralScore,
-        platforms: dto.platforms,
-        maxPostsPerDay: dto.maxPostsPerDay,
-        timezone: dto.timezone,
-      },
-    );
+    return this.autofillService.previewAutofill(user.id, dto.month, dto.year, {
+      minViralScore: dto.minViralScore,
+      platforms: dto.platforms,
+      maxPostsPerDay: dto.maxPostsPerDay,
+      timezone: dto.timezone,
+    });
   }
 }
-

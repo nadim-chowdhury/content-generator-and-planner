@@ -1,30 +1,49 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { kanbanApi, KanbanCard, KanbanBoard, KanbanStage, KanbanChecklist, KanbanComment } from '@/lib/kanban';
-import { ideasApi, Idea } from '@/lib/ideas';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import PlatformBadge from '@/components/PlatformBadge';
+import { useEffect, useState } from "react";
+import {
+  kanbanApi,
+  KanbanCard,
+  KanbanBoard,
+  KanbanStage,
+  KanbanChecklist,
+  KanbanComment,
+} from "@/lib/kanban";
+import { ideasApi, Idea } from "@/lib/ideas";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PlatformBadge from "@/components/PlatformBadge";
 
-const STAGES: KanbanStage[] = ['IDEAS', 'DRAFTING', 'EDITING', 'READY', 'SCHEDULED', 'POSTED'];
+const STAGES: KanbanStage[] = [
+  "IDEAS",
+  "DRAFTING",
+  "EDITING",
+  "READY",
+  "SCHEDULED",
+  "POSTED",
+];
 
 const STAGE_LABELS: Record<KanbanStage, string> = {
-  IDEAS: 'Ideas',
-  DRAFTING: 'Drafting',
-  EDITING: 'Editing',
-  READY: 'Ready',
-  SCHEDULED: 'Scheduled',
-  POSTED: 'Posted',
+  IDEAS: "Ideas",
+  DRAFTING: "Drafting",
+  EDITING: "Editing",
+  READY: "Ready",
+  SCHEDULED: "Scheduled",
+  POSTED: "Posted",
 };
 
 const STAGE_COLORS: Record<KanbanStage, string> = {
-  IDEAS: 'bg-blue-100 border-blue-300 dark:bg-blue-900/20 dark:border-blue-700',
-  DRAFTING: 'bg-yellow-100 border-yellow-300 dark:bg-yellow-900/20 dark:border-yellow-700',
-  EDITING: 'bg-orange-100 border-orange-300 dark:bg-orange-900/20 dark:border-orange-700',
-  READY: 'bg-purple-100 border-purple-300 dark:bg-purple-900/20 dark:border-purple-700',
-  SCHEDULED: 'bg-indigo-100 border-indigo-300 dark:bg-indigo-900/20 dark:border-indigo-700',
-  POSTED: 'bg-green-100 border-green-300 dark:bg-green-900/20 dark:border-green-700',
+  IDEAS: "bg-blue-100 border-blue-300 dark:bg-blue-900/20 dark:border-blue-700",
+  DRAFTING:
+    "bg-yellow-100 border-yellow-300 dark:bg-yellow-900/20 dark:border-yellow-700",
+  EDITING:
+    "bg-orange-100 border-orange-300 dark:bg-orange-900/20 dark:border-orange-700",
+  READY:
+    "bg-purple-100 border-purple-300 dark:bg-purple-900/20 dark:border-purple-700",
+  SCHEDULED:
+    "bg-indigo-100 border-indigo-300 dark:bg-indigo-900/20 dark:border-indigo-700",
+  POSTED:
+    "bg-green-100 border-green-300 dark:bg-green-900/20 dark:border-green-700",
 };
 
 export default function KanbanPage() {
@@ -54,7 +73,7 @@ export default function KanbanPage() {
       const data = await kanbanApi.getBoard();
       setBoard(data);
     } catch (err) {
-      console.error('Failed to load board:', err);
+      console.error("Failed to load board:", err);
     } finally {
       setLoading(false);
     }
@@ -62,10 +81,10 @@ export default function KanbanPage() {
 
   const loadIdeas = async () => {
     try {
-      const data = await ideasApi.getAll('DRAFT');
+      const data = await ideasApi.getAll("DRAFT");
       setIdeas(data);
     } catch (err) {
-      console.error('Failed to load ideas:', err);
+      console.error("Failed to load ideas:", err);
     }
   };
 
@@ -93,8 +112,8 @@ export default function KanbanPage() {
 
       await loadBoard();
     } catch (err) {
-      console.error('Failed to move card:', err);
-      alert('Failed to move card');
+      console.error("Failed to move card:", err);
+      alert("Failed to move card");
     } finally {
       setDraggedCard(null);
     }
@@ -106,31 +125,35 @@ export default function KanbanPage() {
       setSelectedCard(card);
       setShowCardModal(true);
     } catch (err) {
-      console.error('Failed to load card:', err);
+      console.error("Failed to load card:", err);
     }
   };
 
-  const handleCreateCard = async (title: string, description?: string, ideaId?: string) => {
+  const handleCreateCard = async (
+    title: string,
+    description?: string,
+    ideaId?: string
+  ) => {
     try {
       await kanbanApi.createCard({
         title,
         description,
         ideaId,
-        stage: 'IDEAS',
+        stage: "IDEAS",
       });
       await loadBoard();
       setShowCreateModal(false);
     } catch (err) {
-      alert('Failed to create card');
+      alert("Failed to create card");
     }
   };
 
   const handleCreateFromIdea = async (ideaId: string) => {
     try {
-      await kanbanApi.createCardFromIdea(ideaId, 'IDEAS');
+      await kanbanApi.createCardFromIdea(ideaId, "IDEAS");
       await loadBoard();
     } catch (err) {
-      alert('Failed to create card from idea');
+      alert("Failed to create card from idea");
     }
   };
 
@@ -143,11 +166,14 @@ export default function KanbanPage() {
         setSelectedCard(updated);
       }
     } catch (err) {
-      alert('Failed to add checklist');
+      alert("Failed to add checklist");
     }
   };
 
-  const handleUpdateChecklist = async (checklistId: string, items: Array<{ id: string; text: string; completed: boolean }>) => {
+  const handleUpdateChecklist = async (
+    checklistId: string,
+    items: Array<{ id: string; text: string; completed: boolean }>
+  ) => {
     try {
       await kanbanApi.updateChecklist(checklistId, items);
       if (selectedCard) {
@@ -155,7 +181,7 @@ export default function KanbanPage() {
         setSelectedCard(updated);
       }
     } catch (err) {
-      alert('Failed to update checklist');
+      alert("Failed to update checklist");
     }
   };
 
@@ -167,19 +193,19 @@ export default function KanbanPage() {
         setSelectedCard(updated);
       }
     } catch (err) {
-      alert('Failed to add comment');
+      alert("Failed to add comment");
     }
   };
 
   const handleDeleteCard = async (cardId: string) => {
-    if (!confirm('Are you sure you want to delete this card?')) return;
+    if (!confirm("Are you sure you want to delete this card?")) return;
     try {
       await kanbanApi.deleteCard(cardId);
       await loadBoard();
       setShowCardModal(false);
       setSelectedCard(null);
     } catch (err) {
-      alert('Failed to delete card');
+      alert("Failed to delete card");
     }
   };
 
@@ -189,7 +215,9 @@ export default function KanbanPage() {
         <Navbar />
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Kanban Board</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Kanban Board
+            </h1>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowCreateModal(true)}
@@ -202,7 +230,9 @@ export default function KanbanPage() {
 
           {loading ? (
             <div className="text-center py-12">
-              <div className="text-gray-600 dark:text-gray-400">Loading board...</div>
+              <div className="text-gray-600 dark:text-gray-400">
+                Loading board...
+              </div>
             </div>
           ) : (
             <div className="flex gap-4 overflow-x-auto pb-4">
@@ -211,7 +241,7 @@ export default function KanbanPage() {
                   key={stage}
                   onDragOver={(e) => handleDragOver(e, stage)}
                   onDrop={(e) => handleDrop(e, stage)}
-                  className={`flex-shrink-0 w-80 ${STAGE_COLORS[stage]} border-2 rounded-lg p-4 min-h-[600px]`}
+                  className={`shrink-0 w-80 ${STAGE_COLORS[stage]} border-2 rounded-lg p-4 min-h-[600px]`}
                 >
                   <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
                     {STAGE_LABELS[stage]} ({board[stage].length})
@@ -224,7 +254,11 @@ export default function KanbanPage() {
                         onDragStart={() => handleDragStart(card)}
                         onClick={() => handleCardClick(card.id)}
                         className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow cursor-move hover:shadow-md transition-shadow"
-                        style={card.color ? { borderLeft: `4px solid ${card.color}` } : {}}
+                        style={
+                          card.color
+                            ? { borderLeft: `4px solid ${card.color}` }
+                            : {}
+                        }
                       >
                         <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
                           {card.title}
@@ -236,7 +270,10 @@ export default function KanbanPage() {
                         )}
                         {card.idea && (
                           <div className="mb-2">
-                            <PlatformBadge platform={card.idea.platform} size="sm" />
+                            <PlatformBadge
+                              platform={card.idea.platform}
+                              size="sm"
+                            />
                             {card.idea.viralScore && (
                               <span className="ml-2 text-xs text-gray-600 dark:text-gray-400">
                                 Score: {card.idea.viralScore}
@@ -247,8 +284,19 @@ export default function KanbanPage() {
                         <div className="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
                           {card.checklists.length > 0 && (
                             <span>
-                              ✓ {card.checklists.reduce((acc, cl) => acc + cl.items.filter((i: any) => i.completed).length, 0)}/
-                              {card.checklists.reduce((acc, cl) => acc + cl.items.length, 0)}
+                              ✓{" "}
+                              {card.checklists.reduce(
+                                (acc, cl) =>
+                                  acc +
+                                  cl.items.filter((i: any) => i.completed)
+                                    .length,
+                                0
+                              )}
+                              /
+                              {card.checklists.reduce(
+                                (acc, cl) => acc + cl.items.length,
+                                0
+                              )}
                             </span>
                           )}
                           {card.comments.length > 0 && (
@@ -261,7 +309,13 @@ export default function KanbanPage() {
                             <span>👥 {card.assignedTo.length}</span>
                           )}
                           {card.dueDate && (
-                            <span className={new Date(card.dueDate) < new Date() ? 'text-red-600 dark:text-red-400' : ''}>
+                            <span
+                              className={
+                                new Date(card.dueDate) < new Date()
+                                  ? "text-red-600 dark:text-red-400"
+                                  : ""
+                              }
+                            >
                               📅 {new Date(card.dueDate).toLocaleDateString()}
                             </span>
                           )}
@@ -320,14 +374,16 @@ function CreateCardModal({
   onCreate: (title: string, description?: string, ideaId?: string) => void;
   onCreateFromIdea: (ideaId: string) => void;
 }) {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [ideaId, setIdeaId] = useState<string>('');
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [ideaId, setIdeaId] = useState<string>("");
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Create Card</h2>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          Create Card
+        </h2>
         <div className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -418,18 +474,26 @@ function CardDetailModal({
   onClose: () => void;
   onDelete: (cardId: string) => void;
   onAddChecklist: (cardId: string, title: string) => void;
-  onUpdateChecklist: (checklistId: string, items: Array<{ id: string; text: string; completed: boolean }>) => void;
+  onUpdateChecklist: (
+    checklistId: string,
+    items: Array<{ id: string; text: string; completed: boolean }>
+  ) => void;
   onAddComment: (cardId: string, content: string) => void;
   onReload: () => void;
 }) {
-  const [newChecklistTitle, setNewChecklistTitle] = useState('');
-  const [newComment, setNewComment] = useState('');
+  const [newChecklistTitle, setNewChecklistTitle] = useState("");
+  const [newComment, setNewComment] = useState("");
 
-  const handleToggleChecklistItem = async (checklistId: string, itemId: string) => {
-    const checklist = card.checklists.find(c => c.id === checklistId);
+  const handleToggleChecklistItem = async (
+    checklistId: string,
+    itemId: string
+  ) => {
+    const checklist = card.checklists.find((c) => c.id === checklistId);
     if (!checklist) return;
 
-    const items = (checklist.items as Array<{ id: string; text: string; completed: boolean }>).map(item =>
+    const items = (
+      checklist.items as Array<{ id: string; text: string; completed: boolean }>
+    ).map((item) =>
       item.id === itemId ? { ...item, completed: !item.completed } : item
     );
     await onUpdateChecklist(checklistId, items);
@@ -439,7 +503,9 @@ function CardDetailModal({
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-start mb-4">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">{card.title}</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            {card.title}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
@@ -449,7 +515,9 @@ function CardDetailModal({
         </div>
 
         {card.description && (
-          <p className="text-gray-600 dark:text-gray-400 mb-4">{card.description}</p>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            {card.description}
+          </p>
         )}
 
         {card.idea && (
@@ -468,7 +536,9 @@ function CardDetailModal({
         {/* AI Generated Tasks */}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-3">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">AI Generated Tasks</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              AI Generated Tasks
+            </h3>
             <button
               onClick={async () => {
                 try {
@@ -480,11 +550,15 @@ function CardDetailModal({
                       text: `${task.text} [${task.priority}]`,
                       completed: false,
                     }));
-                    const checklist = await kanbanApi.addChecklist(card.id, 'AI Generated Tasks', items);
+                    const checklist = await kanbanApi.addChecklist(
+                      card.id,
+                      "AI Generated Tasks",
+                      items
+                    );
                     await onReload();
                   }
                 } catch (err) {
-                  alert('Failed to generate AI tasks');
+                  alert("Failed to generate AI tasks");
                 }
               }}
               className="px-3 py-1 text-sm bg-indigo-600 text-white rounded hover:bg-indigo-700"
@@ -496,20 +570,44 @@ function CardDetailModal({
 
         {/* Checklists */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Checklists</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            Checklists
+          </h3>
           {card.checklists.map((checklist) => (
-            <div key={checklist.id} className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded">
-              <h4 className="font-medium text-gray-900 dark:text-white mb-2">{checklist.title}</h4>
+            <div
+              key={checklist.id}
+              className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded"
+            >
+              <h4 className="font-medium text-gray-900 dark:text-white mb-2">
+                {checklist.title}
+              </h4>
               <div className="space-y-2">
-                {(checklist.items as Array<{ id: string; text: string; completed: boolean }>).map((item) => (
-                  <label key={item.id} className="flex items-center gap-2 cursor-pointer">
+                {(
+                  checklist.items as Array<{
+                    id: string;
+                    text: string;
+                    completed: boolean;
+                  }>
+                ).map((item) => (
+                  <label
+                    key={item.id}
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
                     <input
                       type="checkbox"
                       checked={item.completed}
-                      onChange={() => handleToggleChecklistItem(checklist.id, item.id)}
+                      onChange={() =>
+                        handleToggleChecklistItem(checklist.id, item.id)
+                      }
                       className="rounded"
                     />
-                    <span className={item.completed ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-900 dark:text-white'}>
+                    <span
+                      className={
+                        item.completed
+                          ? "line-through text-gray-500 dark:text-gray-400"
+                          : "text-gray-900 dark:text-white"
+                      }
+                    >
                       {item.text}
                     </span>
                   </label>
@@ -529,7 +627,7 @@ function CardDetailModal({
               onClick={() => {
                 if (newChecklistTitle) {
                   onAddChecklist(card.id, newChecklistTitle);
-                  setNewChecklistTitle('');
+                  setNewChecklistTitle("");
                 }
               }}
               className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -541,13 +639,19 @@ function CardDetailModal({
 
         {/* Comments */}
         <div className="mb-6">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Comments</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+            Comments
+          </h3>
           <div className="space-y-3 mb-4">
             {card.comments.map((comment) => (
-              <div key={comment.id} className="p-3 bg-gray-50 dark:bg-gray-700 rounded">
+              <div
+                key={comment.id}
+                className="p-3 bg-gray-50 dark:bg-gray-700 rounded"
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center text-white text-sm">
-                    {comment.user.name?.[0] || comment.user.email[0].toUpperCase()}
+                    {comment.user.name?.[0] ||
+                      comment.user.email[0].toUpperCase()}
                   </div>
                   <div>
                     <div className="font-medium text-gray-900 dark:text-white text-sm">
@@ -558,7 +662,9 @@ function CardDetailModal({
                     </div>
                   </div>
                 </div>
-                <p className="text-gray-700 dark:text-gray-300">{comment.content}</p>
+                <p className="text-gray-700 dark:text-gray-300">
+                  {comment.content}
+                </p>
               </div>
             ))}
           </div>
@@ -574,7 +680,7 @@ function CardDetailModal({
               onClick={() => {
                 if (newComment.trim()) {
                   onAddComment(card.id, newComment);
-                  setNewComment('');
+                  setNewComment("");
                 }
               }}
               className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
@@ -587,7 +693,9 @@ function CardDetailModal({
         {/* Attachments */}
         {card.attachments.length > 0 && (
           <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">Attachments</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+              Attachments
+            </h3>
             <div className="space-y-2">
               {card.attachments.map((attachment, idx) => (
                 <a
@@ -622,4 +730,3 @@ function CardDetailModal({
     </div>
   );
 }
-

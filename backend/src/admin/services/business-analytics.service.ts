@@ -77,14 +77,6 @@ export class BusinessAnalyticsService {
    * Calculate MRR (Monthly Recurring Revenue)
    */
   async calculateMRR(): Promise<number> {
-    // Get all active Pro and Agency subscriptions
-    const proUsers = await this.prisma.user.count({
-      where: {
-        plan: { in: ['PRO', 'AGENCY'] },
-        stripeSubscriptionId: { not: null },
-      },
-    });
-
     // Default pricing (can be configured)
     const PRO_PRICE = 29; // $29/month
     const AGENCY_PRICE = 99; // $99/month
@@ -125,7 +117,10 @@ export class BusinessAnalyticsService {
         }
         mrr = totalMRR;
       } catch (error) {
-        this.logger.warn('Failed to fetch MRR from Stripe, using default calculation:', error);
+        this.logger.warn(
+          'Failed to fetch MRR from Stripe, using default calculation:',
+          error,
+        );
       }
     }
 
@@ -289,14 +284,17 @@ export class BusinessAnalyticsService {
     return ideas.map((item) => ({
       niche: item.niche,
       count: item._count.niche,
-      percentage: Math.round((item._count.niche / totalIdeas) * 100 * 100) / 100,
+      percentage:
+        Math.round((item._count.niche / totalIdeas) * 100 * 100) / 100,
     }));
   }
 
   /**
    * Get business analytics summary
    */
-  async getBusinessAnalyticsSummary(days: number = 30): Promise<BusinessAnalyticsSummary> {
+  async getBusinessAnalyticsSummary(
+    days: number = 30,
+  ): Promise<BusinessAnalyticsSummary> {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
@@ -390,6 +388,3 @@ export class BusinessAnalyticsService {
     });
   }
 }
-
-
-

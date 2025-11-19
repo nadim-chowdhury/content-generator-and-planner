@@ -23,5 +23,3 @@ import { TeamActivityService } from './services/team-activity.service';
   ],
 })
 export class TeamsModule {}
-
-

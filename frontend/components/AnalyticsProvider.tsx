@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useEffect } from 'react';
-import { usePathname, useSearchParams } from 'next/navigation';
-import { initPostHog, capture } from '@/lib/posthog';
+import { useEffect } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { initPostHog, capture } from "@/lib/posthog";
 
 export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -16,7 +16,7 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Track page views
     if (pathname) {
-      capture('$pageview', {
+      capture("$pageview", {
         path: pathname,
         search: searchParams?.toString(),
       });
@@ -25,4 +25,3 @@ export function AnalyticsProvider({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
-

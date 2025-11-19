@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { ReactNode } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { ReactNode } from "react";
+import { useAuthStore } from "@/store/auth-store";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface RoleGuardProps {
   children: ReactNode;
-  allowedRoles?: ('ADMIN' | 'USER')[];
-  allowedPlans?: ('FREE' | 'PRO' | 'AGENCY')[];
-  requirePlan?: 'FREE' | 'PRO' | 'AGENCY';
+  allowedRoles?: ("ADMIN" | "USER")[];
+  allowedPlans?: ("FREE" | "PRO" | "AGENCY")[];
+  requirePlan?: "FREE" | "PRO" | "AGENCY";
   fallback?: ReactNode;
   redirectTo?: string;
 }
@@ -20,7 +20,7 @@ export default function RoleGuard({
   allowedPlans,
   requirePlan,
   fallback,
-  redirectTo = '/dashboard',
+  redirectTo = "/dashboard",
 }: RoleGuardProps) {
   const { user } = useAuthStore();
   const router = useRouter();
@@ -33,7 +33,7 @@ export default function RoleGuard({
     }
 
     // Check role
-    if (allowedRoles && !allowedRoles.includes(user.role || 'USER')) {
+    if (allowedRoles && !allowedRoles.includes(user.role || "USER")) {
       setHasAccess(false);
       return;
     }
@@ -70,7 +70,9 @@ export default function RoleGuard({
       <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">Checking permissions...</p>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">
+            Checking permissions...
+          </p>
         </div>
       </div>
     );
@@ -101,6 +103,3 @@ export default function RoleGuard({
 
   return <>{children}</>;
 }
-
-
-

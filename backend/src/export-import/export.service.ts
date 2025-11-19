@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-const Papa = require('papaparse');
+import * as Papa from 'papaparse';
 
 @Injectable()
 export class ExportService {
@@ -341,4 +341,3 @@ export class ExportService {
     };
   }
 }
-

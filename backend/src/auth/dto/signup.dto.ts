@@ -16,4 +16,3 @@ export class SignupDto {
   @IsString()
   affiliateCode?: string;
 }
-

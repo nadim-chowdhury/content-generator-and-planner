@@ -15,7 +15,13 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Throttle } from '@nestjs/throttler';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiBody,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { SignupDto } from './dto/signup.dto';
 import { LoginDto } from './dto/login.dto';
@@ -39,21 +45,27 @@ export class AuthController {
   @Throttle({ default: { limit: 3, ttl: 60000 } }) // 3 signups per minute
   @UseGuards(SpamPreventionGuard, IpThrottleGuard)
   async signup(@Body() signupDto: SignupDto, @Req() req?: any) {
-    const ipAddress = req?.ip || req?.connection?.remoteAddress || req?.headers['x-forwarded-for']?.split(',')[0]?.trim();
-    
+    const ipAddress =
+      req?.ip ||
+      req?.connection?.remoteAddress ||
+      req?.headers['x-forwarded-for']?.split(',')[0]?.trim();
+
     try {
       const result = await this.authService.signup(signupDto);
-      
+
       // Reset spam prevention on successful signup
       if (ipAddress) {
         await this.authService.resetSpamAttempts(ipAddress, signupDto.email);
       }
-      
+
       return result;
     } catch (error) {
       // Record failed attempt
       if (ipAddress) {
-        await this.authService.recordFailedSignupAttempt(ipAddress, signupDto.email);
+        await this.authService.recordFailedSignupAttempt(
+          ipAddress,
+          signupDto.email,
+        );
       }
       throw error;
     }
@@ -71,23 +83,35 @@ export class AuthController {
     @Body('twoFactorToken') twoFactorToken?: string,
     @Req() req?: any,
   ) {
-    const ipAddress = req?.ip || req?.connection?.remoteAddress || req?.headers['x-forwarded-for']?.split(',')[0]?.trim();
+    const ipAddress =
+      req?.ip ||
+      req?.connection?.remoteAddress ||
+      req?.headers['x-forwarded-for']?.split(',')[0]?.trim();
     const userAgent = req?.headers?.['user-agent'];
     const deviceInfo = req?.headers?.['device-info'];
-    
+
     try {
-      const result = await this.authService.login(loginDto, ipAddress, userAgent, deviceInfo, twoFactorToken);
-      
+      const result = await this.authService.login(
+        loginDto,
+        ipAddress,
+        userAgent,
+        deviceInfo,
+        twoFactorToken,
+      );
+
       // Reset spam prevention on successful login
       if (ipAddress) {
         await this.authService.resetSpamAttempts(ipAddress, loginDto.email);
       }
-      
+
       return result;
     } catch (error) {
       // Record failed attempt
       if (ipAddress) {
-        await this.authService.recordFailedLoginAttempt(ipAddress, loginDto.email);
+        await this.authService.recordFailedLoginAttempt(
+          ipAddress,
+          loginDto.email,
+        );
       }
       throw error;
     }
@@ -152,8 +176,14 @@ export class AuthController {
       const ipAddress = req.ip || req.connection?.remoteAddress;
       const userAgent = req.headers?.['user-agent'];
       const deviceInfo = req.headers?.['device-info'];
-      const result = await this.authService.handleSocialLogin('google', profile, ipAddress, userAgent, deviceInfo);
-      
+      const result = await this.authService.handleSocialLogin(
+        'google',
+        profile,
+        ipAddress,
+        userAgent,
+        deviceInfo,
+      );
+
       // Redirect to frontend with token and refresh token
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
       const params = new URLSearchParams({
@@ -163,7 +193,9 @@ export class AuthController {
       res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
     } catch (error: any) {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-      const errorMessage = encodeURIComponent(error.message || 'Authentication failed');
+      const errorMessage = encodeURIComponent(
+        error.message || 'Authentication failed',
+      );
       res.redirect(`${frontendUrl}/auth/callback?error=${errorMessage}`);
     }
   }
@@ -186,8 +218,14 @@ export class AuthController {
       const ipAddress = req.ip || req.connection?.remoteAddress;
       const userAgent = req.headers?.['user-agent'];
       const deviceInfo = req.headers?.['device-info'];
-      const result = await this.authService.handleSocialLogin('facebook', profile, ipAddress, userAgent, deviceInfo);
-      
+      const result = await this.authService.handleSocialLogin(
+        'facebook',
+        profile,
+        ipAddress,
+        userAgent,
+        deviceInfo,
+      );
+
       // Redirect to frontend with token and refresh token
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
       const params = new URLSearchParams({
@@ -197,7 +235,9 @@ export class AuthController {
       res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
     } catch (error: any) {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-      const errorMessage = encodeURIComponent(error.message || 'Authentication failed');
+      const errorMessage = encodeURIComponent(
+        error.message || 'Authentication failed',
+      );
       res.redirect(`${frontendUrl}/auth/callback?error=${errorMessage}`);
     }
   }
@@ -220,8 +260,14 @@ export class AuthController {
       const ipAddress = req.ip || req.connection?.remoteAddress;
       const userAgent = req.headers?.['user-agent'];
       const deviceInfo = req.headers?.['device-info'];
-      const result = await this.authService.handleSocialLogin('github', profile, ipAddress, userAgent, deviceInfo);
-      
+      const result = await this.authService.handleSocialLogin(
+        'github',
+        profile,
+        ipAddress,
+        userAgent,
+        deviceInfo,
+      );
+
       // Redirect to frontend with token and refresh token
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
       const params = new URLSearchParams({
@@ -231,7 +277,9 @@ export class AuthController {
       res.redirect(`${frontendUrl}/auth/callback?${params.toString()}`);
     } catch (error: any) {
       const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-      const errorMessage = encodeURIComponent(error.message || 'Authentication failed');
+      const errorMessage = encodeURIComponent(
+        error.message || 'Authentication failed',
+      );
       res.redirect(`${frontendUrl}/auth/callback?error=${errorMessage}`);
     }
   }
@@ -239,7 +287,7 @@ export class AuthController {
   // Magic Link
   @Post('magic-link/request')
   async requestMagicLink(@Body('email') email: string) {
-    const magicLinkService = (this.authService as any).magicLinkService as any;
+    const magicLinkService = (this.authService as any).magicLinkService;
     const link = await magicLinkService.generateMagicLink(email);
     // TODO: Send email with magic link
     return { message: 'If the email exists, a magic link has been sent' };
@@ -247,14 +295,16 @@ export class AuthController {
 
   @Post('magic-link/verify')
   @HttpCode(HttpStatus.OK)
-  async verifyMagicLink(
-    @Body('token') token: string,
-    @Req() req: any,
-  ) {
+  async verifyMagicLink(@Body('token') token: string, @Req() req: any) {
     const ipAddress = req.ip || req.connection?.remoteAddress;
     const userAgent = req.headers?.['user-agent'];
     const deviceInfo = req.headers?.['device-info'];
-    return this.authService.loginWithMagicLink(token, ipAddress, userAgent, deviceInfo);
+    return this.authService.loginWithMagicLink(
+      token,
+      ipAddress,
+      userAgent,
+      deviceInfo,
+    );
   }
 
   // 2FA
@@ -266,10 +316,7 @@ export class AuthController {
 
   @Post('2fa/enable')
   @UseGuards(JwtAuthGuard)
-  async enable2FA(
-    @CurrentUser() user: any,
-    @Body('token') token: string,
-  ) {
+  async enable2FA(@CurrentUser() user: any, @Body('token') token: string) {
     return this.authService.enable2FA(user.id, token);
   }
 
@@ -285,20 +332,24 @@ export class AuthController {
   async getSessions(@CurrentUser() user: any, @Req() req: any) {
     const sessions = await this.authService.getUserSessions(user.id);
     const token = req.headers.authorization?.replace('Bearer ', '');
-    
+
     // Mark current session
     if (token) {
-      const currentSession = await this.authService['prisma'].session.findFirst({
-        where: { token },
-      });
+      const currentSession = await this.authService['prisma'].session.findFirst(
+        {
+          where: { token },
+        },
+      );
       if (currentSession) {
-        const sessionIndex = sessions.findIndex((s: any) => s.id === currentSession.id);
+        const sessionIndex = sessions.findIndex(
+          (s: any) => s.id === currentSession.id,
+        );
         if (sessionIndex !== -1) {
           sessions[sessionIndex].isCurrent = true;
         }
       }
     }
-    
+
     return sessions;
   }
 
@@ -313,10 +364,7 @@ export class AuthController {
 
   @Delete('sessions')
   @UseGuards(JwtAuthGuard)
-  async revokeAllSessions(
-    @CurrentUser() user: any,
-    @Req() req: any,
-  ) {
+  async revokeAllSessions(@CurrentUser() user: any, @Req() req: any) {
     // Get current session ID from token
     const token = req.headers.authorization?.replace('Bearer ', '');
     const currentSession = await this.authService['prisma'].session.findFirst({
@@ -332,7 +380,10 @@ export class AuthController {
     @CurrentUser() user: any,
     @Query('limit') limit?: string,
   ) {
-    return this.authService.getLoginActivities(user.id, limit ? parseInt(limit, 10) : 50);
+    return this.authService.getLoginActivities(
+      user.id,
+      limit ? parseInt(limit, 10) : 50,
+    );
   }
 
   // Profile Management
@@ -378,7 +429,11 @@ export class AuthController {
     @Body('password') password?: string,
     @Body('hardDelete') hardDelete?: boolean,
   ) {
-    return this.authService.deleteAccount(user.id, password, hardDelete || false);
+    return this.authService.deleteAccount(
+      user.id,
+      password,
+      hardDelete || false,
+    );
   }
 
   // GDPR Data Export
@@ -388,4 +443,3 @@ export class AuthController {
     return this.authService.exportUserData(user.id);
   }
 }
-

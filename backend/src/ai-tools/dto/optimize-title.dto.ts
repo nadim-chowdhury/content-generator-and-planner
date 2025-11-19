@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class OptimizeTitleDto {
   @IsString()
@@ -27,6 +34,3 @@ export class OptimizeTitleDto {
   @IsOptional()
   additionalContext?: string;
 }
-
-
-

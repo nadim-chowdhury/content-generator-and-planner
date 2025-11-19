@@ -1,4 +1,10 @@
-import { IsString, IsOptional, IsInt, IsDateString, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsInt,
+  IsDateString,
+  IsEnum,
+} from 'class-validator';
 
 export enum AnalyticsSource {
   MANUAL = 'MANUAL',
@@ -70,6 +76,3 @@ export class CreateAnalyticsDto {
   @IsOptional()
   notes?: string;
 }
-
-
-

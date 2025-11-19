@@ -1,76 +1,92 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { settingsApi, UserSettings, UpdateUserSettingsDto } from '@/lib/settings';
-import { SocialPlatform } from '@/lib/settings';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Slider } from '@/components/ui/slider';
-import { Textarea } from '@/components/ui/textarea';
-import { 
-  Settings, 
-  Globe, 
-  Palette, 
-  Sparkles, 
-  CheckCircle2, 
+import { useState, useEffect } from "react";
+import {
+  settingsApi,
+  UserSettings,
+  UpdateUserSettingsDto,
+} from "@/lib/settings";
+import { SocialPlatform } from "@/lib/settings";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Slider } from "@/components/ui/slider";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Settings,
+  Globe,
+  Palette,
+  Sparkles,
+  CheckCircle2,
   AlertCircle,
   Languages,
   Clock,
-  Monitor
-} from 'lucide-react';
+  Monitor,
+} from "lucide-react";
 
 const LANGUAGES = [
-  { code: 'en', name: 'English' },
-  { code: 'es', name: 'Spanish' },
-  { code: 'fr', name: 'French' },
-  { code: 'de', name: 'German' },
-  { code: 'it', name: 'Italian' },
-  { code: 'pt', name: 'Portuguese' },
-  { code: 'ja', name: 'Japanese' },
-  { code: 'zh', name: 'Chinese' },
+  { code: "en", name: "English" },
+  { code: "es", name: "Spanish" },
+  { code: "fr", name: "French" },
+  { code: "de", name: "German" },
+  { code: "it", name: "Italian" },
+  { code: "pt", name: "Portuguese" },
+  { code: "ja", name: "Japanese" },
+  { code: "zh", name: "Chinese" },
 ];
 
 const TIMEZONES = [
-  'UTC',
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Asia/Tokyo',
-  'Asia/Shanghai',
-  'Australia/Sydney',
+  "UTC",
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Asia/Tokyo",
+  "Asia/Shanghai",
+  "Australia/Sydney",
 ];
 
 const PLATFORMS: { value: SocialPlatform; label: string }[] = [
-  { value: 'FACEBOOK', label: 'Facebook' },
-  { value: 'TWITTER', label: 'Twitter' },
-  { value: 'INSTAGRAM', label: 'Instagram' },
-  { value: 'THREADS', label: 'Threads' },
-  { value: 'LINKEDIN', label: 'LinkedIn' },
-  { value: 'REDDIT', label: 'Reddit' },
-  { value: 'QUORA', label: 'Quora' },
-  { value: 'PINTEREST', label: 'Pinterest' },
-  { value: 'TIKTOK', label: 'TikTok' },
-  { value: 'YOUTUBE', label: 'YouTube' },
+  { value: "FACEBOOK", label: "Facebook" },
+  { value: "TWITTER", label: "Twitter" },
+  { value: "INSTAGRAM", label: "Instagram" },
+  { value: "THREADS", label: "Threads" },
+  { value: "LINKEDIN", label: "LinkedIn" },
+  { value: "REDDIT", label: "Reddit" },
+  { value: "QUORA", label: "Quora" },
+  { value: "PINTEREST", label: "Pinterest" },
+  { value: "TIKTOK", label: "TikTok" },
+  { value: "YOUTUBE", label: "YouTube" },
 ];
 
 export default function PreferencesSettingsPage() {
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -83,7 +99,7 @@ export default function PreferencesSettingsPage() {
       const data = await settingsApi.getUserSettings();
       setSettings(data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load settings');
+      setError(err.response?.data?.message || "Failed to load settings");
     } finally {
       setLoading(false);
     }
@@ -94,14 +110,14 @@ export default function PreferencesSettingsPage() {
 
     try {
       setSaving(true);
-      setError('');
+      setError("");
       setSuccess(false);
       const updated = await settingsApi.updateUserSettings(updates);
       setSettings(updated);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save settings');
+      setError(err.response?.data?.message || "Failed to save settings");
     } finally {
       setSaving(false);
     }
@@ -131,7 +147,9 @@ export default function PreferencesSettingsPage() {
           <div className="max-w-4xl mx-auto px-4 py-8">
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error || 'Settings not found'}</AlertDescription>
+              <AlertDescription>
+                {error || "Settings not found"}
+              </AlertDescription>
             </Alert>
           </div>
         </div>
@@ -145,7 +163,9 @@ export default function PreferencesSettingsPage() {
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">User Preferences</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              User Preferences
+            </h1>
             <p className="text-muted-foreground mt-1">
               Customize your GenPlan experience
             </p>
@@ -222,7 +242,9 @@ export default function PreferencesSettingsPage() {
                     <Input
                       type="text"
                       value={settings.dateFormat}
-                      onChange={(e) => handleSave({ dateFormat: e.target.value })}
+                      onChange={(e) =>
+                        handleSave({ dateFormat: e.target.value })
+                      }
                       placeholder="MM/DD/YYYY"
                     />
                   </div>
@@ -230,7 +252,9 @@ export default function PreferencesSettingsPage() {
                     <Label>Time Format</Label>
                     <Select
                       value={settings.timeFormat}
-                      onValueChange={(value) => handleSave({ timeFormat: value as '12h' | '24h' })}
+                      onValueChange={(value) =>
+                        handleSave({ timeFormat: value as "12h" | "24h" })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -259,7 +283,9 @@ export default function PreferencesSettingsPage() {
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {PLATFORMS.map((platform) => {
-                    const isSelected = settings.preferredPlatforms.includes(platform.value);
+                    const isSelected = settings.preferredPlatforms.includes(
+                      platform.value
+                    );
                     return (
                       <label
                         key={platform.value}
@@ -270,7 +296,9 @@ export default function PreferencesSettingsPage() {
                           onCheckedChange={(checked) => {
                             const newPlatforms = checked
                               ? [...settings.preferredPlatforms, platform.value]
-                              : settings.preferredPlatforms.filter((p) => p !== platform.value);
+                              : settings.preferredPlatforms.filter(
+                                  (p) => p !== platform.value
+                                );
                             handleSave({ preferredPlatforms: newPlatforms });
                           }}
                         />
@@ -299,7 +327,7 @@ export default function PreferencesSettingsPage() {
                   <Select
                     value={settings.aiTone}
                     onValueChange={(value) =>
-                      handleSave({ aiTone: value as UserSettings['aiTone'] })
+                      handleSave({ aiTone: value as UserSettings["aiTone"] })
                     }
                   >
                     <SelectTrigger>
@@ -319,7 +347,7 @@ export default function PreferencesSettingsPage() {
                   <Select
                     value={settings.aiStyle}
                     onValueChange={(value) =>
-                      handleSave({ aiStyle: value as UserSettings['aiStyle'] })
+                      handleSave({ aiStyle: value as UserSettings["aiStyle"] })
                     }
                   >
                     <SelectTrigger>
@@ -336,17 +364,23 @@ export default function PreferencesSettingsPage() {
                 <div className="space-y-2">
                   <Label>AI Personality (Optional)</Label>
                   <Textarea
-                    value={settings.aiPersonality || ''}
-                    onChange={(e) => handleSave({ aiPersonality: e.target.value })}
+                    value={settings.aiPersonality || ""}
+                    onChange={(e) =>
+                      handleSave({ aiPersonality: e.target.value })
+                    }
                     placeholder="Describe the personality you want AI content to have..."
                     rows={3}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label>Max Content Length: {settings.aiMaxLength} characters</Label>
+                  <Label>
+                    Max Content Length: {settings.aiMaxLength} characters
+                  </Label>
                   <Slider
                     value={[settings.aiMaxLength]}
-                    onValueChange={(value) => handleSave({ aiMaxLength: value[0] })}
+                    onValueChange={(value) =>
+                      handleSave({ aiMaxLength: value[0] })
+                    }
                     min={50}
                     max={2000}
                     step={50}
@@ -357,16 +391,24 @@ export default function PreferencesSettingsPage() {
                   <label className="flex items-center space-x-2 cursor-pointer">
                     <Checkbox
                       checked={settings.aiIncludeHashtags}
-                      onCheckedChange={(checked) => handleSave({ aiIncludeHashtags: checked as boolean })}
+                      onCheckedChange={(checked) =>
+                        handleSave({ aiIncludeHashtags: checked as boolean })
+                      }
                     />
-                    <span className="text-sm">Include hashtags in AI-generated content</span>
+                    <span className="text-sm">
+                      Include hashtags in AI-generated content
+                    </span>
                   </label>
                   <label className="flex items-center space-x-2 cursor-pointer">
                     <Checkbox
                       checked={settings.aiIncludeEmojis}
-                      onCheckedChange={(checked) => handleSave({ aiIncludeEmojis: checked as boolean })}
+                      onCheckedChange={(checked) =>
+                        handleSave({ aiIncludeEmojis: checked as boolean })
+                      }
                     />
-                    <span className="text-sm">Include emojis in AI-generated content</span>
+                    <span className="text-sm">
+                      Include emojis in AI-generated content
+                    </span>
                   </label>
                 </div>
               </CardContent>
@@ -388,7 +430,9 @@ export default function PreferencesSettingsPage() {
                   <Label>Theme</Label>
                   <Select
                     value={settings.theme}
-                    onValueChange={(value) => handleSave({ theme: value as 'light' | 'dark' | 'auto' })}
+                    onValueChange={(value) =>
+                      handleSave({ theme: value as "light" | "dark" | "auto" })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />

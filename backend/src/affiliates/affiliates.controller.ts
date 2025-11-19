@@ -43,7 +43,11 @@ export class AffiliatesController {
     @Body('paymentMethod') paymentMethod: string,
     @Body('paymentDetails') paymentDetails: string,
   ) {
-    return this.affiliatesService.requestPayout(user.id, paymentMethod, paymentDetails);
+    return this.affiliatesService.requestPayout(
+      user.id,
+      paymentMethod,
+      paymentDetails,
+    );
   }
 
   // Admin endpoints
@@ -81,5 +85,3 @@ export class AffiliatesController {
     return { message: `Payout ${status.toLowerCase()}` };
   }
 }
-
-

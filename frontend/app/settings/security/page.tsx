@@ -1,28 +1,41 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { authApi } from '@/lib/auth';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import TwoFactorSetup from '@/components/TwoFactorSetup';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { 
-  Shield, 
-  Smartphone, 
-  Monitor, 
-  LogIn, 
-  CheckCircle2, 
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/auth-store";
+import { authApi } from "@/lib/auth";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import TwoFactorSetup from "@/components/TwoFactorSetup";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Shield,
+  Smartphone,
+  Monitor,
+  LogIn,
+  CheckCircle2,
   XCircle,
   AlertTriangle,
-  Trash2
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  Trash2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function SecuritySettingsPage() {
   const { user, updateUser } = useAuthStore();
@@ -46,14 +59,18 @@ export default function SecuritySettingsPage() {
       setActivities(activitiesData);
       setTwoFactorEnabled(user?.twoFactorEnabled || false);
     } catch (err) {
-      console.error('Failed to load security data:', err);
+      console.error("Failed to load security data:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDisable2FA = async () => {
-    if (!confirm('Are you sure you want to disable 2FA? This will reduce your account security.')) {
+    if (
+      !confirm(
+        "Are you sure you want to disable 2FA? This will reduce your account security."
+      )
+    ) {
       return;
     }
 
@@ -61,14 +78,14 @@ export default function SecuritySettingsPage() {
       await authApi.disable2FA();
       setTwoFactorEnabled(false);
       updateUser({ twoFactorEnabled: false });
-      alert('2FA disabled successfully');
+      alert("2FA disabled successfully");
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to disable 2FA');
+      alert(err.response?.data?.message || "Failed to disable 2FA");
     }
   };
 
   const handleRevokeSession = async (sessionId: string) => {
-    if (!confirm('Are you sure you want to revoke this session?')) {
+    if (!confirm("Are you sure you want to revoke this session?")) {
       return;
     }
 
@@ -76,12 +93,16 @@ export default function SecuritySettingsPage() {
       await authApi.revokeSession(sessionId);
       await loadData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to revoke session');
+      alert(err.response?.data?.message || "Failed to revoke session");
     }
   };
 
   const handleRevokeAllSessions = async () => {
-    if (!confirm('Are you sure you want to revoke all other sessions? You will be logged out from all other devices.')) {
+    if (
+      !confirm(
+        "Are you sure you want to revoke all other sessions? You will be logged out from all other devices."
+      )
+    ) {
       return;
     }
 
@@ -89,7 +110,7 @@ export default function SecuritySettingsPage() {
       await authApi.revokeAllSessions();
       await loadData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to revoke sessions');
+      alert(err.response?.data?.message || "Failed to revoke sessions");
     }
   };
 
@@ -99,11 +120,11 @@ export default function SecuritySettingsPage() {
     }
     if (session.userAgent) {
       const ua = session.userAgent.toLowerCase();
-      if (ua.includes('mobile')) return 'Mobile Device';
-      if (ua.includes('tablet')) return 'Tablet';
-      return 'Desktop';
+      if (ua.includes("mobile")) return "Mobile Device";
+      if (ua.includes("tablet")) return "Tablet";
+      return "Desktop";
     }
-    return 'Unknown Device';
+    return "Unknown Device";
   };
 
   return (
@@ -112,7 +133,9 @@ export default function SecuritySettingsPage() {
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <h1 className="text-3xl font-bold tracking-tight">Security Settings</h1>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Security Settings
+            </h1>
             <p className="text-muted-foreground mt-1">
               Manage your account security and active sessions
             </p>
@@ -139,9 +162,16 @@ export default function SecuritySettingsPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="font-medium">2FA is enabled</div>
-                            <div className="text-sm">Your account is protected with two-factor authentication</div>
+                            <div className="text-sm">
+                              Your account is protected with two-factor
+                              authentication
+                            </div>
                           </div>
-                          <Button variant="destructive" size="sm" onClick={handleDisable2FA}>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={handleDisable2FA}
+                          >
                             Disable
                           </Button>
                         </div>
@@ -184,7 +214,11 @@ export default function SecuritySettingsPage() {
                     </CardDescription>
                   </div>
                   {sessions.length > 1 && (
-                    <Button variant="destructive" size="sm" onClick={handleRevokeAllSessions}>
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      onClick={handleRevokeAllSessions}
+                    >
                       <Trash2 className="w-4 h-4 mr-2" />
                       Revoke All Other Sessions
                     </Button>
@@ -209,33 +243,43 @@ export default function SecuritySettingsPage() {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <Monitor className="w-4 h-4 text-muted-foreground" />
-                              <span className="font-medium">{getDeviceInfo(session)}</span>
+                              <span className="font-medium">
+                                {getDeviceInfo(session)}
+                              </span>
                               {session.id === sessions[0]?.id && (
-                                <Badge variant="secondary" className="text-xs">Current</Badge>
+                                <Badge variant="secondary" className="text-xs">
+                                  Current
+                                </Badge>
                               )}
                             </div>
                             <div className="text-sm text-muted-foreground space-y-1">
-                              {session.ipAddress && <div>IP: {session.ipAddress}</div>}
+                              {session.ipAddress && (
+                                <div>IP: {session.ipAddress}</div>
+                              )}
                               {session.userAgent && (
                                 <div className="truncate max-w-md">
                                   {session.userAgent.substring(0, 80)}...
                                 </div>
                               )}
                               <div>
-                                Last active: {new Date(session.lastActivity || session.createdAt).toLocaleString()}
+                                Last active:{" "}
+                                {new Date(
+                                  session.lastActivity || session.createdAt
+                                ).toLocaleString()}
                               </div>
                             </div>
                           </div>
-                          {sessions.length > 1 && session.id !== sessions[0]?.id && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleRevokeSession(session.id)}
-                            >
-                              <Trash2 className="w-4 h-4 mr-2" />
-                              Revoke
-                            </Button>
-                          )}
+                          {sessions.length > 1 &&
+                            session.id !== sessions[0]?.id && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRevokeSession(session.id)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                Revoke
+                              </Button>
+                            )}
                         </div>
                       </Card>
                     ))}
@@ -299,10 +343,10 @@ export default function SecuritySettingsPage() {
                             )}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {activity.deviceInfo || 'Unknown'}
+                            {activity.deviceInfo || "Unknown"}
                           </TableCell>
                           <TableCell className="text-muted-foreground">
-                            {activity.ipAddress || '-'}
+                            {activity.ipAddress || "-"}
                           </TableCell>
                         </TableRow>
                       ))}

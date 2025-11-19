@@ -29,7 +29,9 @@ export class PostingReminderProcessor extends WorkerHost {
       });
 
       if (!idea || idea.status !== 'SCHEDULED' || !idea.scheduledAt) {
-        this.logger.warn(`Idea ${ideaId} not found or not scheduled, skipping reminder`);
+        this.logger.warn(
+          `Idea ${ideaId} not found or not scheduled, skipping reminder`,
+        );
         return;
       }
 
@@ -91,9 +93,11 @@ export class PostingReminderProcessor extends WorkerHost {
         this.logger.log(`Rescheduled reminder for idea ${ideaId}`);
       }
     } catch (error: any) {
-      this.logger.error(`Failed to process posting reminder: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to process posting reminder: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
 }
-

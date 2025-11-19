@@ -1,14 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useDebounce } from '@/hooks/useDebounce';
-import { searchApi, SearchResult, SearchFilters, SavedSearch } from '@/lib/search';
-import { Idea } from '@/lib/ideas';
-import Navbar from '@/components/Navbar';
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from "react";
+import { useDebounce } from "@/hooks/useDebounce";
+import {
+  searchApi,
+  SearchResult,
+  SearchFilters,
+  SavedSearch,
+} from "@/lib/search";
+import { Idea } from "@/lib/ideas";
+import Navbar from "@/components/Navbar";
+import Link from "next/link";
 
 export default function SearchPage() {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
   const [filters, setFilters] = useState<SearchFilters | null>(null);
   const [savedSearches, setSavedSearches] = useState<SavedSearch[]>([]);
@@ -17,7 +22,7 @@ export default function SearchPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedStatus, setSelectedStatus] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
-  const [saveSearchName, setSaveSearchName] = useState('');
+  const [saveSearchName, setSaveSearchName] = useState("");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
 
   const debouncedQuery = useDebounce(query, 300);
@@ -28,7 +33,12 @@ export default function SearchPage() {
   }, []);
 
   useEffect(() => {
-    if (debouncedQuery || selectedPlatforms.length > 0 || selectedTags.length > 0 || selectedStatus.length > 0) {
+    if (
+      debouncedQuery ||
+      selectedPlatforms.length > 0 ||
+      selectedTags.length > 0 ||
+      selectedStatus.length > 0
+    ) {
       performSearch();
     }
   }, [debouncedQuery, selectedPlatforms, selectedTags, selectedStatus]);
@@ -38,7 +48,7 @@ export default function SearchPage() {
       const data = await searchApi.getFilters();
       setFilters(data);
     } catch (error) {
-      console.error('Failed to load filters:', error);
+      console.error("Failed to load filters:", error);
     }
   };
 
@@ -47,7 +57,7 @@ export default function SearchPage() {
       const data = await searchApi.getSavedSearches();
       setSavedSearches(data);
     } catch (error) {
-      console.error('Failed to load saved searches:', error);
+      console.error("Failed to load saved searches:", error);
     }
   };
 
@@ -63,7 +73,7 @@ export default function SearchPage() {
       });
       setResults(result);
     } catch (error) {
-      console.error('Search failed:', error);
+      console.error("Search failed:", error);
     } finally {
       setLoading(false);
     }
@@ -79,15 +89,15 @@ export default function SearchPage() {
         status: selectedStatus,
       });
       setShowSaveDialog(false);
-      setSaveSearchName('');
+      setSaveSearchName("");
       loadSavedSearches();
     } catch (error) {
-      console.error('Failed to save search:', error);
+      console.error("Failed to save search:", error);
     }
   };
 
   const handleLoadSavedSearch = (saved: SavedSearch) => {
-    setQuery(saved.query || '');
+    setQuery(saved.query || "");
     setSelectedPlatforms(saved.filters?.platforms || []);
     setSelectedTags(saved.filters?.tags || []);
     setSelectedStatus(saved.filters?.status || []);
@@ -98,7 +108,7 @@ export default function SearchPage() {
       await searchApi.deleteSavedSearch(searchId);
       loadSavedSearches();
     } catch (error) {
-      console.error('Failed to delete saved search:', error);
+      console.error("Failed to delete saved search:", error);
     }
   };
 
@@ -106,7 +116,9 @@ export default function SearchPage() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Navbar />
       <div className="max-w-6xl mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Search</h1>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+          Search
+        </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
@@ -144,12 +156,14 @@ export default function SearchPage() {
             {/* Filters */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-4">
               <div className="flex items-center justify-between mb-3">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Filters</h2>
+                <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Filters
+                </h2>
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className="text-sm text-indigo-600 dark:text-indigo-400"
                 >
-                  {showFilters ? 'Hide' : 'Show'}
+                  {showFilters ? "Hide" : "Show"}
                 </button>
               </div>
 
@@ -162,20 +176,32 @@ export default function SearchPage() {
                     </label>
                     <div className="space-y-1 max-h-40 overflow-y-auto">
                       {filters.platforms.map((platform) => (
-                        <label key={platform} className="flex items-center space-x-2">
+                        <label
+                          key={platform}
+                          className="flex items-center space-x-2"
+                        >
                           <input
                             type="checkbox"
                             checked={selectedPlatforms.includes(platform)}
                             onChange={(e) => {
                               if (e.target.checked) {
-                                setSelectedPlatforms([...selectedPlatforms, platform]);
+                                setSelectedPlatforms([
+                                  ...selectedPlatforms,
+                                  platform,
+                                ]);
                               } else {
-                                setSelectedPlatforms(selectedPlatforms.filter((p) => p !== platform));
+                                setSelectedPlatforms(
+                                  selectedPlatforms.filter(
+                                    (p) => p !== platform
+                                  )
+                                );
                               }
                             }}
                             className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{platform}</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            {platform}
+                          </span>
                         </label>
                       ))}
                     </div>
@@ -188,7 +214,10 @@ export default function SearchPage() {
                     </label>
                     <div className="space-y-1">
                       {filters.statuses.map((status) => (
-                        <label key={status} className="flex items-center space-x-2">
+                        <label
+                          key={status}
+                          className="flex items-center space-x-2"
+                        >
                           <input
                             type="checkbox"
                             checked={selectedStatus.includes(status)}
@@ -196,12 +225,16 @@ export default function SearchPage() {
                               if (e.target.checked) {
                                 setSelectedStatus([...selectedStatus, status]);
                               } else {
-                                setSelectedStatus(selectedStatus.filter((s) => s !== status));
+                                setSelectedStatus(
+                                  selectedStatus.filter((s) => s !== status)
+                                );
                               }
                             }}
                             className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{status}</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            {status}
+                          </span>
                         </label>
                       ))}
                     </div>
@@ -214,7 +247,10 @@ export default function SearchPage() {
                     </label>
                     <div className="space-y-1 max-h-40 overflow-y-auto">
                       {filters.tags.slice(0, 20).map((tag) => (
-                        <label key={tag} className="flex items-center space-x-2">
+                        <label
+                          key={tag}
+                          className="flex items-center space-x-2"
+                        >
                           <input
                             type="checkbox"
                             checked={selectedTags.includes(tag)}
@@ -222,12 +258,16 @@ export default function SearchPage() {
                               if (e.target.checked) {
                                 setSelectedTags([...selectedTags, tag]);
                               } else {
-                                setSelectedTags(selectedTags.filter((t) => t !== tag));
+                                setSelectedTags(
+                                  selectedTags.filter((t) => t !== tag)
+                                );
                               }
                             }}
                             className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                           />
-                          <span className="text-sm text-gray-700 dark:text-gray-300">{tag}</span>
+                          <span className="text-sm text-gray-700 dark:text-gray-300">
+                            {tag}
+                          </span>
                         </label>
                       ))}
                     </div>
@@ -260,7 +300,9 @@ export default function SearchPage() {
 
             {/* Results */}
             {loading && (
-              <div className="text-center py-8 text-gray-600 dark:text-gray-400">Searching...</div>
+              <div className="text-center py-8 text-gray-600 dark:text-gray-400">
+                Searching...
+              </div>
             )}
 
             {!loading && results && (
@@ -272,7 +314,9 @@ export default function SearchPage() {
                 {/* Ideas Results */}
                 {results.ideas.length > 0 && (
                   <div className="space-y-4 mb-6">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Ideas</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      Ideas
+                    </h2>
                     {results.ideas.map((idea: Idea) => (
                       <Link
                         key={idea.id}
@@ -305,7 +349,9 @@ export default function SearchPage() {
                 {/* Folders Results */}
                 {results.folders.length > 0 && (
                   <div className="space-y-4">
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Folders</h2>
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      Folders
+                    </h2>
                     {results.folders.map((folder) => (
                       <Link
                         key={folder.id}
@@ -316,7 +362,9 @@ export default function SearchPage() {
                           {folder.name}
                         </h3>
                         {folder.description && (
-                          <p className="text-sm text-gray-600 dark:text-gray-400">{folder.description}</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            {folder.description}
+                          </p>
                         )}
                       </Link>
                     ))}
@@ -357,7 +405,7 @@ export default function SearchPage() {
                 <button
                   onClick={() => {
                     setShowSaveDialog(false);
-                    setSaveSearchName('');
+                    setSaveSearchName("");
                   }}
                   className="flex-1 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600"
                 >
@@ -371,5 +419,3 @@ export default function SearchPage() {
     </div>
   );
 }
-
-

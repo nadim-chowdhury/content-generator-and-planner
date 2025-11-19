@@ -17,11 +17,11 @@ export class InstagramService {
     try {
       // Build caption
       let caption = content.caption || '';
-      
+
       // Add hashtags if provided
       if (content.hashtags && content.hashtags.length > 0) {
         const hashtagsText = content.hashtags
-          .map(tag => tag.startsWith('#') ? tag : `#${tag}`)
+          .map((tag) => (tag.startsWith('#') ? tag : `#${tag}`))
           .join(' ');
         caption = `${caption} ${hashtagsText}`.trim();
       }
@@ -47,11 +47,17 @@ export class InstagramService {
         access_token: pageAccessToken,
       });
 
-      this.logger.log(`Successfully posted to Instagram: ${publishResponse.data.id}`);
+      this.logger.log(
+        `Successfully posted to Instagram: ${publishResponse.data.id}`,
+      );
       return { success: true, postId: publishResponse.data.id };
     } catch (error: any) {
-      this.logger.error(`Failed to post to Instagram: ${error.message}`, error.stack);
-      const errorMessage = error.response?.data?.error?.message || error.message;
+      this.logger.error(
+        `Failed to post to Instagram: ${error.message}`,
+        error.stack,
+      );
+      const errorMessage =
+        error.response?.data?.error?.message || error.message;
       return { success: false, error: errorMessage };
     }
   }
@@ -70,4 +76,3 @@ export class InstagramService {
     }
   }
 }
-

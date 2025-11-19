@@ -37,7 +37,8 @@ export class NotificationsController {
   @Put('preferences')
   updatePreferences(
     @CurrentUser() user: any,
-    @Body() data: {
+    @Body()
+    data: {
       emailEnabled?: boolean;
       pushEnabled?: boolean;
       inAppEnabled?: boolean;
@@ -67,6 +68,3 @@ export class NotificationsController {
     return this.notificationsService.deleteNotification(user.id, id);
   }
 }
-
-
-

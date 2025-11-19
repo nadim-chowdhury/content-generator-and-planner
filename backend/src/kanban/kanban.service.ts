@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateKanbanCardDto, KanbanStage } from './dto/create-kanban-card.dto';
 import { UpdateKanbanCardDto } from './dto/update-kanban-card.dto';
@@ -48,10 +52,7 @@ export class KanbanService {
           orderBy: { createdAt: 'asc' },
         },
       },
-      orderBy: [
-        { stage: 'asc' },
-        { position: 'asc' },
-      ],
+      orderBy: [{ stage: 'asc' }, { position: 'asc' }],
     });
 
     // Organize by stage
@@ -142,7 +143,8 @@ export class KanbanService {
     if (dto.stage !== undefined) updateData.stage = dto.stage;
     if (dto.position !== undefined) updateData.position = dto.position;
     if (dto.color !== undefined) updateData.color = dto.color;
-    if (dto.dueDate !== undefined) updateData.dueDate = dto.dueDate ? new Date(dto.dueDate) : null;
+    if (dto.dueDate !== undefined)
+      updateData.dueDate = dto.dueDate ? new Date(dto.dueDate) : null;
     if (dto.attachments !== undefined) updateData.attachments = dto.attachments;
     if (dto.assignedTo !== undefined) updateData.assignedTo = dto.assignedTo;
 
@@ -187,9 +189,10 @@ export class KanbanService {
       throw new NotFoundException('Card not found');
     }
 
-    const targetPosition = dto.targetPosition !== undefined
-      ? dto.targetPosition
-      : await this.getMaxPosition(userId, dto.targetStage) + 1;
+    const targetPosition =
+      dto.targetPosition !== undefined
+        ? dto.targetPosition
+        : (await this.getMaxPosition(userId, dto.targetStage)) + 1;
 
     // If moving to different stage, update positions in both stages
     if (card.stage !== dto.targetStage) {
@@ -278,7 +281,10 @@ export class KanbanService {
   /**
    * Get max position in a stage
    */
-  private async getMaxPosition(userId: string, stage: KanbanStage): Promise<number> {
+  private async getMaxPosition(
+    userId: string,
+    stage: KanbanStage,
+  ): Promise<number> {
     const maxCard = await this.prisma.kanbanCard.findFirst({
       where: { userId, stage },
       orderBy: { position: 'desc' },
@@ -340,7 +346,11 @@ export class KanbanService {
   /**
    * Update checklist
    */
-  async updateChecklist(userId: string, checklistId: string, items: Array<{ id: string; text: string; completed: boolean }>) {
+  async updateChecklist(
+    userId: string,
+    checklistId: string,
+    items: Array<{ id: string; text: string; completed: boolean }>,
+  ) {
     const checklist = await this.prisma.kanbanChecklist.findFirst({
       where: { id: checklistId },
       include: { card: true },
@@ -398,7 +408,9 @@ export class KanbanService {
     const workspaceId = card.user.currentWorkspaceId;
 
     // Extract mentions from comment
-    const mentionStrings = this.collaborationService.extractMentions(dto.content);
+    const mentionStrings = this.collaborationService.extractMentions(
+      dto.content,
+    );
     const mentionedUserIds = await this.collaborationService.resolveMentions(
       mentionStrings,
       workspaceId,
@@ -518,7 +530,11 @@ export class KanbanService {
   /**
    * Create card from idea
    */
-  async createCardFromIdea(userId: string, ideaId: string, stage?: KanbanStage) {
+  async createCardFromIdea(
+    userId: string,
+    ideaId: string,
+    stage?: KanbanStage,
+  ) {
     const idea = await this.prisma.idea.findFirst({
       where: { id: ideaId, userId },
     });
@@ -572,5 +588,3 @@ export class KanbanService {
     });
   }
 }
-
-

@@ -9,8 +9,15 @@ import { QueueModule } from '../queue/queue.module';
 @Module({
   imports: [PrismaModule, forwardRef(() => QueueModule)],
   controllers: [PlannerController],
-  providers: [PlannerService, PostingTimeSuggestionsService, CalendarAutofillService],
-  exports: [PlannerService, PostingTimeSuggestionsService, CalendarAutofillService],
+  providers: [
+    PlannerService,
+    PostingTimeSuggestionsService,
+    CalendarAutofillService,
+  ],
+  exports: [
+    PlannerService,
+    PostingTimeSuggestionsService,
+    CalendarAutofillService,
+  ],
 })
 export class PlannerModule {}
-

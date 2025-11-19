@@ -12,12 +12,18 @@ export interface PlatformSpecs {
 @Injectable()
 export class PlatformOptimizerService {
   private platformSpecs: Record<string, PlatformSpecs> = {
-    'YouTube': {
+    YouTube: {
       optimalDuration: { min: 300, max: 3600, recommended: 600 }, // 5-60 min, recommended 10 min
       aspectRatio: '16:9',
       maxCaptionLength: 5000,
       hashtagCount: { min: 0, max: 15, recommended: 5 },
-      contentType: ['tutorial', 'vlog', 'educational', 'entertainment', 'review'],
+      contentType: [
+        'tutorial',
+        'vlog',
+        'educational',
+        'entertainment',
+        'review',
+      ],
       bestPractices: [
         'Include timestamps in description',
         'Create compelling thumbnails with text overlays',
@@ -32,7 +38,13 @@ export class PlatformOptimizerService {
       aspectRatio: '9:16',
       maxCaptionLength: 200,
       hashtagCount: { min: 3, max: 10, recommended: 5 },
-      contentType: ['quick tips', 'trending', 'entertainment', 'challenges', 'viral moments'],
+      contentType: [
+        'quick tips',
+        'trending',
+        'entertainment',
+        'challenges',
+        'viral moments',
+      ],
       bestPractices: [
         'Hook viewers in first 3 seconds',
         'Use trending sounds and music',
@@ -43,12 +55,18 @@ export class PlatformOptimizerService {
         'Use #Shorts hashtag',
       ],
     },
-    'TikTok': {
+    TikTok: {
       optimalDuration: { min: 15, max: 60, recommended: 30 },
       aspectRatio: '9:16',
       maxCaptionLength: 2200,
       hashtagCount: { min: 3, max: 10, recommended: 5 },
-      contentType: ['trending', 'challenges', 'entertainment', 'educational', 'comedy'],
+      contentType: [
+        'trending',
+        'challenges',
+        'entertainment',
+        'educational',
+        'comedy',
+      ],
       bestPractices: [
         'Hook in first 3 seconds',
         'Use trending sounds',
@@ -64,7 +82,13 @@ export class PlatformOptimizerService {
       aspectRatio: '9:16',
       maxCaptionLength: 2200,
       hashtagCount: { min: 5, max: 10, recommended: 7 },
-      contentType: ['trending', 'tutorial', 'entertainment', 'behind-the-scenes', 'educational'],
+      contentType: [
+        'trending',
+        'tutorial',
+        'entertainment',
+        'behind-the-scenes',
+        'educational',
+      ],
       bestPractices: [
         'Hook in first 3 seconds',
         'Use trending audio',
@@ -81,7 +105,13 @@ export class PlatformOptimizerService {
       aspectRatio: '9:16',
       maxCaptionLength: 2000,
       hashtagCount: { min: 3, max: 10, recommended: 5 },
-      contentType: ['entertainment', 'community', 'relatable', 'trending', 'educational'],
+      contentType: [
+        'entertainment',
+        'community',
+        'relatable',
+        'trending',
+        'educational',
+      ],
       bestPractices: [
         'Focus on community engagement',
         'Use Facebook-specific features',
@@ -92,12 +122,18 @@ export class PlatformOptimizerService {
         'Share to groups',
       ],
     },
-    'Twitter': {
+    Twitter: {
       optimalDuration: { min: 0, max: 140, recommended: 0 }, // Text-based primarily
       aspectRatio: '16:9 or 1:1',
       maxCaptionLength: 280,
       hashtagCount: { min: 0, max: 2, recommended: 1 },
-      contentType: ['news', 'opinion', 'threads', 'quick tips', 'trending topics'],
+      contentType: [
+        'news',
+        'opinion',
+        'threads',
+        'quick tips',
+        'trending topics',
+      ],
       bestPractices: [
         'Keep it concise and timely',
         'Use threads for longer content',
@@ -108,12 +144,18 @@ export class PlatformOptimizerService {
         'Retweet relevant content',
       ],
     },
-    'LinkedIn': {
+    LinkedIn: {
       optimalDuration: { min: 0, max: 600, recommended: 0 }, // Text-based primarily
       aspectRatio: '16:9 or 1:1',
       maxCaptionLength: 3000,
       hashtagCount: { min: 3, max: 5, recommended: 3 },
-      contentType: ['thought leadership', 'industry insights', 'career advice', 'professional tips', 'B2B content'],
+      contentType: [
+        'thought leadership',
+        'industry insights',
+        'career advice',
+        'professional tips',
+        'B2B content',
+      ],
       bestPractices: [
         'Professional tone required',
         'Share industry insights',
@@ -143,7 +185,10 @@ export class PlatformOptimizerService {
   validateDuration(platform: string, duration: number): boolean {
     const specs = this.getPlatformSpecs(platform);
     if (!specs) return true;
-    return duration >= specs.optimalDuration.min && duration <= specs.optimalDuration.max;
+    return (
+      duration >= specs.optimalDuration.min &&
+      duration <= specs.optimalDuration.max
+    );
   }
 
   getBestPractices(platform: string): string[] {
@@ -151,6 +196,3 @@ export class PlatformOptimizerService {
     return specs?.bestPractices || [];
   }
 }
-
-
-

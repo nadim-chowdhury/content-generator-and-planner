@@ -40,7 +40,12 @@ export class EmailProcessor extends WorkerHost {
       }
 
       // Use EmailService to send email based on template
-      await this.sendEmailByTemplate(emailAddress, subject, template, data || {});
+      await this.sendEmailByTemplate(
+        emailAddress,
+        subject,
+        template,
+        data || {},
+      );
 
       return { sent: true, to: emailAddress };
     } catch (error: any) {
@@ -64,7 +69,10 @@ export class EmailProcessor extends WorkerHost {
         );
         break;
       case 'email-verification':
-        await this.emailService.sendVerificationEmail(to, data.verificationToken);
+        await this.emailService.sendVerificationEmail(
+          to,
+          data.verificationToken,
+        );
         break;
       case 'password-reset':
         await this.emailService.sendPasswordResetEmail(to, data.resetToken);
@@ -78,7 +86,11 @@ export class EmailProcessor extends WorkerHost {
         break;
       case 'trial-expired':
         // Use trial-expiring template with 0 days
-        await this.emailService.sendTrialEndingEmail(to, data.userName || 'User', 0);
+        await this.emailService.sendTrialEndingEmail(
+          to,
+          data.userName || 'User',
+          0,
+        );
         break;
       case 'payment-success':
         await this.emailService.sendPaymentSuccessEmail(
@@ -98,7 +110,7 @@ export class EmailProcessor extends WorkerHost {
           new Date(data.scheduledDate),
         );
         break;
-      case 'batch-generation-complete':
+      case 'batch-generation-complete': {
         // Fallback to simple email for batch generation
         const html = `
           <h2>Batch Generation Complete</h2>
@@ -107,11 +119,12 @@ export class EmailProcessor extends WorkerHost {
         `;
         await this.emailService.sendEmail(to, subject, html);
         break;
-      default:
+      }
+      default: {
         // Generic email
         const defaultHtml = `<p>${JSON.stringify(data)}</p>`;
         await this.emailService.sendEmail(to, subject, defaultHtml);
+      }
     }
   }
 }
-

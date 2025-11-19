@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsArray,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class CreateIdeaDto {
   @IsString()
@@ -76,4 +84,3 @@ export class CreateIdeaDto {
   @IsOptional()
   language?: string; // Language code (default: 'en')
 }
-

@@ -30,7 +30,10 @@ export class ExportImportController {
   async exportIdeasJSON(@CurrentUser() user: any, @Res() res: Response) {
     const data = await this.exportService.exportIdeas(user.id);
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="ideas-export-${Date.now()}.json"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="ideas-export-${Date.now()}.json"`,
+    );
     res.json(data);
   }
 
@@ -41,7 +44,10 @@ export class ExportImportController {
   @Header('Content-Type', 'text/csv')
   async exportIdeasCSV(@CurrentUser() user: any, @Res() res: Response) {
     const csv = await this.exportService.exportIdeasCSV(user.id);
-    res.setHeader('Content-Disposition', `attachment; filename="ideas-export-${Date.now()}.csv"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="ideas-export-${Date.now()}.csv"`,
+    );
     res.send(csv);
   }
 
@@ -52,7 +58,10 @@ export class ExportImportController {
   async exportPlanner(@CurrentUser() user: any, @Res() res: Response) {
     const data = await this.exportService.exportPlanner(user.id);
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="planner-export-${Date.now()}.json"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="planner-export-${Date.now()}.json"`,
+    );
     res.json(data);
   }
 
@@ -71,7 +80,10 @@ export class ExportImportController {
     const data = await this.exportService.exportCalendar(user.id, start, end);
     if (res) {
       res.setHeader('Content-Type', 'application/json');
-      res.setHeader('Content-Disposition', `attachment; filename="calendar-export-${Date.now()}.json"`);
+      res.setHeader(
+        'Content-Disposition',
+        `attachment; filename="calendar-export-${Date.now()}.json"`,
+      );
       res.json(data);
     }
     return data;
@@ -88,7 +100,10 @@ export class ExportImportController {
   ) {
     const data = await this.exportService.exportWorkspace(teamId, user.id);
     res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Disposition', `attachment; filename="workspace-export-${Date.now()}.json"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="workspace-export-${Date.now()}.json"`,
+    );
     res.json(data);
   }
 
@@ -96,8 +111,10 @@ export class ExportImportController {
    * Import ideas from CSV
    */
   @Post('ideas/import')
-  async importIdeas(@CurrentUser() user: any, @Body('csvContent') csvContent: string) {
+  async importIdeas(
+    @CurrentUser() user: any,
+    @Body('csvContent') csvContent: string,
+  ) {
     return this.importService.importIdeasFromCSV(user.id, csvContent);
   }
 }
-

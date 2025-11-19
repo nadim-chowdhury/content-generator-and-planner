@@ -6,6 +6,3 @@ export class UpdateTeamDto {
   @MaxLength(100)
   name: string;
 }
-
-
-

@@ -27,5 +27,3 @@ import { SpamPreventionGuard } from './guards/spam-prevention.guard';
   ],
 })
 export class SecurityModule {}
-
-

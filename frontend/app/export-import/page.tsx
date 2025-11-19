@@ -1,25 +1,28 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { exportImportApi } from '@/lib/export-import';
-import { useAuthStore } from '@/store/auth-store';
-import Navbar from '@/components/Navbar';
+import { useState } from "react";
+import { exportImportApi } from "@/lib/export-import";
+import { useAuthStore } from "@/store/auth-store";
+import Navbar from "@/components/Navbar";
 
 export default function ExportImportPage() {
   const { user } = useAuthStore();
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<any>(null);
-  const [importError, setImportError] = useState('');
+  const [importError, setImportError] = useState("");
   const [file, setFile] = useState<File | null>(null);
 
-  const handleExport = async (type: string, format: 'json' | 'csv' = 'json') => {
+  const handleExport = async (
+    type: string,
+    format: "json" | "csv" = "json"
+  ) => {
     try {
       let blob: Blob;
       let filename: string;
 
       switch (type) {
-        case 'ideas':
-          if (format === 'csv') {
+        case "ideas":
+          if (format === "csv") {
             blob = await exportImportApi.exportIdeasCSV();
             filename = `ideas-export-${Date.now()}.csv`;
           } else {
@@ -27,11 +30,11 @@ export default function ExportImportPage() {
             filename = `ideas-export-${Date.now()}.json`;
           }
           break;
-        case 'planner':
+        case "planner":
           blob = await exportImportApi.exportPlanner();
           filename = `planner-export-${Date.now()}.json`;
           break;
-        case 'calendar':
+        case "calendar":
           blob = await exportImportApi.exportCalendar();
           filename = `calendar-export-${Date.now()}.json`;
           break;
@@ -40,7 +43,7 @@ export default function ExportImportPage() {
       }
 
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = filename;
       document.body.appendChild(a);
@@ -48,19 +51,21 @@ export default function ExportImportPage() {
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
     } catch (error: any) {
-      console.error('Export failed:', error);
-      alert('Export failed: ' + (error.response?.data?.message || error.message));
+      console.error("Export failed:", error);
+      alert(
+        "Export failed: " + (error.response?.data?.message || error.message)
+      );
     }
   };
 
   const handleImport = async () => {
     if (!file) {
-      setImportError('Please select a file');
+      setImportError("Please select a file");
       return;
     }
 
     setImporting(true);
-    setImportError('');
+    setImportError("");
     setImportResult(null);
 
     try {
@@ -68,7 +73,7 @@ export default function ExportImportPage() {
       const result = await exportImportApi.importIdeas(text);
       setImportResult(result);
     } catch (error: any) {
-      setImportError(error.response?.data?.message || 'Import failed');
+      setImportError(error.response?.data?.message || "Import failed");
     } finally {
       setImporting(false);
     }
@@ -85,7 +90,9 @@ export default function ExportImportPage() {
         <div className="space-y-8">
           {/* Export Section */}
           <section className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Export Data</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+              Export Data
+            </h2>
             <div className="space-y-4">
               <div>
                 <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -93,13 +100,13 @@ export default function ExportImportPage() {
                 </h3>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleExport('ideas', 'json')}
+                    onClick={() => handleExport("ideas", "json")}
                     className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                   >
                     Export as JSON
                   </button>
                   <button
-                    onClick={() => handleExport('ideas', 'csv')}
+                    onClick={() => handleExport("ideas", "csv")}
                     className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                   >
                     Export as CSV
@@ -112,7 +119,7 @@ export default function ExportImportPage() {
                   Export Planner
                 </h3>
                 <button
-                  onClick={() => handleExport('planner')}
+                  onClick={() => handleExport("planner")}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                 >
                   Export Planner (JSON)
@@ -124,14 +131,14 @@ export default function ExportImportPage() {
                   Export Calendar
                 </h3>
                 <button
-                  onClick={() => handleExport('calendar')}
+                  onClick={() => handleExport("calendar")}
                   className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                 >
                   Export Calendar (JSON)
                 </button>
               </div>
 
-              {user?.plan === 'AGENCY' && (
+              {user?.plan === "AGENCY" && (
                 <div>
                   <h3 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Export Workspace
@@ -150,9 +157,9 @@ export default function ExportImportPage() {
               Import Ideas from CSV
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Import ideas from a CSV file (e.g., exported from Notion or Google Sheets). The CSV
-              should include columns: Title, Platform, Niche, and optionally Description, Hashtags,
-              etc.
+              Import ideas from a CSV file (e.g., exported from Notion or Google
+              Sheets). The CSV should include columns: Title, Platform, Niche,
+              and optionally Description, Hashtags, etc.
             </p>
 
             <div className="space-y-4">
@@ -173,7 +180,7 @@ export default function ExportImportPage() {
                 disabled={importing || !file}
                 className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {importing ? 'Importing...' : 'Import Ideas'}
+                {importing ? "Importing..." : "Import Ideas"}
               </button>
 
               {importError && (
@@ -187,17 +194,20 @@ export default function ExportImportPage() {
                   <p className="font-semibold">Import Complete!</p>
                   <p className="text-sm mt-1">
                     Successfully imported {importResult.imported} ideas
-                    {importResult.errors > 0 && `, ${importResult.errors} errors`}
+                    {importResult.errors > 0 &&
+                      `, ${importResult.errors} errors`}
                   </p>
                   {importResult.errors > 0 && (
                     <details className="mt-2 text-sm">
                       <summary className="cursor-pointer">View Errors</summary>
                       <ul className="mt-2 list-disc list-inside">
-                        {importResult.details.errors.map((error: any, idx: number) => (
-                          <li key={idx}>
-                            Row {error.row}: {error.error}
-                          </li>
-                        ))}
+                        {importResult.details.errors.map(
+                          (error: any, idx: number) => (
+                            <li key={idx}>
+                              Row {error.row}: {error.error}
+                            </li>
+                          )
+                        )}
                       </ul>
                     </details>
                   )}
@@ -210,5 +220,3 @@ export default function ExportImportPage() {
     </div>
   );
 }
-
-

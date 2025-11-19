@@ -1,16 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { teamsApi, Team } from '@/lib/teams';
-import { useAuthStore } from '@/store/auth-store';
+import { useState, useEffect } from "react";
+import { teamsApi, Team } from "@/lib/teams";
+import { useAuthStore } from "@/store/auth-store";
 
 interface WorkspaceSwitcherProps {
   onWorkspaceChange?: (workspace: Team | null) => void;
 }
 
-export default function WorkspaceSwitcher({ onWorkspaceChange }: WorkspaceSwitcherProps) {
+export default function WorkspaceSwitcher({
+  onWorkspaceChange,
+}: WorkspaceSwitcherProps) {
   const { user } = useAuthStore();
-  const [workspaces, setWorkspaces] = useState<{ owned: Team[]; memberOf: Team[] }>({
+  const [workspaces, setWorkspaces] = useState<{
+    owned: Team[];
+    memberOf: Team[];
+  }>({
     owned: [],
     memberOf: [],
   });
@@ -35,7 +40,7 @@ export default function WorkspaceSwitcher({ onWorkspaceChange }: WorkspaceSwitch
         onWorkspaceChange(current);
       }
     } catch (err) {
-      console.error('Failed to load workspaces:', err);
+      console.error("Failed to load workspaces:", err);
     } finally {
       setLoading(false);
     }
@@ -46,7 +51,7 @@ export default function WorkspaceSwitcher({ onWorkspaceChange }: WorkspaceSwitch
       if (workspaceId) {
         await teamsApi.switchWorkspace(workspaceId);
         const workspace = [...workspaces.owned, ...workspaces.memberOf].find(
-          (w) => w.id === workspaceId,
+          (w) => w.id === workspaceId
         );
         setCurrentWorkspace(workspace || null);
         if (onWorkspaceChange) {
@@ -61,19 +66,21 @@ export default function WorkspaceSwitcher({ onWorkspaceChange }: WorkspaceSwitch
       }
       setShowDropdown(false);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to switch workspace');
+      alert(err.response?.data?.message || "Failed to switch workspace");
     }
   };
 
   const allWorkspaces = [
-    { id: null, name: 'Personal Workspace', type: 'personal' },
-    ...workspaces.owned.map((w) => ({ ...w, type: 'owned' as const })),
-    ...workspaces.memberOf.map((w) => ({ ...w, type: 'member' as const })),
+    { id: null, name: "Personal Workspace", type: "personal" },
+    ...workspaces.owned.map((w) => ({ ...w, type: "owned" as const })),
+    ...workspaces.memberOf.map((w) => ({ ...w, type: "member" as const })),
   ];
 
   if (loading) {
     return (
-      <div className="px-3 py-2 text-sm text-gray-500">Loading workspaces...</div>
+      <div className="px-3 py-2 text-sm text-gray-500">
+        Loading workspaces...
+      </div>
     );
   }
 
@@ -84,10 +91,12 @@ export default function WorkspaceSwitcher({ onWorkspaceChange }: WorkspaceSwitch
         className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700"
       >
         <span>
-          {currentWorkspace ? currentWorkspace.name : 'Personal Workspace'}
+          {currentWorkspace ? currentWorkspace.name : "Personal Workspace"}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform ${showDropdown ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 transition-transform ${
+            showDropdown ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -111,21 +120,21 @@ export default function WorkspaceSwitcher({ onWorkspaceChange }: WorkspaceSwitch
             <div className="p-2">
               {allWorkspaces.map((workspace) => (
                 <button
-                  key={workspace.id || 'personal'}
+                  key={workspace.id || "personal"}
                   onClick={() => handleSwitchWorkspace(workspace.id || null)}
                   className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 dark:hover:bg-gray-700 ${
-                    (currentWorkspace?.id === workspace.id) ||
+                    currentWorkspace?.id === workspace.id ||
                     (!currentWorkspace && !workspace.id)
-                      ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300'
-                      : 'text-gray-700 dark:text-gray-300'
+                      ? "bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300"
+                      : "text-gray-700 dark:text-gray-300"
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <span className="font-medium">{workspace.name}</span>
-                    {workspace.type === 'owned' && (
+                    {workspace.type === "owned" && (
                       <span className="text-xs text-gray-500">Owner</span>
                     )}
-                    {workspace.type === 'member' && (
+                    {workspace.type === "member" && (
                       <span className="text-xs text-gray-500">Member</span>
                     )}
                   </div>
@@ -138,5 +147,3 @@ export default function WorkspaceSwitcher({ onWorkspaceChange }: WorkspaceSwitch
     </div>
   );
 }
-
-

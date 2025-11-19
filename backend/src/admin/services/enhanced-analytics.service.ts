@@ -37,7 +37,9 @@ export class EnhancedAnalyticsService {
   /**
    * Get Daily Active Users for the last N days
    */
-  async getDailyActiveUsersTrend(days: number = 30): Promise<Array<{ date: string; count: number }>> {
+  async getDailyActiveUsersTrend(
+    days: number = 30,
+  ): Promise<Array<{ date: string; count: number }>> {
     const results: Array<{ date: string; count: number }> = [];
     const today = new Date();
 
@@ -85,13 +87,18 @@ export class EnhancedAnalyticsService {
   /**
    * Get Monthly Active Users for the last N months
    */
-  async getMonthlyActiveUsersTrend(months: number = 12): Promise<Array<{ month: string; count: number }>> {
+  async getMonthlyActiveUsersTrend(
+    months: number = 12,
+  ): Promise<Array<{ month: string; count: number }>> {
     const results: Array<{ month: string; count: number }> = [];
     const now = new Date();
 
     for (let i = months - 1; i >= 0; i--) {
       const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-      const count = await this.getMonthlyActiveUsers(date.getFullYear(), date.getMonth() + 1);
+      const count = await this.getMonthlyActiveUsers(
+        date.getFullYear(),
+        date.getMonth() + 1,
+      );
       const monthStr = String(date.getMonth() + 1).padStart(2, '0');
       results.push({
         month: `${date.getFullYear()}-${monthStr}`,
@@ -142,7 +149,8 @@ export class EnhancedAnalyticsService {
 
     for (const user of users) {
       const monthsSinceSignup = Math.floor(
-        (new Date().getTime() - new Date(user.createdAt).getTime()) / (1000 * 60 * 60 * 24 * 30),
+        (new Date().getTime() - new Date(user.createdAt).getTime()) /
+          (1000 * 60 * 60 * 24 * 30),
       );
       const monthsActive = Math.max(1, monthsSinceSignup);
 
@@ -166,7 +174,9 @@ export class EnhancedAnalyticsService {
     const medianLTV =
       sortedLTV.length > 0
         ? sortedLTV.length % 2 === 0
-          ? (sortedLTV[sortedLTV.length / 2 - 1] + sortedLTV[sortedLTV.length / 2]) / 2
+          ? (sortedLTV[sortedLTV.length / 2 - 1] +
+              sortedLTV[sortedLTV.length / 2]) /
+            2
           : sortedLTV[Math.floor(sortedLTV.length / 2)]
         : 0;
 
@@ -261,14 +271,15 @@ export class EnhancedAnalyticsService {
    * Get comprehensive analytics report
    */
   async getComprehensiveReport() {
-    const [dau, mau, dauTrend, mauTrend, ltv, socialMetrics] = await Promise.all([
-      this.getDailyActiveUsers(),
-      this.getMonthlyActiveUsers(),
-      this.getDailyActiveUsersTrend(30),
-      this.getMonthlyActiveUsersTrend(12),
-      this.calculateLTV(),
-      this.getSocialSharingMetrics(30),
-    ]);
+    const [dau, mau, dauTrend, mauTrend, ltv, socialMetrics] =
+      await Promise.all([
+        this.getDailyActiveUsers(),
+        this.getMonthlyActiveUsers(),
+        this.getDailyActiveUsersTrend(30),
+        this.getMonthlyActiveUsersTrend(12),
+        this.calculateLTV(),
+        this.getSocialSharingMetrics(30),
+      ]);
 
     return {
       dailyActiveUsers: dau,
@@ -280,4 +291,3 @@ export class EnhancedAnalyticsService {
     };
   }
 }
-

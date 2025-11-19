@@ -65,7 +65,10 @@ export class PermissionsService {
   /**
    * Get user's role in workspace
    */
-  async getUserRole(userId: string, workspaceId: string): Promise<TeamRole | 'OWNER' | null> {
+  async getUserRole(
+    userId: string,
+    workspaceId: string,
+  ): Promise<TeamRole | 'OWNER' | null> {
     const team = await this.prisma.team.findUnique({
       where: { id: workspaceId },
       include: {
@@ -143,4 +146,3 @@ export class PermissionsService {
     }
   }
 }
-

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth-store';
-import { authApi } from '@/lib/auth';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth-store";
+import { authApi } from "@/lib/auth";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,7 +14,7 @@ interface ProtectedRouteProps {
 export default function ProtectedRoute({
   children,
   requireAuth = true,
-  redirectTo = '/login',
+  redirectTo = "/login",
 }: ProtectedRouteProps) {
   const router = useRouter();
   const { token, user, setAuth, clearAuth } = useAuthStore();
@@ -71,4 +71,3 @@ export default function ProtectedRoute({
   // Render children if authenticated or if auth is not required
   return <>{children}</>;
 }
-

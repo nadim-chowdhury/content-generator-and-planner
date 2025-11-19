@@ -17,7 +17,9 @@ export class AutoPostProcessor extends WorkerHost {
   }
 
   async process(job: Job<AutoPostJob>) {
-    this.logger.log(`Processing auto-post job: ${job.id} for idea ${job.data.ideaId}`);
+    this.logger.log(
+      `Processing auto-post job: ${job.id} for idea ${job.data.ideaId}`,
+    );
 
     try {
       const { userId, ideaId, connectionId } = job.data;
@@ -45,7 +47,9 @@ export class AutoPostProcessor extends WorkerHost {
       if (timeDiff > 5 * 60 * 1000) {
         // More than 5 minutes early, reschedule
         this.logger.log(`Idea ${ideaId} scheduled for future, rescheduling...`);
-        throw new Error(`Post scheduled for ${scheduledAt.toISOString()}, current time: ${now.toISOString()}`);
+        throw new Error(
+          `Post scheduled for ${scheduledAt.toISOString()}, current time: ${now.toISOString()}`,
+        );
       }
 
       // Post to platform
@@ -59,11 +63,13 @@ export class AutoPostProcessor extends WorkerHost {
         },
       );
 
-      this.logger.log(`Successfully auto-posted idea ${ideaId} to ${result.platform}`);
+      this.logger.log(
+        `Successfully auto-posted idea ${ideaId} to ${result.platform}`,
+      );
       return { success: true, result };
     } catch (error: any) {
       this.logger.error(`Failed to auto-post: ${error.message}`, error.stack);
-      
+
       // Don't throw error if it's a rescheduling case
       if (error.message.includes('scheduled for future')) {
         throw error; // Let BullMQ retry later
@@ -71,16 +77,26 @@ export class AutoPostProcessor extends WorkerHost {
 
       // For other errors, mark as failed but don't retry indefinitely
       if (job.attemptsMade >= 3) {
-        this.logger.error(`Max retries reached for job ${job.id}, marking as failed`);
+        this.logger.error(
+          `Max retries reached for job ${job.id}, marking as failed`,
+        );
         // Optionally notify user of failure
-        await this.notifyPostFailure(job.data.userId, job.data.ideaId, error.message);
+        await this.notifyPostFailure(
+          job.data.userId,
+          job.data.ideaId,
+          error.message,
+        );
       } else {
         throw error; // Retry
       }
     }
   }
 
-  private async notifyPostFailure(userId: string, ideaId: string, error: string) {
+  private async notifyPostFailure(
+    userId: string,
+    ideaId: string,
+    error: string,
+  ) {
     try {
       // Create notification for user
       await this.prisma.notification.create({
@@ -101,4 +117,3 @@ export class AutoPostProcessor extends WorkerHost {
     }
   }
 }
-

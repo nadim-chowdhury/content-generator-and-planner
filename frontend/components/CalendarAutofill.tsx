@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { plannerApi, CalendarAutofillResult } from '@/lib/planner';
-import { ideasApi, Idea } from '@/lib/ideas';
+import { useState } from "react";
+import { plannerApi, CalendarAutofillResult } from "@/lib/planner";
+import { ideasApi, Idea } from "@/lib/ideas";
 
 interface CalendarAutofillProps {
   currentMonth: number;
@@ -16,7 +16,9 @@ export default function CalendarAutofill({
   onAutofillComplete,
 }: CalendarAutofillProps) {
   const [loading, setLoading] = useState(false);
-  const [preview, setPreview] = useState<CalendarAutofillResult['suggestions']>([]);
+  const [preview, setPreview] = useState<CalendarAutofillResult["suggestions"]>(
+    []
+  );
   const [showPreview, setShowPreview] = useState(false);
   const [options, setOptions] = useState({
     minViralScore: 60,
@@ -28,42 +30,51 @@ export default function CalendarAutofill({
 
   const loadAvailablePlatforms = async () => {
     try {
-      const ideas = await ideasApi.getAll('DRAFT');
-      const platforms = Array.from(new Set(ideas.map(i => i.platform)));
+      const ideas = await ideasApi.getAll("DRAFT");
+      const platforms = Array.from(new Set(ideas.map((i) => i.platform)));
       setAvailablePlatforms(platforms);
     } catch (err) {
-      console.error('Failed to load platforms:', err);
+      console.error("Failed to load platforms:", err);
     }
   };
 
   const handlePreview = async () => {
     try {
       setLoading(true);
-      const suggestions = await plannerApi.previewAutofill(currentMonth, currentYear, options);
+      const suggestions = await plannerApi.previewAutofill(
+        currentMonth,
+        currentYear,
+        options
+      );
       setPreview(suggestions);
       setShowPreview(true);
     } catch (err) {
-      console.error('Failed to preview autofill:', err);
-      alert('Failed to preview autofill');
+      console.error("Failed to preview autofill:", err);
+      alert("Failed to preview autofill");
     } finally {
       setLoading(false);
     }
   };
 
   const handleAutofill = async () => {
-    if (!confirm(`This will schedule ${preview.length} ideas. Continue?`)) return;
+    if (!confirm(`This will schedule ${preview.length} ideas. Continue?`))
+      return;
 
     try {
       setLoading(true);
-      const result = await plannerApi.autofillCalendar(currentMonth, currentYear, options);
+      const result = await plannerApi.autofillCalendar(
+        currentMonth,
+        currentYear,
+        options
+      );
       setShowPreview(false);
       if (onAutofillComplete) {
         onAutofillComplete(result);
       }
       alert(`Successfully scheduled ${result.scheduled} ideas!`);
     } catch (err) {
-      console.error('Failed to autofill:', err);
-      alert('Failed to autofill calendar');
+      console.error("Failed to autofill:", err);
+      alert("Failed to autofill calendar");
     } finally {
       setLoading(false);
     }
@@ -85,7 +96,12 @@ export default function CalendarAutofill({
             min="0"
             max="100"
             value={options.minViralScore}
-            onChange={(e) => setOptions({ ...options, minViralScore: parseInt(e.target.value) || 60 })}
+            onChange={(e) =>
+              setOptions({
+                ...options,
+                minViralScore: parseInt(e.target.value) || 60,
+              })
+            }
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
@@ -99,7 +115,12 @@ export default function CalendarAutofill({
             min="1"
             max="10"
             value={options.maxPostsPerDay}
-            onChange={(e) => setOptions({ ...options, maxPostsPerDay: parseInt(e.target.value) || 3 })}
+            onChange={(e) =>
+              setOptions({
+                ...options,
+                maxPostsPerDay: parseInt(e.target.value) || 3,
+              })
+            }
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
           />
         </div>
@@ -111,7 +132,9 @@ export default function CalendarAutofill({
           <input
             type="text"
             value={options.timezone}
-            onChange={(e) => setOptions({ ...options, timezone: e.target.value })}
+            onChange={(e) =>
+              setOptions({ ...options, timezone: e.target.value })
+            }
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
             placeholder="America/New_York"
           />
@@ -129,7 +152,7 @@ export default function CalendarAutofill({
             disabled={loading}
             className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
           >
-            {loading ? 'Loading...' : 'Preview Autofill'}
+            {loading ? "Loading..." : "Preview Autofill"}
           </button>
         </div>
 
@@ -146,7 +169,9 @@ export default function CalendarAutofill({
                   key={idx}
                   className="p-2 bg-gray-50 dark:bg-gray-700 rounded text-sm"
                 >
-                  <div className="font-medium text-gray-900 dark:text-white">{suggestion.title}</div>
+                  <div className="font-medium text-gray-900 dark:text-white">
+                    {suggestion.title}
+                  </div>
                   <div className="text-gray-600 dark:text-gray-400">
                     {new Date(suggestion.scheduledAt).toLocaleString()}
                   </div>
@@ -163,7 +188,7 @@ export default function CalendarAutofill({
               disabled={loading}
               className="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50"
             >
-              {loading ? 'Scheduling...' : 'Apply Autofill'}
+              {loading ? "Scheduling..." : "Apply Autofill"}
             </button>
           </div>
         )}
@@ -171,7 +196,8 @@ export default function CalendarAutofill({
         {showPreview && preview.length === 0 && (
           <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded">
             <p className="text-sm text-yellow-800 dark:text-yellow-200">
-              No ideas found matching the criteria. Try lowering the minimum viral score or check if you have unscheduled ideas.
+              No ideas found matching the criteria. Try lowering the minimum
+              viral score or check if you have unscheduled ideas.
             </p>
           </div>
         )}
@@ -179,6 +205,3 @@ export default function CalendarAutofill({
     </div>
   );
 }
-
-
-

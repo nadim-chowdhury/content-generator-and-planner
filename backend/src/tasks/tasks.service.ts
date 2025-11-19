@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTaskDto } from './dto/create-task.dto';
 import { UpdateTaskDto } from './dto/update-task.dto';
@@ -73,10 +77,7 @@ export class TasksService {
 
     return this.prisma.task.findMany({
       where,
-      orderBy: [
-        { deadline: 'asc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ deadline: 'asc' }, { createdAt: 'desc' }],
     });
   }
 
@@ -114,14 +115,20 @@ export class TasksService {
     };
 
     // Set completedAt when status changes to COMPLETED
-    if (dto.status === TaskStatus.COMPLETED && task.status !== TaskStatus.COMPLETED) {
+    if (
+      dto.status === TaskStatus.COMPLETED &&
+      task.status !== TaskStatus.COMPLETED
+    ) {
       updateData.completedAt = new Date();
-    } else if (dto.status !== TaskStatus.COMPLETED && task.status === TaskStatus.COMPLETED) {
+    } else if (
+      dto.status !== TaskStatus.COMPLETED &&
+      task.status === TaskStatus.COMPLETED
+    ) {
       updateData.completedAt = null;
     }
 
     // Remove undefined values
-    Object.keys(updateData).forEach(key => {
+    Object.keys(updateData).forEach((key) => {
       if (updateData[key] === undefined) {
         delete updateData[key];
       }
@@ -169,7 +176,11 @@ export class TasksService {
     return { message: `${taskIds.length} tasks deleted successfully` };
   }
 
-  async bulkUpdateStatus(userId: string, taskIds: string[], status: TaskStatus) {
+  async bulkUpdateStatus(
+    userId: string,
+    taskIds: string[],
+    status: TaskStatus,
+  ) {
     const tasks = await this.prisma.task.findMany({
       where: {
         id: { in: taskIds },
@@ -199,6 +210,3 @@ export class TasksService {
     return { message: `${taskIds.length} tasks updated successfully` };
   }
 }
-
-
-

@@ -1,4 +1,10 @@
-import { Injectable, CanActivate, ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { IpThrottleService } from '../services/ip-throttle.service';
 
 @Injectable()
@@ -35,6 +41,3 @@ export class IpThrottleGuard implements CanActivate {
     );
   }
 }
-
-
-

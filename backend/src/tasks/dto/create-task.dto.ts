@@ -1,4 +1,13 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsDateString, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsArray,
+  IsDateString,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class CreateTaskDto {
   @IsString()
@@ -37,6 +46,3 @@ export class CreateTaskDto {
   @IsOptional()
   notes?: string;
 }
-
-
-

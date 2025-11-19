@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, IsOptional, IsArray, IsEnum, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsArray,
+  IsEnum,
+  IsDateString,
+} from 'class-validator';
 
 export enum KanbanStage {
   IDEAS = 'IDEAS',
@@ -44,6 +51,3 @@ export class CreateKanbanCardDto {
   @IsOptional()
   assignedTo?: string[];
 }
-
-
-

@@ -1,33 +1,39 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { authApi } from '@/lib/auth';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Sparkles, Mail, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { authApi } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Sparkles, Mail, CheckCircle2, ArrowLeft } from "lucide-react";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       await authApi.forgotPassword(email);
       setSuccess(true);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to send reset email');
+      setError(err.response?.data?.message || "Failed to send reset email");
     } finally {
       setLoading(false);
     }
@@ -43,9 +49,12 @@ export default function ForgotPasswordPage() {
                 <Sparkles className="w-6 h-6 text-primary-foreground" />
               </div>
             </div>
-            <CardTitle className="text-2xl font-bold">Reset your password</CardTitle>
+            <CardTitle className="text-2xl font-bold">
+              Reset your password
+            </CardTitle>
             <CardDescription>
-              Enter your email address and we'll send you a link to reset your password
+              Enter your email address and we'll send you a link to reset your
+              password
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -56,10 +65,16 @@ export default function ForgotPasswordPage() {
                   <div className="space-y-2">
                     <p className="font-semibold">Check Your Email</p>
                     <p className="text-sm">
-                      If an account exists with that email, we've sent you a password reset link. 
-                      Please check your inbox and follow the instructions.
+                      If an account exists with that email, we've sent you a
+                      password reset link. Please check your inbox and follow
+                      the instructions.
                     </p>
-                    <Button variant="outline" size="sm" className="mt-2" asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="mt-2"
+                      asChild
+                    >
                       <Link href="/login">
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to Login
@@ -93,7 +108,7 @@ export default function ForgotPasswordPage() {
                 )}
 
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? 'Sending...' : 'Send Reset Link'}
+                  {loading ? "Sending..." : "Send Reset Link"}
                 </Button>
 
                 <div className="text-center">

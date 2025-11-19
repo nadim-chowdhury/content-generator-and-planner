@@ -10,5 +10,3 @@ import { TeamsModule } from '../teams/teams.module';
   exports: [CollaborationGateway, CollaborationService],
 })
 export class CollaborationModule {}
-
-

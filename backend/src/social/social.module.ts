@@ -23,4 +23,3 @@ import { ConfigModule } from '@nestjs/config';
   exports: [SocialService],
 })
 export class SocialModule {}
-

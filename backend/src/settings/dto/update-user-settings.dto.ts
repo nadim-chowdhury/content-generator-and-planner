@@ -1,6 +1,25 @@
-import { IsString, IsOptional, IsArray, IsBoolean, IsInt, Min, Max, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsArray,
+  IsBoolean,
+  IsInt,
+  Min,
+  Max,
+  IsEnum,
+} from 'class-validator';
 // import { SocialPlatform } from '@prisma/client';
-type SocialPlatform = 'FACEBOOK' | 'TWITTER' | 'INSTAGRAM' | 'THREADS' | 'LINKEDIN' | 'REDDIT' | 'QUORA' | 'PINTEREST' | 'TIKTOK' | 'YOUTUBE';
+type SocialPlatform =
+  | 'FACEBOOK'
+  | 'TWITTER'
+  | 'INSTAGRAM'
+  | 'THREADS'
+  | 'LINKEDIN'
+  | 'REDDIT'
+  | 'QUORA'
+  | 'PINTEREST'
+  | 'TIKTOK'
+  | 'YOUTUBE';
 
 export class UpdateUserSettingsDto {
   @IsOptional()
@@ -61,4 +80,3 @@ export class UpdateUserSettingsDto {
   @IsEnum(['light', 'dark', 'auto'])
   theme?: 'light' | 'dark' | 'auto';
 }
-

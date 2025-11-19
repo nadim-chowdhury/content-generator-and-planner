@@ -9,8 +9,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 @Module({
   imports: [PrismaModule],
   controllers: [AnalyticsController],
-  providers: [AnalyticsService, PerformanceCalculatorService, PredictionService, UserAnalyticsService],
+  providers: [
+    AnalyticsService,
+    PerformanceCalculatorService,
+    PredictionService,
+    UserAnalyticsService,
+  ],
   exports: [AnalyticsService, UserAnalyticsService],
 })
 export class AnalyticsModule {}
-

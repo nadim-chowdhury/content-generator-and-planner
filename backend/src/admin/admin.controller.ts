@@ -10,7 +10,6 @@ import {
   Query,
   NotFoundException,
   BadRequestException,
-  ForbiddenException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserRole, UserPlan } from '@prisma/client';
@@ -220,7 +219,9 @@ export class AdminController {
 
   @Get('analytics/active-users')
   getActiveUsers(@Query('days') days?: string) {
-    return this.businessAnalytics.getActiveUsers(days ? parseInt(days, 10) : 30);
+    return this.businessAnalytics.getActiveUsers(
+      days ? parseInt(days, 10) : 30,
+    );
   }
 
   @Get('analytics/mrr')
@@ -235,22 +236,30 @@ export class AdminController {
 
   @Get('analytics/daily-signups')
   getDailySignups(@Query('days') days?: string) {
-    return this.businessAnalytics.getDailySignups(days ? parseInt(days, 10) : 30);
+    return this.businessAnalytics.getDailySignups(
+      days ? parseInt(days, 10) : 30,
+    );
   }
 
   @Get('analytics/churn-rate')
   getChurnRate(@Query('days') days?: string) {
-    return this.businessAnalytics.calculateChurnRate(days ? parseInt(days, 10) : 30);
+    return this.businessAnalytics.calculateChurnRate(
+      days ? parseInt(days, 10) : 30,
+    );
   }
 
   @Get('analytics/conversion-rate')
   getConversionRate(@Query('days') days?: string) {
-    return this.businessAnalytics.calculateConversionRate(days ? parseInt(days, 10) : 30);
+    return this.businessAnalytics.calculateConversionRate(
+      days ? parseInt(days, 10) : 30,
+    );
   }
 
   @Get('analytics/top-niches')
   getTopNiches(@Query('limit') limit?: string) {
-    return this.businessAnalytics.getTopNiches(limit ? parseInt(limit, 10) : 10);
+    return this.businessAnalytics.getTopNiches(
+      limit ? parseInt(limit, 10) : 10,
+    );
   }
 
   // User Management Endpoints
@@ -329,7 +338,10 @@ export class AdminController {
     @Param('userId') userId: string,
     @Query('limit') limit: string = '10',
   ) {
-    return this.billingService.getUserInvoices(userId, parseInt(limit, 10) || 10);
+    return this.billingService.getUserInvoices(
+      userId,
+      parseInt(limit, 10) || 10,
+    );
   }
 
   @Post('billing/refund')
@@ -376,7 +388,8 @@ export class AdminController {
   @Put('settings/quotas/:plan')
   async updateQuotaSettings(
     @Param('plan') plan: 'free' | 'pro' | 'agency',
-    @Body() settings: { dailyGenerations?: number; monthlyGenerations?: number },
+    @Body()
+    settings: { dailyGenerations?: number; monthlyGenerations?: number },
   ) {
     return this.platformSettings.updateQuotaSettings(plan, settings);
   }
@@ -387,11 +400,14 @@ export class AdminController {
   }
 
   @Put('settings/stripe')
-  async updateStripeProductIds(@Body() settings: {
-    proMonthlyPriceId?: string;
-    proYearlyPriceId?: string;
-    agencyPriceId?: string;
-  }) {
+  async updateStripeProductIds(
+    @Body()
+    settings: {
+      proMonthlyPriceId?: string;
+      proYearlyPriceId?: string;
+      agencyPriceId?: string;
+    },
+  ) {
     return this.platformSettings.updateStripeProductIds(settings);
   }
 
@@ -463,7 +479,13 @@ export class AdminController {
     @Body('action') action: string = 'FLAG',
     @CurrentUser() admin: any,
   ) {
-    return this.contentModeration.addBlacklistKeyword(keyword, category, severity, action, admin.id);
+    return this.contentModeration.addBlacklistKeyword(
+      keyword,
+      category,
+      severity,
+      action,
+      admin.id,
+    );
   }
 
   @Delete('moderation/blacklist/:keywordId')
@@ -474,7 +496,8 @@ export class AdminController {
   @Put('moderation/blacklist/:keywordId')
   async updateBlacklistKeyword(
     @Param('keywordId') keywordId: string,
-    @Body() updates: {
+    @Body()
+    updates: {
       category?: string;
       severity?: string;
       action?: string;
@@ -488,16 +511,23 @@ export class AdminController {
   @Get('analytics/dau')
   async getDailyActiveUsers(@Query('date') date?: string) {
     const targetDate = date ? new Date(date) : undefined;
-    return { count: await this.enhancedAnalytics.getDailyActiveUsers(targetDate) };
+    return {
+      count: await this.enhancedAnalytics.getDailyActiveUsers(targetDate),
+    };
   }
 
   @Get('analytics/dau/trend')
   async getDailyActiveUsersTrend(@Query('days') days: string = '30') {
-    return this.enhancedAnalytics.getDailyActiveUsersTrend(parseInt(days, 10) || 30);
+    return this.enhancedAnalytics.getDailyActiveUsersTrend(
+      parseInt(days, 10) || 30,
+    );
   }
 
   @Get('analytics/mau')
-  async getMonthlyActiveUsers(@Query('year') year?: string, @Query('month') month?: string) {
+  async getMonthlyActiveUsers(
+    @Query('year') year?: string,
+    @Query('month') month?: string,
+  ) {
     return {
       count: await this.enhancedAnalytics.getMonthlyActiveUsers(
         year ? parseInt(year, 10) : undefined,
@@ -508,7 +538,9 @@ export class AdminController {
 
   @Get('analytics/mau/trend')
   async getMonthlyActiveUsersTrend(@Query('months') months: string = '12') {
-    return this.enhancedAnalytics.getMonthlyActiveUsersTrend(parseInt(months, 10) || 12);
+    return this.enhancedAnalytics.getMonthlyActiveUsersTrend(
+      parseInt(months, 10) || 12,
+    );
   }
 
   @Get('analytics/ltv')
@@ -518,7 +550,9 @@ export class AdminController {
 
   @Get('analytics/social-sharing')
   async getSocialSharingMetrics(@Query('days') days: string = '30') {
-    return this.enhancedAnalytics.getSocialSharingMetrics(parseInt(days, 10) || 30);
+    return this.enhancedAnalytics.getSocialSharingMetrics(
+      parseInt(days, 10) || 30,
+    );
   }
 
   @Get('analytics/comprehensive')
@@ -526,4 +560,3 @@ export class AdminController {
     return this.enhancedAnalytics.getComprehensiveReport();
   }
 }
-

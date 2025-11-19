@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface QueueStats {
   postingReminders: {
@@ -54,16 +54,14 @@ export const queueApi = {
     language?: string;
   }): Promise<{ jobId: string; message: string }> => {
     const { data: result } = await api.post<{ jobId: string; message: string }>(
-      '/api/queue/batch-generation',
-      data,
+      "/api/queue/batch-generation",
+      data
     );
     return result;
   },
 
   getQueueStats: async (): Promise<QueueStats> => {
-    const { data } = await api.get<QueueStats>('/api/queue/stats');
+    const { data } = await api.get<QueueStats>("/api/queue/stats");
     return data;
   },
 };
-
-

@@ -14,8 +14,11 @@ export class EmailService {
     private configService: ConfigService,
     private queueService: QueueService,
   ) {
-    this.fromEmail = this.configService.get<string>('SMTP_FROM_EMAIL') || 'noreply@example.com';
-    this.frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
+    this.fromEmail =
+      this.configService.get<string>('SMTP_FROM_EMAIL') ||
+      'noreply@example.com';
+    this.frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3001';
 
     // Create SMTP transporter
     this.transporter = nodemailer.createTransport({
@@ -59,7 +62,10 @@ export class EmailService {
       await this.transporter.sendMail(mailOptions);
       this.logger.log(`Email sent to ${to}: ${subject}`);
     } catch (error: any) {
-      this.logger.error(`Failed to send email to ${to}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to send email to ${to}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -88,7 +94,11 @@ export class EmailService {
   /**
    * Send welcome email
    */
-  async sendWelcomeEmail(userEmail: string, userName: string, verificationToken: string): Promise<void> {
+  async sendWelcomeEmail(
+    userEmail: string,
+    userName: string,
+    verificationToken: string,
+  ): Promise<void> {
     const verificationLink = `${this.frontendUrl}/auth/verify-email?token=${verificationToken}`;
     const html = this.getWelcomeEmailTemplate(userName, verificationLink);
     await this.sendEmail(
@@ -101,35 +111,41 @@ export class EmailService {
   /**
    * Send email verification email
    */
-  async sendVerificationEmail(userEmail: string, verificationToken: string): Promise<void> {
+  async sendVerificationEmail(
+    userEmail: string,
+    verificationToken: string,
+  ): Promise<void> {
     const verificationLink = `${this.frontendUrl}/auth/verify-email?token=${verificationToken}`;
     const html = this.getVerificationEmailTemplate(verificationLink);
-    await this.sendEmail(
-      userEmail,
-      'Verify Your Email Address',
-      html,
-    );
+    await this.sendEmail(userEmail, 'Verify Your Email Address', html);
   }
 
   /**
    * Send password reset email
    */
-  async sendPasswordResetEmail(userEmail: string, resetToken: string): Promise<void> {
+  async sendPasswordResetEmail(
+    userEmail: string,
+    resetToken: string,
+  ): Promise<void> {
     const resetLink = `${this.frontendUrl}/auth/reset-password?token=${resetToken}`;
     const html = this.getPasswordResetEmailTemplate(resetLink);
-    await this.sendEmail(
-      userEmail,
-      'Reset Your Password',
-      html,
-    );
+    await this.sendEmail(userEmail, 'Reset Your Password', html);
   }
 
   /**
    * Send trial ending email
    */
-  async sendTrialEndingEmail(userEmail: string, userName: string, daysRemaining: number): Promise<void> {
+  async sendTrialEndingEmail(
+    userEmail: string,
+    userName: string,
+    daysRemaining: number,
+  ): Promise<void> {
     const upgradeLink = `${this.frontendUrl}/pricing`;
-    const html = this.getTrialEndingEmailTemplate(userName, daysRemaining, upgradeLink);
+    const html = this.getTrialEndingEmailTemplate(
+      userName,
+      daysRemaining,
+      upgradeLink,
+    );
     await this.sendEmail(
       userEmail,
       `Your Trial Ends in ${daysRemaining} Day${daysRemaining !== 1 ? 's' : ''}`,
@@ -147,12 +163,13 @@ export class EmailService {
     amount: number,
     invoiceUrl?: string,
   ): Promise<void> {
-    const html = this.getPaymentSuccessEmailTemplate(userName, planName, amount, invoiceUrl);
-    await this.sendEmail(
-      userEmail,
-      'Payment Successful - Thank You!',
-      html,
+    const html = this.getPaymentSuccessEmailTemplate(
+      userName,
+      planName,
+      amount,
+      invoiceUrl,
     );
+    await this.sendEmail(userEmail, 'Payment Successful - Thank You!', html);
   }
 
   /**
@@ -165,7 +182,12 @@ export class EmailService {
     platform: string,
     scheduledDate: Date,
   ): Promise<void> {
-    const html = this.getPostingReminderEmailTemplate(userName, ideaTitle, platform, scheduledDate);
+    const html = this.getPostingReminderEmailTemplate(
+      userName,
+      ideaTitle,
+      platform,
+      scheduledDate,
+    );
     await this.sendEmail(
       userEmail,
       `Reminder: Post "${ideaTitle}" on ${platform}`,
@@ -176,7 +198,10 @@ export class EmailService {
   /**
    * Email Templates
    */
-  private getWelcomeEmailTemplate(userName: string, verificationLink: string): string {
+  private getWelcomeEmailTemplate(
+    userName: string,
+    verificationLink: string,
+  ): string {
     return `
       <!DOCTYPE html>
       <html>
@@ -266,7 +291,11 @@ export class EmailService {
     `;
   }
 
-  private getTrialEndingEmailTemplate(userName: string, daysRemaining: number, upgradeLink: string): string {
+  private getTrialEndingEmailTemplate(
+    userName: string,
+    daysRemaining: number,
+    upgradeLink: string,
+  ): string {
     return `
       <!DOCTYPE html>
       <html>
@@ -403,5 +432,3 @@ export class EmailService {
       .trim();
   }
 }
-
-

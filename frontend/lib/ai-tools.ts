@@ -1,9 +1,9 @@
-import api from './api';
+import api from "./api";
 
 // Script Generator
 export interface ScriptGeneratorDto {
   topic: string;
-  type: 'SHORT' | 'LONG';
+  type: "SHORT" | "LONG";
   platform?: string;
   tone?: string;
   targetDuration?: number;
@@ -138,7 +138,7 @@ export interface TrendingTopicsDto {
   niche: string;
   platform?: string;
   count?: number;
-  timeFrame?: 'daily' | 'weekly' | 'monthly';
+  timeFrame?: "daily" | "weekly" | "monthly";
   language?: string;
 }
 
@@ -212,64 +212,105 @@ export interface ViralScoreResult {
 export const aiToolsApi = {
   // Script Generator
   generateScript: async (dto: ScriptGeneratorDto): Promise<ScriptResult> => {
-    const { data } = await api.post<ScriptResult>('/api/ai-tools/script-generator', dto);
+    const { data } = await api.post<ScriptResult>(
+      "/api/ai-tools/script-generator",
+      dto
+    );
     return data;
   },
 
   // Rewrite Tool
   rewriteContent: async (dto: RewriteDto): Promise<RewriteResult> => {
-    const { data } = await api.post<RewriteResult>('/api/ai-tools/rewrite', dto);
+    const { data } = await api.post<RewriteResult>(
+      "/api/ai-tools/rewrite",
+      dto
+    );
     return data;
   },
 
   // Idea Elaboration
-  elaborateIdea: async (dto: ElaborateIdeaDto): Promise<ElaborateIdeaResult> => {
-    const { data } = await api.post<ElaborateIdeaResult>('/api/ai-tools/elaborate-idea', dto);
+  elaborateIdea: async (
+    dto: ElaborateIdeaDto
+  ): Promise<ElaborateIdeaResult> => {
+    const { data } = await api.post<ElaborateIdeaResult>(
+      "/api/ai-tools/elaborate-idea",
+      dto
+    );
     return data;
   },
 
   // Title Optimization
-  optimizeTitle: async (dto: OptimizeTitleDto): Promise<OptimizeTitleResult> => {
-    const { data } = await api.post<OptimizeTitleResult>('/api/ai-tools/optimize-title', dto);
+  optimizeTitle: async (
+    dto: OptimizeTitleDto
+  ): Promise<OptimizeTitleResult> => {
+    const { data } = await api.post<OptimizeTitleResult>(
+      "/api/ai-tools/optimize-title",
+      dto
+    );
     return data;
   },
 
   // Calendar Auto-fill
-  autofillCalendar: async (dto: CalendarAutofillDto): Promise<CalendarAutofillResult> => {
-    const { data } = await api.post<CalendarAutofillResult>('/api/ai-tools/calendar-autofill', dto);
+  autofillCalendar: async (
+    dto: CalendarAutofillDto
+  ): Promise<CalendarAutofillResult> => {
+    const { data } = await api.post<CalendarAutofillResult>(
+      "/api/ai-tools/calendar-autofill",
+      dto
+    );
     return data;
   },
 
   // Competitor Analysis
-  analyzeCompetitors: async (dto: CompetitorAnalysisDto): Promise<CompetitorAnalysisResult> => {
-    const { data } = await api.post<CompetitorAnalysisResult>('/api/ai-tools/competitor-analysis', dto);
+  analyzeCompetitors: async (
+    dto: CompetitorAnalysisDto
+  ): Promise<CompetitorAnalysisResult> => {
+    const { data } = await api.post<CompetitorAnalysisResult>(
+      "/api/ai-tools/competitor-analysis",
+      dto
+    );
     return data;
   },
 
   // Niche Research
-  researchNiche: async (dto: NicheResearchDto): Promise<NicheResearchResult> => {
-    const { data } = await api.post<NicheResearchResult>('/api/ai-tools/niche-research', dto);
+  researchNiche: async (
+    dto: NicheResearchDto
+  ): Promise<NicheResearchResult> => {
+    const { data } = await api.post<NicheResearchResult>(
+      "/api/ai-tools/niche-research",
+      dto
+    );
     return data;
   },
 
   // Trending Topics
-  generateTrendingTopics: async (dto: TrendingTopicsDto): Promise<TrendingTopicsResult> => {
-    const { data } = await api.post<TrendingTopicsResult>('/api/ai-tools/trending-topics', dto);
+  generateTrendingTopics: async (
+    dto: TrendingTopicsDto
+  ): Promise<TrendingTopicsResult> => {
+    const { data } = await api.post<TrendingTopicsResult>(
+      "/api/ai-tools/trending-topics",
+      dto
+    );
     return data;
   },
 
   // Audience Persona
-  buildAudiencePersona: async (dto: AudiencePersonaDto): Promise<AudiencePersonaResult> => {
-    const { data } = await api.post<AudiencePersonaResult>('/api/ai-tools/audience-persona', dto);
+  buildAudiencePersona: async (
+    dto: AudiencePersonaDto
+  ): Promise<AudiencePersonaResult> => {
+    const { data } = await api.post<AudiencePersonaResult>(
+      "/api/ai-tools/audience-persona",
+      dto
+    );
     return data;
   },
 
   // Viral Score Predictor
   predictViralScore: async (dto: ViralScoreDto): Promise<ViralScoreResult> => {
-    const { data } = await api.post<ViralScoreResult>('/api/ai-tools/viral-score', dto);
+    const { data } = await api.post<ViralScoreResult>(
+      "/api/ai-tools/viral-score",
+      dto
+    );
     return data;
   },
 };
-
-
-

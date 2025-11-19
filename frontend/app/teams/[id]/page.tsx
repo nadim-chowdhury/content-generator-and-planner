@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useAuthStore } from '@/store/auth-store';
-import { teamsApi, Team, TeamMember } from '@/lib/teams';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import RoleGuard from '@/components/RoleGuard';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth-store";
+import { teamsApi, Team, TeamMember } from "@/lib/teams";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import RoleGuard from "@/components/RoleGuard";
 
 export default function TeamDetailPage() {
   const params = useParams();
@@ -15,10 +15,12 @@ export default function TeamDetailPage() {
   const teamId = params.id as string;
   const [team, setTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showInviteModal, setShowInviteModal] = useState(false);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN'>('EDITOR');
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteRole, setInviteRole] = useState<
+    "VIEWER" | "EDITOR" | "MANAGER" | "ADMIN"
+  >("EDITOR");
 
   useEffect(() => {
     loadTeam();
@@ -30,7 +32,7 @@ export default function TeamDetailPage() {
       const data = await teamsApi.getTeam(teamId);
       setTeam(data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load team');
+      setError(err.response?.data?.message || "Failed to load team");
     } finally {
       setLoading(false);
     }
@@ -40,62 +42,69 @@ export default function TeamDetailPage() {
     e.preventDefault();
     try {
       await teamsApi.inviteMember(teamId, inviteEmail, inviteRole);
-      setInviteEmail('');
-      setInviteRole('EDITOR');
+      setInviteEmail("");
+      setInviteRole("EDITOR");
       setShowInviteModal(false);
       await loadTeam();
-      alert('Invitation sent!');
+      alert("Invitation sent!");
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to send invitation');
+      alert(err.response?.data?.message || "Failed to send invitation");
     }
   };
 
-  const handleUpdateRole = async (memberId: string, role: 'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN') => {
+  const handleUpdateRole = async (
+    memberId: string,
+    role: "VIEWER" | "EDITOR" | "MANAGER" | "ADMIN"
+  ) => {
     try {
       await teamsApi.updateMemberRole(teamId, memberId, role);
       await loadTeam();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update role');
+      alert(err.response?.data?.message || "Failed to update role");
     }
   };
 
   const handleRemoveMember = async (memberId: string) => {
-    if (!confirm('Are you sure you want to remove this member?')) {
+    if (!confirm("Are you sure you want to remove this member?")) {
       return;
     }
     try {
       await teamsApi.removeMember(teamId, memberId);
       await loadTeam();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to remove member');
+      alert(err.response?.data?.message || "Failed to remove member");
     }
   };
 
   const isOwner = team?.ownerId === user?.id;
-  const isTeamAdmin = team?.members.some(m => m.userId === user?.id && (m.role === 'ADMIN' || m.role === 'MANAGER'));
+  const isTeamAdmin = team?.members.some(
+    (m) => m.userId === user?.id && (m.role === "ADMIN" || m.role === "MANAGER")
+  );
 
   return (
     <ProtectedRoute>
-      <RoleGuard allowedPlans={['AGENCY']}>
+      <RoleGuard allowedPlans={["AGENCY"]}>
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <Navbar />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-8">
               <button
-                onClick={() => router.push('/teams')}
+                onClick={() => router.push("/teams")}
                 className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500 mb-4"
               >
                 ← Back to Teams
               </button>
               <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {team?.name || 'Team Details'}
+                {team?.name || "Team Details"}
               </h1>
             </div>
 
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-400">Loading team...</p>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">
+                  Loading team...
+                </p>
               </div>
             ) : error ? (
               <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 px-4 py-3 rounded">
@@ -162,13 +171,16 @@ export default function TeamDetailPage() {
                                 ) : (
                                   <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                                     <span className="text-gray-500 dark:text-gray-400">
-                                      {member.user.name?.charAt(0) || member.user.email.charAt(0).toUpperCase()}
+                                      {member.user.name?.charAt(0) ||
+                                        member.user.email
+                                          .charAt(0)
+                                          .toUpperCase()}
                                     </span>
                                   </div>
                                 )}
                                 <div className="ml-4">
                                   <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                    {member.user.name || 'No name'}
+                                    {member.user.name || "No name"}
                                   </div>
                                   <div className="text-sm text-gray-500 dark:text-gray-400">
                                     {member.user.email}
@@ -177,10 +189,20 @@ export default function TeamDetailPage() {
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              {(isOwner || isTeamAdmin) && member.userId !== team.ownerId ? (
+                              {(isOwner || isTeamAdmin) &&
+                              member.userId !== team.ownerId ? (
                                 <select
                                   value={member.role}
-                                  onChange={(e) => handleUpdateRole(member.id, e.target.value as 'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN')}
+                                  onChange={(e) =>
+                                    handleUpdateRole(
+                                      member.id,
+                                      e.target.value as
+                                        | "VIEWER"
+                                        | "EDITOR"
+                                        | "MANAGER"
+                                        | "ADMIN"
+                                    )
+                                  }
                                   className="px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                                 >
                                   <option value="VIEWER">VIEWER</option>
@@ -189,12 +211,17 @@ export default function TeamDetailPage() {
                                   <option value="ADMIN">ADMIN</option>
                                 </select>
                               ) : (
-                                <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                                  member.role === 'ADMIN' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
-                                  member.role === 'MANAGER' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                                  member.role === 'EDITOR' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' :
-                                  'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                                }`}>
+                                <span
+                                  className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                    member.role === "ADMIN"
+                                      ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                                      : member.role === "MANAGER"
+                                      ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                      : member.role === "EDITOR"
+                                      ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                                      : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                                  }`}
+                                >
                                   {member.role}
                                 </span>
                               )}
@@ -204,14 +231,17 @@ export default function TeamDetailPage() {
                             </td>
                             {(isOwner || isTeamAdmin) && (
                               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                {member.userId !== team.ownerId && member.userId !== user?.id && (
-                                  <button
-                                    onClick={() => handleRemoveMember(member.id)}
-                                    className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                                  >
-                                    Remove
-                                  </button>
-                                )}
+                                {member.userId !== team.ownerId &&
+                                  member.userId !== user?.id && (
+                                    <button
+                                      onClick={() =>
+                                        handleRemoveMember(member.id)
+                                      }
+                                      className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                                    >
+                                      Remove
+                                    </button>
+                                  )}
                               </td>
                             )}
                           </tr>
@@ -250,12 +280,26 @@ export default function TeamDetailPage() {
                       </label>
                       <select
                         value={inviteRole}
-                        onChange={(e) => setInviteRole(e.target.value as 'VIEWER' | 'EDITOR' | 'MANAGER' | 'ADMIN')}
+                        onChange={(e) =>
+                          setInviteRole(
+                            e.target.value as
+                              | "VIEWER"
+                              | "EDITOR"
+                              | "MANAGER"
+                              | "ADMIN"
+                          )
+                        }
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
                       >
-                        <option value="VIEWER">VIEWER - Can only view content</option>
-                        <option value="EDITOR">EDITOR - Can create and edit content</option>
-                        <option value="MANAGER">MANAGER - Can manage team members</option>
+                        <option value="VIEWER">
+                          VIEWER - Can only view content
+                        </option>
+                        <option value="EDITOR">
+                          EDITOR - Can create and edit content
+                        </option>
+                        <option value="MANAGER">
+                          MANAGER - Can manage team members
+                        </option>
                         <option value="ADMIN">ADMIN - Full access</option>
                       </select>
                     </div>
@@ -264,8 +308,8 @@ export default function TeamDetailPage() {
                         type="button"
                         onClick={() => {
                           setShowInviteModal(false);
-                          setInviteEmail('');
-                          setInviteRole('EDITOR');
+                          setInviteEmail("");
+                          setInviteRole("EDITOR");
                         }}
                         className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
                       >
@@ -288,5 +332,3 @@ export default function TeamDetailPage() {
     </ProtectedRoute>
   );
 }
-
-

@@ -1,25 +1,29 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { blogApi, BlogPost } from '@/lib/blog';
-import Navbar from '@/components/Navbar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { 
-  BookOpen, 
-  Calendar, 
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { blogApi, BlogPost } from "@/lib/blog";
+import Navbar from "@/components/Navbar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  BookOpen,
+  Calendar,
   Eye,
   ChevronLeft,
-  ChevronRight
-} from 'lucide-react';
+  ChevronRight,
+} from "lucide-react";
 
 export default function BlogPage() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [categories, setCategories] = useState<Array<{ category: string; count: number }>>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | undefined>();
+  const [categories, setCategories] = useState<
+    Array<{ category: string; count: number }>
+  >([]);
+  const [selectedCategory, setSelectedCategory] = useState<
+    string | undefined
+  >();
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -39,17 +43,17 @@ export default function BlogPage() {
       setTotalPages(postsData.pagination.pages);
       setCategories(categoriesData);
     } catch (err) {
-      console.error('Failed to load blog posts:', err);
+      console.error("Failed to load blog posts:", err);
     } finally {
       setLoading(false);
     }
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -71,7 +75,7 @@ export default function BlogPage() {
         {categories.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-8 justify-center">
             <Button
-              variant={!selectedCategory ? 'default' : 'outline'}
+              variant={!selectedCategory ? "default" : "outline"}
               size="sm"
               onClick={() => setSelectedCategory(undefined)}
             >
@@ -80,7 +84,9 @@ export default function BlogPage() {
             {categories.map((cat) => (
               <Button
                 key={cat.category}
-                variant={selectedCategory === cat.category ? 'default' : 'outline'}
+                variant={
+                  selectedCategory === cat.category ? "default" : "outline"
+                }
                 size="sm"
                 onClick={() => setSelectedCategory(cat.category)}
               >
@@ -142,7 +148,9 @@ export default function BlogPage() {
                       <div className="flex items-center justify-between text-sm text-muted-foreground">
                         <div className="flex items-center gap-1">
                           <Calendar className="w-4 h-4" />
-                          <span>{formatDate(post.publishedAt || post.createdAt)}</span>
+                          <span>
+                            {formatDate(post.publishedAt || post.createdAt)}
+                          </span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Eye className="w-4 h-4" />

@@ -16,7 +16,10 @@ export class AiTasksService {
   /**
    * Generate AI tasks for a card based on its content
    */
-  async generateTasksForCard(cardId: string, userId: string): Promise<Array<{ text: string; priority: string }>> {
+  async generateTasksForCard(
+    cardId: string,
+    userId: string,
+  ): Promise<Array<{ text: string; priority: string }>> {
     const card = await this.prisma.kanbanCard.findFirst({
       where: { id: cardId, userId },
       include: {
@@ -54,7 +57,8 @@ Focus on tasks relevant to the current stage and content type.`;
         messages: [
           {
             role: 'system',
-            content: 'I need help breaking down this content creation task into actionable steps. Give me real tasks that a creator would actually do, not generic productivity advice. Make them specific and useful.',
+            content:
+              'I need help breaking down this content creation task into actionable steps. Give me real tasks that a creator would actually do, not generic productivity advice. Make them specific and useful.',
           },
           {
             role: 'user',
@@ -82,8 +86,13 @@ Focus on tasks relevant to the current stage and content type.`;
   /**
    * Get fallback tasks based on stage
    */
-  private getFallbackTasks(stage: string): Array<{ text: string; priority: string }> {
-    const stageTasks: Record<string, Array<{ text: string; priority: string }>> = {
+  private getFallbackTasks(
+    stage: string,
+  ): Array<{ text: string; priority: string }> {
+    const stageTasks: Record<
+      string,
+      Array<{ text: string; priority: string }>
+    > = {
       IDEAS: [
         { text: 'Research trending topics', priority: 'high' },
         { text: 'Validate idea with audience', priority: 'medium' },
@@ -120,6 +129,3 @@ Focus on tasks relevant to the current stage and content type.`;
     return stageTasks[stage] || [];
   }
 }
-
-
-

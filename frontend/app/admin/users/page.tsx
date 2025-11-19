@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { adminApi, User } from '@/lib/admin';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import RoleGuard from '@/components/RoleGuard';
+import { useState, useEffect } from "react";
+import { useAuthStore } from "@/store/auth-store";
+import { adminApi, User } from "@/lib/admin";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import RoleGuard from "@/components/RoleGuard";
 
 export default function AdminUsersPage() {
   const { user: currentUser } = useAuthStore();
@@ -13,11 +13,11 @@ export default function AdminUsersPage() {
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [bonusCredits, setBonusCredits] = useState<Record<string, string>>({});
-  const [banReason, setBanReason] = useState('');
+  const [banReason, setBanReason] = useState("");
   const [showBanModal, setShowBanModal] = useState(false);
   const [banningUser, setBanningUser] = useState<User | null>(null);
 
@@ -28,42 +28,60 @@ export default function AdminUsersPage() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const { users: usersData, pagination } = await adminApi.getAllUsers(page, 20);
+      const { users: usersData, pagination } = await adminApi.getAllUsers(
+        page,
+        20
+      );
       setUsers(usersData);
       setTotal(pagination.total);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load users');
+      setError(err.response?.data?.message || "Failed to load users");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdateRole = async (userId: string, role: 'USER' | 'ADMIN') => {
+  const handleUpdateRole = async (userId: string, role: "USER" | "ADMIN") => {
     try {
       const updatedUser = await adminApi.updateUserRole(userId, role);
       // Update the user in the list
-      setUsers(users.map(u => u.id === userId ? { ...u, role: updatedUser.role } : u));
+      setUsers(
+        users.map((u) =>
+          u.id === userId ? { ...u, role: updatedUser.role } : u
+        )
+      );
       setShowEditModal(false);
       setEditingUser(null);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update role');
+      alert(err.response?.data?.message || "Failed to update role");
     }
   };
 
-  const handleUpdatePlan = async (userId: string, plan: 'FREE' | 'PRO' | 'AGENCY') => {
+  const handleUpdatePlan = async (
+    userId: string,
+    plan: "FREE" | "PRO" | "AGENCY"
+  ) => {
     try {
       const updatedUser = await adminApi.updateUserPlan(userId, plan);
       // Update the user in the list
-      setUsers(users.map(u => u.id === userId ? { ...u, plan: updatedUser.plan } : u));
+      setUsers(
+        users.map((u) =>
+          u.id === userId ? { ...u, plan: updatedUser.plan } : u
+        )
+      );
       setShowEditModal(false);
       setEditingUser(null);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update plan');
+      alert(err.response?.data?.message || "Failed to update plan");
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
+    if (
+      !confirm(
+        "Are you sure you want to delete this user? This action cannot be undone."
+      )
+    ) {
       return;
     }
 
@@ -71,7 +89,7 @@ export default function AdminUsersPage() {
       await adminApi.deleteUser(userId);
       await loadUsers();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to delete user');
+      alert(err.response?.data?.message || "Failed to delete user");
     }
   };
 
@@ -81,14 +99,14 @@ export default function AdminUsersPage() {
       await loadUsers();
       setShowBanModal(false);
       setBanningUser(null);
-      setBanReason('');
+      setBanReason("");
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to ban user');
+      alert(err.response?.data?.message || "Failed to ban user");
     }
   };
 
   const handleUnbanUser = async (userId: string) => {
-    if (!confirm('Are you sure you want to unban this user?')) {
+    if (!confirm("Are you sure you want to unban this user?")) {
       return;
     }
 
@@ -96,45 +114,45 @@ export default function AdminUsersPage() {
       await adminApi.unbanUser(userId);
       await loadUsers();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to unban user');
+      alert(err.response?.data?.message || "Failed to unban user");
     }
   };
 
   const handleResetQuota = async (userId: string) => {
-    if (!confirm('Are you sure you want to reset this user\'s daily quota?')) {
+    if (!confirm("Are you sure you want to reset this user's daily quota?")) {
       return;
     }
 
     try {
       await adminApi.resetUserQuota(userId);
       await loadUsers();
-      alert('User quota reset successfully');
+      alert("User quota reset successfully");
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to reset quota');
+      alert(err.response?.data?.message || "Failed to reset quota");
     }
   };
 
   const handleAddBonusCredits = async (userId: string) => {
-    const creditsStr = bonusCredits[userId] || '';
+    const creditsStr = bonusCredits[userId] || "";
     const credits = parseInt(creditsStr, 10);
     if (!credits || credits <= 0) {
-      alert('Please enter a valid number of credits');
+      alert("Please enter a valid number of credits");
       return;
     }
 
     try {
       await adminApi.addBonusCredits(userId, credits);
       await loadUsers();
-      setBonusCredits({ ...bonusCredits, [userId]: '' });
+      setBonusCredits({ ...bonusCredits, [userId]: "" });
       alert(`Added ${credits} bonus credits successfully`);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to add bonus credits');
+      alert(err.response?.data?.message || "Failed to add bonus credits");
     }
   };
 
   return (
     <ProtectedRoute>
-      <RoleGuard allowedRoles={['ADMIN']}>
+      <RoleGuard allowedRoles={["ADMIN"]}>
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <Navbar />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -159,7 +177,9 @@ export default function AdminUsersPage() {
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
-                <p className="mt-4 text-gray-600 dark:text-gray-400">Loading users...</p>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">
+                  Loading users...
+                </p>
               </div>
             ) : (
               <>
@@ -198,13 +218,14 @@ export default function AdminUsersPage() {
                               ) : (
                                 <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                                   <span className="text-gray-500 dark:text-gray-400">
-                                    {user.name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                                    {user.name?.charAt(0) ||
+                                      user.email.charAt(0).toUpperCase()}
                                   </span>
                                 </div>
                               )}
                               <div className="ml-4">
                                 <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {user.name || 'No name'}
+                                  {user.name || "No name"}
                                 </div>
                                 <div className="text-sm text-gray-500 dark:text-gray-400">
                                   {user.email}
@@ -213,19 +234,26 @@ export default function AdminUsersPage() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              user.plan === 'AGENCY' ? 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200' :
-                              user.plan === 'PRO' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' :
-                              'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                            }`}>
+                            <span
+                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                user.plan === "AGENCY"
+                                  ? "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200"
+                                  : user.plan === "PRO"
+                                  ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                                  : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                              }`}
+                            >
                               {user.plan}
                             </span>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              user.role === 'ADMIN' ? 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' :
-                              'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200'
-                            }`}>
+                            <span
+                              className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                                user.role === "ADMIN"
+                                  ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                                  : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                              }`}
+                            >
                               {user.role}
                             </span>
                           </td>
@@ -298,8 +326,13 @@ export default function AdminUsersPage() {
                                 <input
                                   type="number"
                                   placeholder="Bonus credits"
-                                  value={bonusCredits[user.id] || ''}
-                                  onChange={(e) => setBonusCredits({ ...bonusCredits, [user.id]: e.target.value })}
+                                  value={bonusCredits[user.id] || ""}
+                                  onChange={(e) =>
+                                    setBonusCredits({
+                                      ...bonusCredits,
+                                      [user.id]: e.target.value,
+                                    })
+                                  }
                                   className="w-24 px-2 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded dark:bg-gray-700 dark:text-white"
                                 />
                                 <button
@@ -320,18 +353,19 @@ export default function AdminUsersPage() {
                 {/* Pagination */}
                 <div className="mt-6 flex justify-between items-center">
                   <div className="text-sm text-gray-700 dark:text-gray-300">
-                    Showing {(page - 1) * 20 + 1} to {Math.min(page * 20, total)} of {total} users
+                    Showing {(page - 1) * 20 + 1} to{" "}
+                    {Math.min(page * 20, total)} of {total} users
                   </div>
                   <div className="flex space-x-2">
                     <button
-                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={page === 1}
                       className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Previous
                     </button>
                     <button
-                      onClick={() => setPage(p => p + 1)}
+                      onClick={() => setPage((p) => p + 1)}
                       disabled={page * 20 >= total}
                       className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
@@ -357,7 +391,12 @@ export default function AdminUsersPage() {
                       </label>
                       <select
                         value={editingUser.role}
-                        onChange={(e) => handleUpdateRole(editingUser.id, e.target.value as 'USER' | 'ADMIN')}
+                        onChange={(e) =>
+                          handleUpdateRole(
+                            editingUser.id,
+                            e.target.value as "USER" | "ADMIN"
+                          )
+                        }
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
                       >
                         <option value="USER">USER</option>
@@ -371,7 +410,12 @@ export default function AdminUsersPage() {
                       </label>
                       <select
                         value={editingUser.plan}
-                        onChange={(e) => handleUpdatePlan(editingUser.id, e.target.value as 'FREE' | 'PRO' | 'AGENCY')}
+                        onChange={(e) =>
+                          handleUpdatePlan(
+                            editingUser.id,
+                            e.target.value as "FREE" | "PRO" | "AGENCY"
+                          )
+                        }
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white"
                       >
                         <option value="FREE">FREE</option>
@@ -385,7 +429,9 @@ export default function AdminUsersPage() {
                           Usage Info
                         </label>
                         <div className="text-sm text-gray-600 dark:text-gray-400">
-                          <p>Daily Generations: {editingUser.dailyAiGenerations}</p>
+                          <p>
+                            Daily Generations: {editingUser.dailyAiGenerations}
+                          </p>
                           <p>Bonus Credits: {editingUser.bonusCredits || 0}</p>
                         </div>
                       </div>
@@ -435,14 +481,16 @@ export default function AdminUsersPage() {
                       onClick={() => {
                         setShowBanModal(false);
                         setBanningUser(null);
-                        setBanReason('');
+                        setBanReason("");
                       }}
                       className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600"
                     >
                       Cancel
                     </button>
                     <button
-                      onClick={() => handleBanUser(banningUser.id, banReason || undefined)}
+                      onClick={() =>
+                        handleBanUser(banningUser.id, banReason || undefined)
+                      }
                       className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700"
                     >
                       Ban User
@@ -457,4 +505,3 @@ export default function AdminUsersPage() {
     </ProtectedRoute>
   );
 }
-

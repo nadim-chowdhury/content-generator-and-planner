@@ -8,3 +8,4 @@ ALTER TABLE "users" ADD COLUMN IF NOT EXISTS "bonusCredits" INTEGER NOT NULL DEF
 CREATE INDEX IF NOT EXISTS "users_banned_idx" ON "users"("banned");
 
 
+

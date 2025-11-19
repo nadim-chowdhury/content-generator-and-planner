@@ -19,3 +19,4 @@ CREATE INDEX IF NOT EXISTS "saved_searches_teamId_idx" ON "saved_searches"("team
 ALTER TABLE "saved_searches" ADD CONSTRAINT "saved_searches_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 
+

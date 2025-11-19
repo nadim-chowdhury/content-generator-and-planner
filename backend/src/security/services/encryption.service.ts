@@ -18,16 +18,22 @@ export class EncryptionService {
       // For development, generate a warning but allow operation
       // In production, this should be required
       if (process.env.NODE_ENV === 'production') {
-        throw new Error('ENCRYPTION_KEY environment variable is required in production');
+        throw new Error(
+          'ENCRYPTION_KEY environment variable is required in production',
+        );
       }
-      console.warn('⚠️  ENCRYPTION_KEY not set. Encryption will use a default key (NOT SECURE FOR PRODUCTION)');
+      console.warn(
+        '⚠️  ENCRYPTION_KEY not set. Encryption will use a default key (NOT SECURE FOR PRODUCTION)',
+      );
       // Generate a default key for development (32 bytes = 64 hex chars)
       this.encryptionKey = randomBytes(this.keyLength);
     } else {
       this.encryptionKey = Buffer.from(keyString, 'hex');
-      
+
       if (this.encryptionKey.length !== this.keyLength) {
-        throw new Error(`ENCRYPTION_KEY must be ${this.keyLength * 2} hex characters (${this.keyLength} bytes)`);
+        throw new Error(
+          `ENCRYPTION_KEY must be ${this.keyLength * 2} hex characters (${this.keyLength} bytes)`,
+        );
       }
     }
   }
@@ -35,29 +41,29 @@ export class EncryptionService {
   /**
    * Encrypt sensitive data
    */
-  async encrypt(text: string): Promise<string> {
+  encrypt(text: string): Promise<string> {
     if (!text) {
-      return text;
+      return Promise.resolve(text);
     }
 
     try {
       // Generate random IV for each encryption
       const iv = randomBytes(this.ivLength);
-      
+
       // Create cipher
       const cipher = createCipheriv(this.algorithm, this.encryptionKey, iv);
-      
+
       // Encrypt
       let encrypted = cipher.update(text, 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      
+
       // Get auth tag for GCM mode
       const authTag = cipher.getAuthTag();
-      
+
       // Combine IV + authTag + encrypted data
       const result = `${iv.toString('hex')}:${authTag.toString('hex')}:${encrypted}`;
-      
-      return result;
+
+      return Promise.resolve(result);
     } catch (error) {
       throw new Error(`Encryption failed: ${error.message}`);
     }
@@ -66,9 +72,9 @@ export class EncryptionService {
   /**
    * Decrypt sensitive data
    */
-  async decrypt(encryptedText: string): Promise<string> {
+  decrypt(encryptedText: string): Promise<string> {
     if (!encryptedText) {
-      return encryptedText;
+      return Promise.resolve(encryptedText);
     }
 
     try {
@@ -81,16 +87,16 @@ export class EncryptionService {
       const [ivHex, authTagHex, encrypted] = parts;
       const iv = Buffer.from(ivHex, 'hex');
       const authTag = Buffer.from(authTagHex, 'hex');
-      
+
       // Create decipher
       const decipher = createDecipheriv(this.algorithm, this.encryptionKey, iv);
       decipher.setAuthTag(authTag);
-      
+
       // Decrypt
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
-      
-      return decrypted;
+
+      return Promise.resolve(decrypted);
     } catch (error) {
       throw new Error(`Decryption failed: ${error.message}`);
     }
@@ -104,13 +110,15 @@ export class EncryptionService {
     fieldsToEncrypt: (keyof T)[],
   ): Promise<T> {
     const encrypted = { ...data };
-    
+
     for (const field of fieldsToEncrypt) {
       if (encrypted[field] && typeof encrypted[field] === 'string') {
-        encrypted[field] = await this.encrypt(encrypted[field] as string) as any;
+        encrypted[field] = (await this.encrypt(
+          encrypted[field] as string,
+        )) as any;
       }
     }
-    
+
     return encrypted;
   }
 
@@ -122,19 +130,24 @@ export class EncryptionService {
     fieldsToDecrypt: (keyof T)[],
   ): Promise<T> {
     const decrypted = { ...data };
-    
+
     for (const field of fieldsToDecrypt) {
       if (decrypted[field] && typeof decrypted[field] === 'string') {
         try {
-          decrypted[field] = await this.decrypt(decrypted[field] as string) as any;
+          decrypted[field] = (await this.decrypt(
+            decrypted[field] as string,
+          )) as any;
         } catch (error) {
           // If decryption fails, the field might not be encrypted (for backward compatibility)
           // Log but don't throw
-          console.warn(`Failed to decrypt field ${String(field)}:`, error.message);
+          console.warn(
+            `Failed to decrypt field ${String(field)}:`,
+            error.message,
+          );
         }
       }
     }
-    
+
     return decrypted;
   }
 
@@ -157,11 +170,14 @@ export class EncryptionService {
       const scryptAsync = promisify(scrypt);
       const [saltHex, hashHex] = hash.split(':');
       const salt = Buffer.from(saltHex, 'hex');
-      const computedHash = (await scryptAsync(text, salt, this.keyLength)) as Buffer;
+      const computedHash = (await scryptAsync(
+        text,
+        salt,
+        this.keyLength,
+      )) as Buffer;
       return computedHash.toString('hex') === hashHex;
     } catch {
       return false;
     }
   }
 }
-

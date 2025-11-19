@@ -10,6 +10,3 @@ export class CreateCheckoutDto {
   @IsEnum(PlanType)
   planType: PlanType;
 }
-
-
-

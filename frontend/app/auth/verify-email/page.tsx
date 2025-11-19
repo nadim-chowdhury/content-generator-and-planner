@@ -1,40 +1,45 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { authApi } from '@/lib/auth';
-import Navbar from '@/components/Navbar';
-import Link from 'next/link';
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { authApi } from "@/lib/auth";
+import Navbar from "@/components/Navbar";
+import Link from "next/link";
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<"loading" | "success" | "error">(
+    "loading"
+  );
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const token = searchParams.get('token');
+    const token = searchParams.get("token");
     if (token) {
       verifyEmail(token);
     } else {
-      setStatus('error');
-      setMessage('Verification token is missing');
+      setStatus("error");
+      setMessage("Verification token is missing");
     }
   }, [searchParams]);
 
   const verifyEmail = async (token: string) => {
     try {
-      setStatus('loading');
+      setStatus("loading");
       await authApi.verifyEmail(token);
-      setStatus('success');
-      setMessage('Your email has been verified successfully!');
+      setStatus("success");
+      setMessage("Your email has been verified successfully!");
       // Redirect to login after 3 seconds
       setTimeout(() => {
-        router.push('/login');
+        router.push("/login");
       }, 3000);
     } catch (err: any) {
-      setStatus('error');
-      setMessage(err.response?.data?.message || 'Failed to verify email. The link may have expired.');
+      setStatus("error");
+      setMessage(
+        err.response?.data?.message ||
+          "Failed to verify email. The link may have expired."
+      );
     }
   };
 
@@ -43,7 +48,7 @@ function VerifyEmailContent() {
       <Navbar />
       <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-          {status === 'loading' && (
+          {status === "loading" && (
             <>
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
@@ -55,7 +60,7 @@ function VerifyEmailContent() {
             </>
           )}
 
-          {status === 'success' && (
+          {status === "success" && (
             <>
               <div className="mb-4">
                 <svg
@@ -88,7 +93,7 @@ function VerifyEmailContent() {
             </>
           )}
 
-          {status === 'error' && (
+          {status === "error" && (
             <>
               <div className="mb-4">
                 <svg
@@ -133,17 +138,19 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <Navbar />
+          <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   );

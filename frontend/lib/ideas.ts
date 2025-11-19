@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface Idea {
   id: string;
@@ -16,7 +16,7 @@ export interface Idea {
   language?: string;
   duration?: number;
   scheduledAt?: string;
-  status: 'DRAFT' | 'SCHEDULED' | 'POSTED' | 'ARCHIVED';
+  status: "DRAFT" | "SCHEDULED" | "POSTED" | "ARCHIVED";
   viralScore?: number;
   thumbnailSuggestion?: string;
   platformOptimization?: string;
@@ -51,7 +51,7 @@ export interface IdeaStats {
 
 export const ideasApi = {
   generate: async (dto: GenerateIdeasDto): Promise<Idea[]> => {
-    const { data } = await api.post<Idea[]>('/api/ideas/generate', dto);
+    const { data } = await api.post<Idea[]>("/api/ideas/generate", dto);
     return data;
   },
 
@@ -67,7 +67,7 @@ export const ideasApi = {
     viralScoreMin?: number,
     viralScoreMax?: number,
     tags?: string,
-    folderId?: string,
+    folderId?: string
   ): Promise<Idea[]> => {
     const params: any = {};
     if (status) params.status = status;
@@ -82,7 +82,7 @@ export const ideasApi = {
     if (viralScoreMax !== undefined) params.viralScoreMax = viralScoreMax;
     if (tags) params.tags = tags;
     if (folderId) params.folderId = folderId;
-    const { data } = await api.get<Idea[]>('/api/ideas', { params });
+    const { data } = await api.get<Idea[]>("/api/ideas", { params });
     return data;
   },
 
@@ -92,7 +92,7 @@ export const ideasApi = {
   },
 
   create: async (idea: Partial<Idea>): Promise<Idea> => {
-    const { data } = await api.post<Idea>('/api/ideas', idea);
+    const { data } = await api.post<Idea>("/api/ideas", idea);
     return data;
   },
 
@@ -106,18 +106,33 @@ export const ideasApi = {
   },
 
   getStats: async (): Promise<IdeaStats> => {
-    const { data } = await api.get<IdeaStats>('/api/ideas/stats');
+    const { data } = await api.get<IdeaStats>("/api/ideas/stats");
     return data;
   },
 
-  getSupportedLanguages: async (): Promise<{ languages: Array<{ code: string; name: string; nativeName: string; rtl: boolean }>; default: string }> => {
-    const { data } = await api.get('/api/ideas/languages');
+  getSupportedLanguages: async (): Promise<{
+    languages: Array<{
+      code: string;
+      name: string;
+      nativeName: string;
+      rtl: boolean;
+    }>;
+    default: string;
+  }> => {
+    const { data } = await api.get("/api/ideas/languages");
     return data;
   },
 
   // Duplicate
-  duplicate: async (id: string, newTitle?: string, folderId?: string): Promise<Idea> => {
-    const { data } = await api.post<Idea>(`/api/ideas/${id}/duplicate`, { newTitle, folderId });
+  duplicate: async (
+    id: string,
+    newTitle?: string,
+    folderId?: string
+  ): Promise<Idea> => {
+    const { data } = await api.post<Idea>(`/api/ideas/${id}/duplicate`, {
+      newTitle,
+      folderId,
+    });
     return data;
   },
 
@@ -133,23 +148,46 @@ export const ideasApi = {
   },
 
   // Bulk Operations
-  bulkOperations: async (ideaIds: string[], operation: 'DELETE' | 'ARCHIVE' | 'UNARCHIVE' | 'MOVE' | 'EXPORT', folderId?: string, exportFormat?: 'json' | 'csv' | 'text'): Promise<any> => {
-    const { data } = await api.post('/api/ideas/bulk', { ideaIds, operation, folderId, exportFormat });
+  bulkOperations: async (
+    ideaIds: string[],
+    operation: "DELETE" | "ARCHIVE" | "UNARCHIVE" | "MOVE" | "EXPORT",
+    folderId?: string,
+    exportFormat?: "json" | "csv" | "text"
+  ): Promise<any> => {
+    const { data } = await api.post("/api/ideas/bulk", {
+      ideaIds,
+      operation,
+      folderId,
+      exportFormat,
+    });
     return data;
   },
 
   // Folders
-  createFolder: async (folder: { name: string; description?: string; color?: string; icon?: string }): Promise<any> => {
-    const { data } = await api.post('/api/ideas/folders', folder);
+  createFolder: async (folder: {
+    name: string;
+    description?: string;
+    color?: string;
+    icon?: string;
+  }): Promise<any> => {
+    const { data } = await api.post("/api/ideas/folders", folder);
     return data;
   },
 
   getFolders: async (): Promise<any[]> => {
-    const { data } = await api.get('/api/ideas/folders');
+    const { data } = await api.get("/api/ideas/folders");
     return data;
   },
 
-  updateFolder: async (id: string, folder: { name?: string; description?: string; color?: string; icon?: string }): Promise<any> => {
+  updateFolder: async (
+    id: string,
+    folder: {
+      name?: string;
+      description?: string;
+      color?: string;
+      icon?: string;
+    }
+  ): Promise<any> => {
     const { data } = await api.put(`/api/ideas/folders/${id}`, folder);
     return data;
   },
@@ -160,8 +198,7 @@ export const ideasApi = {
 
   // Tags
   getAllTags: async (): Promise<string[]> => {
-    const { data } = await api.get('/api/ideas/tags/all');
+    const { data } = await api.get("/api/ideas/tags/all");
     return data;
   },
 };
-

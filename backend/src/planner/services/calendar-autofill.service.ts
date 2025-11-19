@@ -64,10 +64,7 @@ export class CalendarAutofillService {
 
     const ideas = await this.prisma.idea.findMany({
       where,
-      orderBy: [
-        { viralScore: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ viralScore: 'desc' }, { createdAt: 'desc' }],
       take: 100, // Limit to top 100 ideas
     });
 
@@ -148,7 +145,7 @@ export class CalendarAutofillService {
         // Check if time slot is already taken
         const dateKey = slotDate.toISOString().split('T')[0];
         const isTaken = existingSchedules
-          .filter(s => s.scheduledAt !== null)
+          .filter((s) => s.scheduledAt !== null)
           .some((s) => s.scheduledAt!.toISOString().split('T')[0] === dateKey);
 
         if (isTaken) {
@@ -240,10 +237,7 @@ export class CalendarAutofillService {
 
     const ideas = await this.prisma.idea.findMany({
       where,
-      orderBy: [
-        { viralScore: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ viralScore: 'desc' }, { createdAt: 'desc' }],
       take: 100,
     });
 
@@ -302,7 +296,7 @@ export class CalendarAutofillService {
 
         const dateKey = slotDate.toISOString().split('T')[0];
         const isTaken = existingSchedules
-          .filter(s => s.scheduledAt !== null)
+          .filter((s) => s.scheduledAt !== null)
           .some((s) => s.scheduledAt!.toISOString().split('T')[0] === dateKey);
 
         if (isTaken) continue;
@@ -325,4 +319,3 @@ export class CalendarAutofillService {
     return suggestions;
   }
 }
-

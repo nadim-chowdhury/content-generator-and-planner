@@ -1,8 +1,16 @@
-import { IsString, IsNotEmpty, IsOptional, IsEnum, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsEnum,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export enum ScriptType {
   SHORT = 'SHORT', // 15-60 seconds
-  LONG = 'LONG',   // 5+ minutes
+  LONG = 'LONG', // 5+ minutes
 }
 
 export class ScriptGeneratorDto {
@@ -35,6 +43,3 @@ export class ScriptGeneratorDto {
   @IsOptional()
   additionalContext?: string;
 }
-
-
-

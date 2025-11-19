@@ -45,11 +45,19 @@ describe('BillingController', () => {
         sessionId: 'test-session-id',
       };
 
-      mockBillingService.createCheckoutSession.mockResolvedValue(expectedResult);
+      mockBillingService.createCheckoutSession.mockResolvedValue(
+        expectedResult,
+      );
 
-      const result = await controller.createCheckoutSession({ planId }, mockUser);
+      const result = await controller.createCheckoutSession(
+        { planId },
+        mockUser,
+      );
 
-      expect(service.createCheckoutSession).toHaveBeenCalledWith(planId, mockUser.id);
+      expect(service.createCheckoutSession).toHaveBeenCalledWith(
+        planId,
+        mockUser.id,
+      );
       expect(result).toHaveProperty('url');
     });
   });
@@ -71,4 +79,3 @@ describe('BillingController', () => {
     });
   });
 });
-

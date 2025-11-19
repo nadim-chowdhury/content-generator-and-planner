@@ -9,6 +9,3 @@ export class AddChecklistDto {
   @IsOptional()
   items?: Array<{ id: string; text: string; completed: boolean }>;
 }
-
-
-

@@ -51,10 +51,7 @@ export class SearchController {
    * Get available filters
    */
   @Get('filters')
-  async getFilters(
-    @CurrentUser() user: any,
-    @Query('teamId') teamId?: string,
-  ) {
+  async getFilters(@CurrentUser() user: any, @Query('teamId') teamId?: string) {
     return this.searchService.getSearchFilters(user.id, teamId);
   }
 
@@ -64,9 +61,16 @@ export class SearchController {
   @Post('save')
   async saveSearch(
     @CurrentUser() user: any,
-    @Body() body: { name: string; query?: string; filters?: any; teamId?: string },
+    @Body()
+    body: { name: string; query?: string; filters?: any; teamId?: string },
   ) {
-    return this.searchService.saveSearch(user.id, body.name, body.query, body.filters, body.teamId);
+    return this.searchService.saveSearch(
+      user.id,
+      body.name,
+      body.query,
+      body.filters,
+      body.teamId,
+    );
   }
 
   /**
@@ -91,4 +95,3 @@ export class SearchController {
     return this.searchService.deleteSavedSearch(user.id, searchId);
   }
 }
-

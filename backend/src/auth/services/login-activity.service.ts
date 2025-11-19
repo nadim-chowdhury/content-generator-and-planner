@@ -3,7 +3,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 
 export interface LoginActivityData {
   userId: string;
-  loginType: 'password' | 'google' | 'facebook' | 'github' | 'magic_link' | 'session_revocation';
+  loginType:
+    | 'password'
+    | 'google'
+    | 'facebook'
+    | 'github'
+    | 'magic_link'
+    | 'session_revocation';
   success: boolean;
   ipAddress?: string;
   userAgent?: string;
@@ -54,5 +60,3 @@ export class LoginActivityService {
     });
   }
 }
-
-

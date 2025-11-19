@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
 export interface FlaggedIdea {
@@ -78,7 +83,12 @@ export class ContentModerationService {
   /**
    * Flag an idea
    */
-  async flagIdea(ideaId: string, reason: string, category: string = 'OTHER', flaggedBy?: string) {
+  async flagIdea(
+    ideaId: string,
+    reason: string,
+    category: string = 'OTHER',
+    flaggedBy?: string,
+  ) {
     const idea = await this.prisma.idea.findUnique({
       where: { id: ideaId },
     });
@@ -114,7 +124,11 @@ export class ContentModerationService {
   /**
    * Review a flagged idea
    */
-  async reviewFlag(flagId: string, action: 'BLOCKED' | 'IGNORED' | 'DELETED', reviewedBy: string) {
+  async reviewFlag(
+    flagId: string,
+    action: 'BLOCKED' | 'IGNORED' | 'DELETED',
+    reviewedBy: string,
+  ) {
     const flag = await this.prisma.ideaFlag.findUnique({
       where: { id: flagId },
       include: { idea: true },
@@ -314,14 +328,24 @@ export class ContentModerationService {
    */
   async checkContentForBlacklist(content: string): Promise<{
     hasBlacklist: boolean;
-    matches: Array<{ keyword: string; category: string; severity: string; action: string }>;
+    matches: Array<{
+      keyword: string;
+      category: string;
+      severity: string;
+      action: string;
+    }>;
   }> {
     const enabledKeywords = await this.prisma.blacklistKeyword.findMany({
       where: { enabled: true },
     });
 
     const contentLower = content.toLowerCase();
-    const matches: Array<{ keyword: string; category: string; severity: string; action: string }> = [];
+    const matches: Array<{
+      keyword: string;
+      category: string;
+      severity: string;
+      action: string;
+    }> = [];
 
     for (const keyword of enabledKeywords) {
       if (contentLower.includes(keyword.keyword)) {
@@ -340,5 +364,3 @@ export class ContentModerationService {
     };
   }
 }
-
-

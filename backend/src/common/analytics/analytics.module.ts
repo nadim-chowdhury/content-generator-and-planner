@@ -7,4 +7,3 @@ import { AnalyticsService } from './analytics.service';
   exports: [AnalyticsService],
 })
 export class AnalyticsModule {}
-

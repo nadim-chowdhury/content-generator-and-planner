@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface DailyGenerationCount {
   date: string;
@@ -44,44 +44,60 @@ export const userAnalyticsApi = {
   getSummary: async (days?: number): Promise<UserAnalyticsSummary> => {
     const params: any = {};
     if (days) params.days = days;
-    const { data } = await api.get<UserAnalyticsSummary>('/api/analytics/user/summary', { params });
+    const { data } = await api.get<UserAnalyticsSummary>(
+      "/api/analytics/user/summary",
+      { params }
+    );
     return data;
   },
 
-  getDailyGenerations: async (days?: number): Promise<DailyGenerationCount[]> => {
+  getDailyGenerations: async (
+    days?: number
+  ): Promise<DailyGenerationCount[]> => {
     const params: any = {};
     if (days) params.days = days;
-    const { data } = await api.get<DailyGenerationCount[]>('/api/analytics/user/daily-generations', { params });
+    const { data } = await api.get<DailyGenerationCount[]>(
+      "/api/analytics/user/daily-generations",
+      { params }
+    );
     return data;
   },
 
   getSavedIdeasCount: async (): Promise<number> => {
-    const { data } = await api.get<number>('/api/analytics/user/saved-ideas');
+    const { data } = await api.get<number>("/api/analytics/user/saved-ideas");
     return data;
   },
 
   getScheduledPostsCount: async (): Promise<number> => {
-    const { data } = await api.get<number>('/api/analytics/user/scheduled-posts');
+    const { data } = await api.get<number>(
+      "/api/analytics/user/scheduled-posts"
+    );
     return data;
   },
 
-  getViralScoreProgression: async (days?: number): Promise<ViralScoreProgression[]> => {
+  getViralScoreProgression: async (
+    days?: number
+  ): Promise<ViralScoreProgression[]> => {
     const params: any = {};
     if (days) params.days = days;
-    const { data } = await api.get<ViralScoreProgression[]>('/api/analytics/user/viral-score-progression', { params });
+    const { data } = await api.get<ViralScoreProgression[]>(
+      "/api/analytics/user/viral-score-progression",
+      { params }
+    );
     return data;
   },
 
   getIdeasByStatus: async (): Promise<IdeasByStatus> => {
-    const { data } = await api.get<IdeasByStatus>('/api/analytics/user/ideas-by-status');
+    const { data } = await api.get<IdeasByStatus>(
+      "/api/analytics/user/ideas-by-status"
+    );
     return data;
   },
 
   getIdeasByPlatform: async (): Promise<IdeasByPlatform[]> => {
-    const { data } = await api.get<IdeasByPlatform[]>('/api/analytics/user/ideas-by-platform');
+    const { data } = await api.get<IdeasByPlatform[]>(
+      "/api/analytics/user/ideas-by-platform"
+    );
     return data;
   },
 };
-
-
-

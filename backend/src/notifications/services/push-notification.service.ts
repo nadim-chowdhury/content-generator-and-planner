@@ -10,7 +10,7 @@ export class PushNotificationService {
   /**
    * Send push notification (placeholder - integrate with FCM, OneSignal, etc.)
    */
-  async sendPushNotification(
+  sendPushNotification(
     userId: string,
     title: string,
     body: string,
@@ -19,7 +19,9 @@ export class PushNotificationService {
     try {
       // TODO: Integrate with actual push notification service
       // For now, just log the notification
-      this.logger.log(`Push notification would be sent to user ${userId}: ${title}`);
+      this.logger.log(
+        `Push notification would be sent to user ${userId}: ${title}`,
+      );
       this.logger.debug(`Notification body: ${body}`);
 
       // Example integration with Firebase Cloud Messaging:
@@ -31,13 +33,13 @@ export class PushNotificationService {
       // };
       // await admin.messaging().send(message);
 
-      return true;
+      return Promise.resolve(true);
     } catch (error) {
-      this.logger.error(`Failed to send push notification to user ${userId}:`, error);
-      return false;
+      this.logger.error(
+        `Failed to send push notification to user ${userId}:`,
+        error,
+      );
+      return Promise.resolve(false);
     }
   }
 }
-
-
-

@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const Fuse = require('fuse.js');
 
 interface SearchOptions {
@@ -27,7 +28,16 @@ export class SearchService {
    * Global search across ideas and folders
    */
   async globalSearch(options: SearchOptions): Promise<SearchResult> {
-    const { query, userId, teamId, platforms, tags, status, limit = 50, offset = 0 } = options;
+    const {
+      query,
+      userId,
+      teamId,
+      platforms,
+      tags,
+      status,
+      limit = 50,
+      offset = 0,
+    } = options;
 
     // Build where clause
     const where: any = {
@@ -44,7 +54,10 @@ export class SearchService {
       });
 
       if (team) {
-        const teamUserIds = [team.ownerId, ...team.members.map((m) => m.userId)];
+        const teamUserIds = [
+          team.ownerId,
+          ...team.members.map((m) => m.userId),
+        ];
         where.userId = { in: teamUserIds };
       }
     }
@@ -91,7 +104,10 @@ export class SearchService {
       });
 
       if (team) {
-        const teamUserIds = [team.ownerId, ...team.members.map((m) => m.userId)];
+        const teamUserIds = [
+          team.ownerId,
+          ...team.members.map((m) => m.userId),
+        ];
         folderWhere.userId = { in: teamUserIds };
       }
     }
@@ -173,7 +189,10 @@ export class SearchService {
       });
 
       if (team) {
-        const teamUserIds = [team.ownerId, ...team.members.map((m) => m.userId)];
+        const teamUserIds = [
+          team.ownerId,
+          ...team.members.map((m) => m.userId),
+        ];
         where.userId = { in: teamUserIds };
       }
     }
@@ -195,7 +214,9 @@ export class SearchService {
     const allHashtags = ideas.flatMap((i) => i.hashtags);
     const allCategoryTags = ideas.flatMap((i) => i.categoryTags);
     const allCustomTags = ideas.flatMap((i) => i.customTags);
-    const allTags = [...new Set([...allHashtags, ...allCategoryTags, ...allCustomTags])].sort();
+    const allTags = [
+      ...new Set([...allHashtags, ...allCategoryTags, ...allCustomTags]),
+    ].sort();
 
     return {
       platforms,
@@ -207,7 +228,13 @@ export class SearchService {
   /**
    * Save a search
    */
-  async saveSearch(userId: string, name: string, query?: string, filters?: any, teamId?: string) {
+  async saveSearch(
+    userId: string,
+    name: string,
+    query?: string,
+    filters?: any,
+    teamId?: string,
+  ) {
     return this.prisma.savedSearch.create({
       data: {
         userId,

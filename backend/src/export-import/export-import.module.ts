@@ -11,5 +11,3 @@ import { PrismaModule } from '../prisma/prisma.module';
   exports: [ExportService, ImportService],
 })
 export class ExportImportModule {}
-
-

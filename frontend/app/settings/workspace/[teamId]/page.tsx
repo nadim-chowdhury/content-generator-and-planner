@@ -1,32 +1,36 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { settingsApi, WorkspaceSettings, UpdateWorkspaceSettingsDto } from '@/lib/settings';
-import Navbar from '@/components/Navbar';
+import { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
+import {
+  settingsApi,
+  WorkspaceSettings,
+  UpdateWorkspaceSettingsDto,
+} from "@/lib/settings";
+import Navbar from "@/components/Navbar";
 
 const DAYS_OF_WEEK = [
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-  'Sunday',
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
 ];
 
 const TIMEZONES = [
-  'UTC',
-  'America/New_York',
-  'America/Chicago',
-  'America/Denver',
-  'America/Los_Angeles',
-  'Europe/London',
-  'Europe/Paris',
-  'Europe/Berlin',
-  'Asia/Tokyo',
-  'Asia/Shanghai',
-  'Australia/Sydney',
+  "UTC",
+  "America/New_York",
+  "America/Chicago",
+  "America/Denver",
+  "America/Los_Angeles",
+  "Europe/London",
+  "Europe/Paris",
+  "Europe/Berlin",
+  "Asia/Tokyo",
+  "Asia/Shanghai",
+  "Australia/Sydney",
 ];
 
 export default function WorkspaceSettingsPage() {
@@ -36,7 +40,7 @@ export default function WorkspaceSettingsPage() {
   const [settings, setSettings] = useState<WorkspaceSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
@@ -51,7 +55,9 @@ export default function WorkspaceSettingsPage() {
       const data = await settingsApi.getWorkspaceSettings(teamId);
       setSettings(data);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to load workspace settings');
+      setError(
+        err.response?.data?.message || "Failed to load workspace settings"
+      );
     } finally {
       setLoading(false);
     }
@@ -62,14 +68,17 @@ export default function WorkspaceSettingsPage() {
 
     try {
       setSaving(true);
-      setError('');
+      setError("");
       setSuccess(false);
-      const updated = await settingsApi.updateWorkspaceSettings(teamId, updates);
+      const updated = await settingsApi.updateWorkspaceSettings(
+        teamId,
+        updates
+      );
       setSettings(updated);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save settings');
+      setError(err.response?.data?.message || "Failed to save settings");
     } finally {
       setSaving(false);
     }
@@ -91,7 +100,9 @@ export default function WorkspaceSettingsPage() {
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-red-600 dark:text-red-400">{error || 'Settings not found'}</div>
+          <div className="text-red-600 dark:text-red-400">
+            {error || "Settings not found"}
+          </div>
         </div>
       </div>
     );
@@ -105,7 +116,9 @@ export default function WorkspaceSettingsPage() {
       <Navbar />
       <div className="max-w-4xl mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Workspace Settings</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Workspace Settings
+          </h1>
           <button
             onClick={() => router.back()}
             className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-500"
@@ -139,7 +152,7 @@ export default function WorkspaceSettingsPage() {
                 </label>
                 <input
                   type="text"
-                  value={settings.brandName || ''}
+                  value={settings.brandName || ""}
                   onChange={(e) => handleSave({ brandName: e.target.value })}
                   placeholder="Your brand name"
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -156,7 +169,7 @@ export default function WorkspaceSettingsPage() {
                     </label>
                     <input
                       type="color"
-                      value={settings.brandColors?.primary || '#667eea'}
+                      value={settings.brandColors?.primary || "#667eea"}
                       onChange={(e) =>
                         handleSave({
                           brandColors: {
@@ -174,7 +187,7 @@ export default function WorkspaceSettingsPage() {
                     </label>
                     <input
                       type="color"
-                      value={settings.brandColors?.secondary || '#764ba2'}
+                      value={settings.brandColors?.secondary || "#764ba2"}
                       onChange={(e) =>
                         handleSave({
                           brandColors: {
@@ -192,7 +205,7 @@ export default function WorkspaceSettingsPage() {
                     </label>
                     <input
                       type="color"
-                      value={settings.brandColors?.accent || '#f093fb'}
+                      value={settings.brandColors?.accent || "#f093fb"}
                       onChange={(e) =>
                         handleSave({
                           brandColors: {
@@ -212,7 +225,7 @@ export default function WorkspaceSettingsPage() {
                 </label>
                 <input
                   type="url"
-                  value={settings.brandLogo || ''}
+                  value={settings.brandLogo || ""}
                   onChange={(e) => handleSave({ brandLogo: e.target.value })}
                   placeholder="https://example.com/logo.png"
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -224,7 +237,7 @@ export default function WorkspaceSettingsPage() {
                 </label>
                 <input
                   type="text"
-                  value={settings.brandFont || ''}
+                  value={settings.brandFont || ""}
                   onChange={(e) => handleSave({ brandFont: e.target.value })}
                   placeholder="Arial, sans-serif"
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -245,7 +258,9 @@ export default function WorkspaceSettingsPage() {
                 </label>
                 <select
                   value={settings.defaultTimeZone}
-                  onChange={(e) => handleSave({ defaultTimeZone: e.target.value })}
+                  onChange={(e) =>
+                    handleSave({ defaultTimeZone: e.target.value })
+                  }
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 >
                   {TIMEZONES.map((tz) => (
@@ -269,9 +284,9 @@ export default function WorkspaceSettingsPage() {
                         className="flex items-center justify-center p-2 border rounded cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700"
                         style={{
                           backgroundColor: isSelected
-                            ? 'rgba(99, 102, 241, 0.1)'
-                            : 'transparent',
-                          borderColor: isSelected ? '#6366f1' : undefined,
+                            ? "rgba(99, 102, 241, 0.1)"
+                            : "transparent",
+                          borderColor: isSelected ? "#6366f1" : undefined,
                         }}
                       >
                         <input
@@ -322,7 +337,9 @@ export default function WorkspaceSettingsPage() {
                       />
                       <button
                         onClick={() => {
-                          const newTimes = scheduleTimes.filter((_, i) => i !== index);
+                          const newTimes = scheduleTimes.filter(
+                            (_, i) => i !== index
+                          );
                           handleSave({
                             defaultPostingSchedule: {
                               ...settings.defaultPostingSchedule,
@@ -341,7 +358,7 @@ export default function WorkspaceSettingsPage() {
                       handleSave({
                         defaultPostingSchedule: {
                           ...settings.defaultPostingSchedule,
-                          times: [...scheduleTimes, '09:00'],
+                          times: [...scheduleTimes, "09:00"],
                         },
                       });
                     }}
@@ -364,7 +381,9 @@ export default function WorkspaceSettingsPage() {
                 <input
                   type="checkbox"
                   checked={settings.allowViewersToComment}
-                  onChange={(e) => handleSave({ allowViewersToComment: e.target.checked })}
+                  onChange={(e) =>
+                    handleSave({ allowViewersToComment: e.target.checked })
+                  }
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -375,7 +394,9 @@ export default function WorkspaceSettingsPage() {
                 <input
                   type="checkbox"
                   checked={settings.allowEditorsToSchedule}
-                  onChange={(e) => handleSave({ allowEditorsToSchedule: e.target.checked })}
+                  onChange={(e) =>
+                    handleSave({ allowEditorsToSchedule: e.target.checked })
+                  }
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -386,7 +407,9 @@ export default function WorkspaceSettingsPage() {
                 <input
                   type="checkbox"
                   checked={settings.allowEditorsToPublish}
-                  onChange={(e) => handleSave({ allowEditorsToPublish: e.target.checked })}
+                  onChange={(e) =>
+                    handleSave({ allowEditorsToPublish: e.target.checked })
+                  }
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -397,7 +420,11 @@ export default function WorkspaceSettingsPage() {
                 <input
                   type="checkbox"
                   checked={settings.requireApprovalForPublishing}
-                  onChange={(e) => handleSave({ requireApprovalForPublishing: e.target.checked })}
+                  onChange={(e) =>
+                    handleSave({
+                      requireApprovalForPublishing: e.target.checked,
+                    })
+                  }
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -408,7 +435,9 @@ export default function WorkspaceSettingsPage() {
                 <input
                   type="checkbox"
                   checked={settings.autoScheduleEnabled}
-                  onChange={(e) => handleSave({ autoScheduleEnabled: e.target.checked })}
+                  onChange={(e) =>
+                    handleSave({ autoScheduleEnabled: e.target.checked })
+                  }
                   className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                 />
                 <span className="text-sm text-gray-700 dark:text-gray-300">
@@ -429,8 +458,10 @@ export default function WorkspaceSettingsPage() {
                   Content Guidelines
                 </label>
                 <textarea
-                  value={settings.contentGuidelines || ''}
-                  onChange={(e) => handleSave({ contentGuidelines: e.target.value })}
+                  value={settings.contentGuidelines || ""}
+                  onChange={(e) =>
+                    handleSave({ contentGuidelines: e.target.value })
+                  }
                   placeholder="Enter content guidelines for your team..."
                   rows={5}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -441,8 +472,10 @@ export default function WorkspaceSettingsPage() {
                   Hashtag Policy
                 </label>
                 <textarea
-                  value={settings.hashtagPolicy || ''}
-                  onChange={(e) => handleSave({ hashtagPolicy: e.target.value })}
+                  value={settings.hashtagPolicy || ""}
+                  onChange={(e) =>
+                    handleSave({ hashtagPolicy: e.target.value })
+                  }
                   placeholder="Enter hashtag usage policy..."
                   rows={3}
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
@@ -455,5 +488,3 @@ export default function WorkspaceSettingsPage() {
     </div>
   );
 }
-
-

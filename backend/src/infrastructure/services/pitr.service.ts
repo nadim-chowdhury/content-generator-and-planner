@@ -10,7 +10,7 @@ const execAsync = promisify(exec);
 
 /**
  * PostgreSQL Point-in-Time Recovery (PITR) Service
- * 
+ *
  * Handles PostgreSQL WAL archiving and point-in-time recovery:
  * - WAL archiving configuration
  * - Base backup creation
@@ -26,10 +26,15 @@ export class PitrService {
   private readonly pgDataDir: string;
 
   constructor(private configService: ConfigService) {
-    this.walArchiveDir = this.configService.get<string>('PITR_WAL_ARCHIVE_DIR') || './backups/wal_archive';
-    this.baseBackupDir = this.configService.get<string>('PITR_BASE_BACKUP_DIR') || './backups/base_backups';
+    this.walArchiveDir =
+      this.configService.get<string>('PITR_WAL_ARCHIVE_DIR') ||
+      './backups/wal_archive';
+    this.baseBackupDir =
+      this.configService.get<string>('PITR_BASE_BACKUP_DIR') ||
+      './backups/base_backups';
     this.databaseUrl = this.configService.get<string>('DATABASE_URL') || '';
-    this.pgDataDir = this.configService.get<string>('PGDATA') || '/var/lib/postgresql/data';
+    this.pgDataDir =
+      this.configService.get<string>('PGDATA') || '/var/lib/postgresql/data';
 
     // Ensure directories exist
     this.ensureDirectories();
@@ -38,11 +43,11 @@ export class PitrService {
   /**
    * Generate PostgreSQL configuration for PITR
    */
-  async generatePitrConfig(): Promise<{
+  generatePitrConfig(): {
     postgresqlConf: string;
     recoveryConf: string;
     instructions: string[];
-  }> {
+  } {
     const postgresqlConf = `
 # Point-in-Time Recovery Configuration
 # Add these settings to your postgresql.conf
@@ -101,9 +106,15 @@ recovery_target_action = 'promote'
       await this.ensureDirectories();
 
       const timestamp = new Date();
-      const dateStr = timestamp.toISOString().replace(/[:.]/g, '-').split('T')[0];
+      const dateStr = timestamp
+        .toISOString()
+        .replace(/[:.]/g, '-')
+        .split('T')[0];
       const timeStr = timestamp.toTimeString().split(' ')[0].replace(/:/g, '-');
-      const backupPath = join(this.baseBackupDir, `base_backup_${dateStr}_${timeStr}`);
+      const backupPath = join(
+        this.baseBackupDir,
+        `base_backup_${dateStr}_${timeStr}`,
+      );
 
       const dbUrl = new URL(this.databaseUrl);
       const dbHost = dbUrl.hostname;
@@ -118,7 +129,7 @@ recovery_target_action = 'promote'
       const { stdout } = await execAsync(pgBasebackupCommand);
 
       // Extract WAL location from output
-      const walLocationMatch = stdout.match(/wal location: ([0-9A-F\/]+)/i);
+      const walLocationMatch = stdout.match(/wal location: ([0-9A-F/]+)/i);
       const walLocation = walLocationMatch ? walLocationMatch[1] : 'unknown';
 
       // Save backup metadata
@@ -143,7 +154,10 @@ recovery_target_action = 'promote'
         walLocation,
       };
     } catch (error) {
-      this.logger.error(`Failed to create base backup: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to create base backup: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -174,7 +188,10 @@ recovery_target_action = 'promote'
       }
 
       // Generate recovery script
-      const recoveryScript = this.generateRecoveryScript(backupPath, targetTimestamp);
+      const recoveryScript = this.generateRecoveryScript(
+        backupPath,
+        targetTimestamp,
+      );
 
       const instructions = [
         '1. Stop PostgreSQL server',
@@ -193,7 +210,10 @@ recovery_target_action = 'promote'
         instructions,
       };
     } catch (error) {
-      this.logger.error(`Failed to generate recovery plan: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to generate recovery plan: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -201,12 +221,14 @@ recovery_target_action = 'promote'
   /**
    * List available base backups
    */
-  async listBaseBackups(): Promise<Array<{
-    path: string;
-    timestamp: Date;
-    walLocation: string;
-    size: number;
-  }>> {
+  async listBaseBackups(): Promise<
+    Array<{
+      path: string;
+      timestamp: Date;
+      walLocation: string;
+      size: number;
+    }>
+  > {
     try {
       await this.ensureDirectories();
 
@@ -215,10 +237,20 @@ recovery_target_action = 'promote'
       }
 
       // List base backup directories
-      const { stdout } = await execAsync(`ls -d ${this.baseBackupDir}/base_backup_* 2>/dev/null || true`);
-      const directories = stdout.trim().split('\n').filter((d: string) => d);
+      const { stdout } = await execAsync(
+        `ls -d ${this.baseBackupDir}/base_backup_* 2>/dev/null || true`,
+      );
+      const directories = stdout
+        .trim()
+        .split('\n')
+        .filter((d: string) => d);
 
-      const backups: Array<{ path: string; timestamp: Date; walLocation: any; size: number }> = [];
+      const backups: Array<{
+        path: string;
+        timestamp: Date;
+        walLocation: any;
+        size: number;
+      }> = [];
 
       for (const dir of directories) {
         const metadataPath = join(dir, 'backup_metadata.json');
@@ -246,7 +278,10 @@ recovery_target_action = 'promote'
 
       return backups;
     } catch (error) {
-      this.logger.error(`Failed to list base backups: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to list base backups: ${error.message}`,
+        error.stack,
+      );
       return [];
     }
   }
@@ -274,7 +309,10 @@ recovery_target_action = 'promote'
       const { stdout: fileList } = await execAsync(
         `find "${this.walArchiveDir}" -name "*.wal" -o -name "*[0-9A-F][0-9A-F]" 2>/dev/null | head -1000 || true`,
       );
-      const files = fileList.trim().split('\n').filter((f: string) => f);
+      const files = fileList
+        .trim()
+        .split('\n')
+        .filter((f: string) => f);
 
       const { stdout: sizeOutput } = await execAsync(
         `du -sb "${this.walArchiveDir}" 2>/dev/null | cut -f1 || echo "0"`,
@@ -286,7 +324,10 @@ recovery_target_action = 'promote'
         totalSize,
       };
     } catch (error) {
-      this.logger.error(`Failed to get WAL archive stats: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to get WAL archive stats: ${error.message}`,
+        error.stack,
+      );
       return {
         totalFiles: 0,
         totalSize: 0,
@@ -297,8 +338,14 @@ recovery_target_action = 'promote'
   /**
    * Generate recovery script
    */
-  private generateRecoveryScript(backupPath: string, targetTimestamp: Date): string {
-    const timestampStr = targetTimestamp.toISOString().replace('T', ' ').substring(0, 19);
+  private generateRecoveryScript(
+    backupPath: string,
+    targetTimestamp: Date,
+  ): string {
+    const timestampStr = targetTimestamp
+      .toISOString()
+      .replace('T', ' ')
+      .substring(0, 19);
 
     return `
 # PostgreSQL Point-in-Time Recovery Script
@@ -353,4 +400,3 @@ sudo tail -f ${this.pgDataDir}/log/postgresql-*.log
     }
   }
 }
-

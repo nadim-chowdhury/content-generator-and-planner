@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConnectPlatformDto, SocialPlatform } from './dto/connect-platform.dto';
 import { FacebookService } from './facebook.service';
@@ -90,10 +95,7 @@ export class SocialService {
         isDefault: true,
         createdAt: true,
       },
-      orderBy: [
-        { isDefault: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   }
 
@@ -114,10 +116,7 @@ export class SocialService {
         isDefault: true,
         createdAt: true,
       },
-      orderBy: [
-        { isDefault: 'desc' },
-        { createdAt: 'desc' },
-      ],
+      orderBy: [{ isDefault: 'desc' }, { createdAt: 'desc' }],
     });
   }
 
@@ -258,11 +257,15 @@ export class SocialService {
   async connectFacebookPage(userId: string, dto: ConnectFacebookPageDto) {
     // First, verify the page access token is valid
     try {
-      const pages = await this.facebookService.getUserPages(dto.userAccessToken);
+      const pages = await this.facebookService.getUserPages(
+        dto.userAccessToken,
+      );
       const page = pages.find((p) => p.id === dto.pageId);
 
       if (!page) {
-        throw new BadRequestException('Page not found or you do not have access');
+        throw new BadRequestException(
+          'Page not found or you do not have access',
+        );
       }
 
       // Connect the page
@@ -276,7 +279,9 @@ export class SocialService {
         platformUsername: page.name,
       });
     } catch (error) {
-      throw new BadRequestException('Failed to connect Facebook page: ' + error.message);
+      throw new BadRequestException(
+        'Failed to connect Facebook page: ' + error.message,
+      );
     }
   }
 
@@ -286,7 +291,10 @@ export class SocialService {
   ): Promise<{ success: boolean; postId?: string; error?: string }> {
     try {
       // Check if token is expired and refresh if needed
-      if (connection.tokenExpiresAt && new Date(connection.tokenExpiresAt) < new Date()) {
+      if (
+        connection.tokenExpiresAt &&
+        new Date(connection.tokenExpiresAt) < new Date()
+      ) {
         const refreshed = await this.refreshConnectionToken(connection);
         if (!refreshed) {
           return { success: false, error: 'Token expired and refresh failed' };
@@ -302,7 +310,10 @@ export class SocialService {
 
       switch (connection.platform) {
         case SocialPlatform.TWITTER:
-          return await this.twitterService.postTweet(connection.accessToken, content);
+          return await this.twitterService.postTweet(
+            connection.accessToken,
+            content,
+          );
 
         case SocialPlatform.FACEBOOK:
           if (connection.pageId) {
@@ -318,9 +329,13 @@ export class SocialService {
         case SocialPlatform.INSTAGRAM:
           // Instagram requires Instagram Business Account ID
           // This should be stored in platformUserId or pageId
-          const instagramAccountId = connection.platformUserId || connection.pageId;
+          const instagramAccountId =
+            connection.platformUserId || connection.pageId;
           if (!instagramAccountId) {
-            return { success: false, error: 'Instagram Business Account ID required' };
+            return {
+              success: false,
+              error: 'Instagram Business Account ID required',
+            };
           }
           return await this.instagramService.postToInstagram(
             connection.accessToken,
@@ -333,7 +348,9 @@ export class SocialService {
           const personUrn = connection.platformUserId;
           if (!personUrn) {
             // Try to get it from the token
-            const urn = await this.linkedInService.getPersonUrn(connection.accessToken);
+            const urn = await this.linkedInService.getPersonUrn(
+              connection.accessToken,
+            );
             if (!urn) {
               return { success: false, error: 'LinkedIn person URN required' };
             }
@@ -342,16 +359,32 @@ export class SocialService {
               where: { id: connection.id },
               data: { platformUserId: urn },
             });
-            return await this.linkedInService.postToLinkedIn(connection.accessToken, urn, content);
+            return await this.linkedInService.postToLinkedIn(
+              connection.accessToken,
+              urn,
+              content,
+            );
           }
-          return await this.linkedInService.postToLinkedIn(connection.accessToken, personUrn, content);
+          return await this.linkedInService.postToLinkedIn(
+            connection.accessToken,
+            personUrn,
+            content,
+          );
 
         default:
-          this.logger.warn(`Platform ${connection.platform} not yet implemented`);
-          return { success: false, error: `Platform ${connection.platform} not supported` };
+          this.logger.warn(
+            `Platform ${connection.platform} not yet implemented`,
+          );
+          return {
+            success: false,
+            error: `Platform ${connection.platform} not supported`,
+          };
       }
     } catch (error: any) {
-      this.logger.error(`Failed to post to platform: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to post to platform: ${error.message}`,
+        error.stack,
+      );
       return { success: false, error: error.message };
     }
   }
@@ -367,8 +400,11 @@ export class SocialService {
     try {
       switch (connection.platform) {
         case SocialPlatform.FACEBOOK:
-          const facebookAppId = this.configService.get<string>('FACEBOOK_APP_ID');
-          const facebookAppSecret = this.configService.get<string>('FACEBOOK_APP_SECRET');
+          const facebookAppId =
+            this.configService.get<string>('FACEBOOK_APP_ID');
+          const facebookAppSecret = this.configService.get<string>(
+            'FACEBOOK_APP_SECRET',
+          );
           if (facebookAppId && facebookAppSecret) {
             const refreshed = await this.facebookPostingService.refreshToken(
               facebookAppId,
@@ -380,7 +416,9 @@ export class SocialService {
                 where: { id: connection.id },
                 data: {
                   accessToken: refreshed.accessToken,
-                  tokenExpiresAt: new Date(Date.now() + refreshed.expiresIn * 1000),
+                  tokenExpiresAt: new Date(
+                    Date.now() + refreshed.expiresIn * 1000,
+                  ),
                 },
               });
               return true;
@@ -392,9 +430,10 @@ export class SocialService {
       }
       return false;
     } catch (error) {
-      this.logger.error(`Failed to refresh token for connection ${connection.id}: ${error}`);
+      this.logger.error(
+        `Failed to refresh token for connection ${connection.id}: ${error}`,
+      );
       return false;
     }
   }
 }
-

@@ -41,7 +41,10 @@ export class TrialExpirationProcessor extends WorkerHost {
       }
 
       // Check if trial has expired
-      if (user.freeTrialEndsAt && new Date(user.freeTrialEndsAt) <= new Date()) {
+      if (
+        user.freeTrialEndsAt &&
+        new Date(user.freeTrialEndsAt) <= new Date()
+      ) {
         // Trial expired - downgrade to FREE plan if no subscription
         if (!user.stripeSubscriptionId && user.plan !== 'FREE') {
           await this.prisma.user.update({
@@ -59,12 +62,16 @@ export class TrialExpirationProcessor extends WorkerHost {
             data: { userId },
           });
 
-          this.logger.log(`Trial expired for user ${userId}, downgraded to FREE plan`);
+          this.logger.log(
+            `Trial expired for user ${userId}, downgraded to FREE plan`,
+          );
         }
       } else if (user.freeTrialEndsAt) {
         // Trial expiring soon (3 days before)
         const expirationDate = new Date(user.freeTrialEndsAt);
-        const threeDaysBefore = new Date(expirationDate.getTime() - 3 * 24 * 60 * 60 * 1000);
+        const threeDaysBefore = new Date(
+          expirationDate.getTime() - 3 * 24 * 60 * 60 * 1000,
+        );
         const now = new Date();
 
         if (now >= threeDaysBefore && now < expirationDate) {
@@ -80,10 +87,11 @@ export class TrialExpirationProcessor extends WorkerHost {
         }
       }
     } catch (error: any) {
-      this.logger.error(`Failed to process trial expiration: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to process trial expiration: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
 }
-
-

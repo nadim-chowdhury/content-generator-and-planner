@@ -9,6 +9,3 @@ export class RescheduleIdeaDto {
   @IsOptional()
   reason?: string; // Reason for rescheduling
 }
-
-
-

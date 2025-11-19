@@ -86,6 +86,3 @@ export class TasksController {
     return this.tasksService.bulkUpdateStatus(user.id, dto.taskIds, dto.status);
   }
 }
-
-
-

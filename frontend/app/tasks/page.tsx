@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { tasksApi, Task, TaskStatus, CreateTaskDto } from '@/lib/tasks';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import PlatformBadge from '@/components/PlatformBadge';
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/auth-store";
+import { tasksApi, Task, TaskStatus, CreateTaskDto } from "@/lib/tasks";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PlatformBadge from "@/components/PlatformBadge";
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -16,28 +16,35 @@ export default function TasksPage() {
   const [bulkMode, setBulkMode] = useState(false);
 
   // Filters
-  const [statusFilter, setStatusFilter] = useState<TaskStatus | ''>('');
-  const [platformFilter, setPlatformFilter] = useState<string>('');
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<TaskStatus | "">("");
+  const [platformFilter, setPlatformFilter] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
   const [tagFilter, setTagFilter] = useState<string[]>([]);
-  const [deadlineFrom, setDeadlineFrom] = useState<string>('');
-  const [deadlineTo, setDeadlineTo] = useState<string>('');
+  const [deadlineFrom, setDeadlineFrom] = useState<string>("");
+  const [deadlineTo, setDeadlineTo] = useState<string>("");
 
   // Form state
   const [formData, setFormData] = useState<CreateTaskDto>({
-    title: '',
-    description: '',
-    platform: '',
-    deadline: '',
+    title: "",
+    description: "",
+    platform: "",
+    deadline: "",
     attachments: [],
     tags: [],
     viralScore: undefined,
-    notes: '',
+    notes: "",
   });
 
   useEffect(() => {
     loadTasks();
-  }, [statusFilter, platformFilter, searchQuery, tagFilter, deadlineFrom, deadlineTo]);
+  }, [
+    statusFilter,
+    platformFilter,
+    searchQuery,
+    tagFilter,
+    deadlineFrom,
+    deadlineTo,
+  ]);
 
   const loadTasks = async () => {
     try {
@@ -45,14 +52,14 @@ export default function TasksPage() {
       const data = await tasksApi.getAll(
         statusFilter || undefined,
         platformFilter || undefined,
-        tagFilter.length > 0 ? tagFilter.join(',') : undefined,
+        tagFilter.length > 0 ? tagFilter.join(",") : undefined,
         searchQuery || undefined,
         deadlineFrom || undefined,
-        deadlineTo || undefined,
+        deadlineTo || undefined
       );
       setTasks(data);
     } catch (err) {
-      console.error('Failed to load tasks:', err);
+      console.error("Failed to load tasks:", err);
     } finally {
       setLoading(false);
     }
@@ -65,7 +72,7 @@ export default function TasksPage() {
       resetForm();
       await loadTasks();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to create task');
+      alert(err.response?.data?.message || "Failed to create task");
     }
   };
 
@@ -77,30 +84,33 @@ export default function TasksPage() {
       resetForm();
       await loadTasks();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update task');
+      alert(err.response?.data?.message || "Failed to update task");
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this task?')) return;
+    if (!confirm("Are you sure you want to delete this task?")) return;
     try {
       await tasksApi.delete(id);
       await loadTasks();
     } catch (err) {
-      alert('Failed to delete task');
+      alert("Failed to delete task");
     }
   };
 
   const handleBulkDelete = async () => {
     if (selectedTasks.size === 0) return;
-    if (!confirm(`Are you sure you want to delete ${selectedTasks.size} task(s)?`)) return;
+    if (
+      !confirm(`Are you sure you want to delete ${selectedTasks.size} task(s)?`)
+    )
+      return;
     try {
       await tasksApi.bulkDelete(Array.from(selectedTasks));
       setSelectedTasks(new Set());
       setBulkMode(false);
       await loadTasks();
     } catch (err) {
-      alert('Failed to delete tasks');
+      alert("Failed to delete tasks");
     }
   };
 
@@ -112,7 +122,7 @@ export default function TasksPage() {
       setBulkMode(false);
       await loadTasks();
     } catch (err) {
-      alert('Failed to update tasks');
+      alert("Failed to update tasks");
     }
   };
 
@@ -121,20 +131,20 @@ export default function TasksPage() {
       await tasksApi.update(taskId, { status });
       await loadTasks();
     } catch (err) {
-      alert('Failed to update task status');
+      alert("Failed to update task status");
     }
   };
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      description: '',
-      platform: '',
-      deadline: '',
+      title: "",
+      description: "",
+      platform: "",
+      deadline: "",
       attachments: [],
       tags: [],
       viralScore: undefined,
-      notes: '',
+      notes: "",
     });
   };
 
@@ -142,13 +152,13 @@ export default function TasksPage() {
     setEditingTask(task);
     setFormData({
       title: task.title,
-      description: task.description || '',
-      platform: task.platform || '',
-      deadline: task.deadline ? task.deadline.split('T')[0] : '',
+      description: task.description || "",
+      platform: task.platform || "",
+      deadline: task.deadline ? task.deadline.split("T")[0] : "",
       attachments: task.attachments || [],
       tags: task.tags || [],
       viralScore: task.viralScore,
-      notes: task.notes || '',
+      notes: task.notes || "",
     });
   };
 
@@ -164,25 +174,28 @@ export default function TasksPage() {
 
   const getStatusColor = (status: TaskStatus) => {
     switch (status) {
-      case 'TODO':
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
-      case 'IN_PROGRESS':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
-      case 'COMPLETED':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
-      case 'CANCELLED':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      case "TODO":
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
+      case "IN_PROGRESS":
+        return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200";
+      case "COMPLETED":
+        return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200";
+      case "CANCELLED":
+        return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200";
       default:
-        return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200';
+        return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200";
     }
   };
 
   const isOverdue = (deadline?: string) => {
     if (!deadline) return false;
-    return new Date(deadline) < new Date() && !tasks.find(t => t.id === deadline)?.completedAt;
+    return (
+      new Date(deadline) < new Date() &&
+      !tasks.find((t) => t.id === deadline)?.completedAt
+    );
   };
 
-  const allTags = Array.from(new Set(tasks.flatMap(t => t.tags || [])));
+  const allTags = Array.from(new Set(tasks.flatMap((t) => t.tags || [])));
 
   return (
     <ProtectedRoute>
@@ -190,12 +203,14 @@ export default function TasksPage() {
         <Navbar />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Content Tasks</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Content Tasks
+            </h1>
             <div className="flex gap-2">
               {bulkMode && selectedTasks.size > 0 && (
                 <>
                   <button
-                    onClick={() => handleBulkStatusUpdate('COMPLETED')}
+                    onClick={() => handleBulkStatusUpdate("COMPLETED")}
                     className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                   >
                     Mark Complete ({selectedTasks.size})
@@ -212,7 +227,7 @@ export default function TasksPage() {
                 onClick={() => setBulkMode(!bulkMode)}
                 className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
               >
-                {bulkMode ? 'Cancel Selection' : 'Bulk Select'}
+                {bulkMode ? "Cancel Selection" : "Bulk Select"}
               </button>
               <button
                 onClick={() => {
@@ -239,7 +254,9 @@ export default function TasksPage() {
               />
               <select
                 value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as TaskStatus | '')}
+                onChange={(e) =>
+                  setStatusFilter(e.target.value as TaskStatus | "")
+                }
                 className="px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
                 <option value="">All Status</option>
@@ -279,15 +296,15 @@ export default function TasksPage() {
                     key={tag}
                     onClick={() => {
                       if (tagFilter.includes(tag)) {
-                        setTagFilter(tagFilter.filter(t => t !== tag));
+                        setTagFilter(tagFilter.filter((t) => t !== tag));
                       } else {
                         setTagFilter([...tagFilter, tag]);
                       }
                     }}
                     className={`px-3 py-1 rounded-full text-sm ${
                       tagFilter.includes(tag)
-                        ? 'bg-indigo-600 text-white'
-                        : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                        ? "bg-indigo-600 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300"
                     }`}
                   >
                     {tag}
@@ -300,11 +317,15 @@ export default function TasksPage() {
           {/* Tasks List */}
           {loading ? (
             <div className="text-center py-12">
-              <div className="text-gray-600 dark:text-gray-400">Loading tasks...</div>
+              <div className="text-gray-600 dark:text-gray-400">
+                Loading tasks...
+              </div>
             </div>
           ) : tasks.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-gray-600 dark:text-gray-400">No tasks found</div>
+              <div className="text-gray-600 dark:text-gray-400">
+                No tasks found
+              </div>
             </div>
           ) : (
             <div className="space-y-4">
@@ -312,9 +333,11 @@ export default function TasksPage() {
                 <div
                   key={task.id}
                   className={`bg-white dark:bg-gray-800 p-6 rounded-lg shadow ${
-                    bulkMode ? 'cursor-pointer' : ''
-                  } ${selectedTasks.has(task.id) ? 'ring-2 ring-indigo-500' : ''} ${
-                    isOverdue(task.deadline) ? 'border-l-4 border-red-500' : ''
+                    bulkMode ? "cursor-pointer" : ""
+                  } ${
+                    selectedTasks.has(task.id) ? "ring-2 ring-indigo-500" : ""
+                  } ${
+                    isOverdue(task.deadline) ? "border-l-4 border-red-500" : ""
                   }`}
                   onClick={() => bulkMode && toggleTaskSelection(task.id)}
                 >
@@ -335,9 +358,16 @@ export default function TasksPage() {
                         </h3>
                         <select
                           value={task.status}
-                          onChange={(e) => handleStatusChange(task.id, e.target.value as TaskStatus)}
+                          onChange={(e) =>
+                            handleStatusChange(
+                              task.id,
+                              e.target.value as TaskStatus
+                            )
+                          }
                           onClick={(e) => e.stopPropagation()}
-                          className={`text-sm px-2 py-1 rounded ${getStatusColor(task.status)}`}
+                          className={`text-sm px-2 py-1 rounded ${getStatusColor(
+                            task.status
+                          )}`}
                         >
                           <option value="TODO">To Do</option>
                           <option value="IN_PROGRESS">In Progress</option>
@@ -346,16 +376,25 @@ export default function TasksPage() {
                         </select>
                       </div>
                       {task.description && (
-                        <p className="text-gray-600 dark:text-gray-400 mb-2">{task.description}</p>
+                        <p className="text-gray-600 dark:text-gray-400 mb-2">
+                          {task.description}
+                        </p>
                       )}
                       <div className="flex items-center gap-4 flex-wrap">
                         {task.platform && (
                           <PlatformBadge platform={task.platform} size="sm" />
                         )}
                         {task.deadline && (
-                          <span className={`text-sm ${isOverdue(task.deadline) ? 'text-red-600 dark:text-red-400 font-semibold' : 'text-gray-600 dark:text-gray-400'}`}>
-                            Deadline: {new Date(task.deadline).toLocaleDateString()}
-                            {isOverdue(task.deadline) && ' (Overdue)'}
+                          <span
+                            className={`text-sm ${
+                              isOverdue(task.deadline)
+                                ? "text-red-600 dark:text-red-400 font-semibold"
+                                : "text-gray-600 dark:text-gray-400"
+                            }`}
+                          >
+                            Deadline:{" "}
+                            {new Date(task.deadline).toLocaleDateString()}
+                            {isOverdue(task.deadline) && " (Overdue)"}
                           </span>
                         )}
                         {task.viralScore !== undefined && (
@@ -378,7 +417,9 @@ export default function TasksPage() {
                       </div>
                       {task.attachments.length > 0 && (
                         <div className="mt-2">
-                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Attachments: </span>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Attachments:{" "}
+                          </span>
                           {task.attachments.map((attachment, idx) => (
                             <a
                               key={idx}
@@ -395,7 +436,9 @@ export default function TasksPage() {
                       )}
                       {task.notes && (
                         <div className="mt-2 p-2 bg-gray-50 dark:bg-gray-700 rounded">
-                          <p className="text-sm text-gray-700 dark:text-gray-300">{task.notes}</p>
+                          <p className="text-sm text-gray-700 dark:text-gray-300">
+                            {task.notes}
+                          </p>
                         </div>
                       )}
                     </div>
@@ -426,7 +469,7 @@ export default function TasksPage() {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
               <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                  {editingTask ? 'Edit Task' : 'Create Task'}
+                  {editingTask ? "Edit Task" : "Create Task"}
                 </h2>
                 <div className="space-y-4">
                   <div>
@@ -436,7 +479,9 @@ export default function TasksPage() {
                     <input
                       type="text"
                       value={formData.title}
-                      onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       required
                     />
@@ -447,7 +492,12 @@ export default function TasksPage() {
                     </label>
                     <textarea
                       value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          description: e.target.value,
+                        })
+                      }
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
@@ -460,7 +510,9 @@ export default function TasksPage() {
                       <input
                         type="text"
                         value={formData.platform}
-                        onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, platform: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     </div>
@@ -471,7 +523,9 @@ export default function TasksPage() {
                       <input
                         type="datetime-local"
                         value={formData.deadline}
-                        onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, deadline: e.target.value })
+                        }
                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       />
                     </div>
@@ -484,8 +538,15 @@ export default function TasksPage() {
                       type="number"
                       min="0"
                       max="100"
-                      value={formData.viralScore || ''}
-                      onChange={(e) => setFormData({ ...formData, viralScore: e.target.value ? parseInt(e.target.value) : undefined })}
+                      value={formData.viralScore || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          viralScore: e.target.value
+                            ? parseInt(e.target.value)
+                            : undefined,
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
                   </div>
@@ -495,8 +556,16 @@ export default function TasksPage() {
                     </label>
                     <input
                       type="text"
-                      value={formData.tags?.join(', ') || ''}
-                      onChange={(e) => setFormData({ ...formData, tags: e.target.value.split(',').map(t => t.trim()).filter(t => t) })}
+                      value={formData.tags?.join(", ") || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          tags: e.target.value
+                            .split(",")
+                            .map((t) => t.trim())
+                            .filter((t) => t),
+                        })
+                      }
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="tag1, tag2, tag3"
                     />
@@ -506,8 +575,15 @@ export default function TasksPage() {
                       Attachments (one URL per line)
                     </label>
                     <textarea
-                      value={formData.attachments?.join('\n') || ''}
-                      onChange={(e) => setFormData({ ...formData, attachments: e.target.value.split('\n').filter(url => url.trim()) })}
+                      value={formData.attachments?.join("\n") || ""}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          attachments: e.target.value
+                            .split("\n")
+                            .filter((url) => url.trim()),
+                        })
+                      }
                       rows={3}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       placeholder="https://example.com/file1.pdf&#10;https://example.com/file2.jpg"
@@ -519,7 +595,9 @@ export default function TasksPage() {
                     </label>
                     <textarea
                       value={formData.notes}
-                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, notes: e.target.value })
+                      }
                       rows={4}
                       className="w-full px-3 py-2 border border-gray-300 dark:border-gray-700 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                     />
@@ -540,7 +618,7 @@ export default function TasksPage() {
                     onClick={editingTask ? handleUpdate : handleCreate}
                     className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
                   >
-                    {editingTask ? 'Update' : 'Create'}
+                    {editingTask ? "Update" : "Create"}
                   </button>
                 </div>
               </div>
@@ -551,6 +629,3 @@ export default function TasksPage() {
     </ProtectedRoute>
   );
 }
-
-
-

@@ -5,6 +5,3 @@ export class ApplyCouponDto {
   @IsNotEmpty()
   couponCode: string;
 }
-
-
-

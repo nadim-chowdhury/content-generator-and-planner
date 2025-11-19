@@ -6,6 +6,3 @@ export class UpgradeDowngradeDto {
   @IsNotEmpty()
   planType: PlanType;
 }
-
-
-

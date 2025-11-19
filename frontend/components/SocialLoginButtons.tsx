@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { authApi } from '@/lib/auth';
+import { authApi } from "@/lib/auth";
 
 export default function SocialLoginButtons() {
   return (
@@ -65,6 +65,3 @@ export default function SocialLoginButtons() {
     </div>
   );
 }
-
-
-

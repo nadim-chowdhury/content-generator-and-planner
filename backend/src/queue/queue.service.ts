@@ -49,15 +49,14 @@ export class QueueService {
   /**
    * Schedule a posting reminder
    */
-  async schedulePostingReminder(job: PostingReminderJob, scheduledDate: Date): Promise<string> {
-    const jobId = await this.postingRemindersQueue.add(
-      'remind-posting',
-      job,
-      {
-        delay: scheduledDate.getTime() - Date.now(),
-        jobId: `posting-reminder-${job.userId}-${job.ideaId}`,
-      },
-    );
+  async schedulePostingReminder(
+    job: PostingReminderJob,
+    scheduledDate: Date,
+  ): Promise<string> {
+    const jobId = await this.postingRemindersQueue.add('remind-posting', job, {
+      delay: scheduledDate.getTime() - Date.now(),
+      jobId: `posting-reminder-${job.userId}-${job.ideaId}`,
+    });
     this.logger.log(`Scheduled posting reminder: ${jobId.id}`);
     return jobId.id!;
   }
@@ -85,17 +84,13 @@ export class QueueService {
    * Queue batch AI generation
    */
   async queueBatchGeneration(job: BatchGenerationJob): Promise<string> {
-    const jobId = await this.batchGenerationsQueue.add(
-      'generate-batch',
-      job,
-      {
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 2000,
-        },
+    const jobId = await this.batchGenerationsQueue.add('generate-batch', job, {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 2000,
       },
-    );
+    });
     this.logger.log(`Queued batch generation: ${jobId.id}`);
     return jobId.id!;
   }
@@ -119,18 +114,14 @@ export class QueueService {
    * Queue email sending
    */
   async queueEmail(job: EmailJob, delay?: number): Promise<string> {
-    const jobId = await this.emailQueue.add(
-      'send-email',
-      job,
-      {
-        delay,
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 1000,
-        },
+    const jobId = await this.emailQueue.add('send-email', job, {
+      delay,
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 1000,
       },
-    );
+    });
     this.logger.log(`Queued email: ${jobId.id}`);
     return jobId.id!;
   }
@@ -138,7 +129,10 @@ export class QueueService {
   /**
    * Schedule trial expiration check
    */
-  async scheduleTrialExpirationCheck(userId: string, expirationDate: Date): Promise<string> {
+  async scheduleTrialExpirationCheck(
+    userId: string,
+    expirationDate: Date,
+  ): Promise<string> {
     const jobId = await this.trialExpirationQueue.add(
       'check-trial-expiration',
       { userId },
@@ -159,28 +153,30 @@ export class QueueService {
     scheduledDate: Date,
   ): Promise<string> {
     const delay = Math.max(0, scheduledDate.getTime() - Date.now());
-    
-    const jobId = await this.autoPostsQueue.add(
-      'post-scheduled',
-      job,
-      {
-        delay,
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 5000, // 5 seconds, 25 seconds, 125 seconds
-        },
-        jobId: `auto-post-${job.userId}-${job.ideaId}-${job.connectionId}`,
+
+    const jobId = await this.autoPostsQueue.add('post-scheduled', job, {
+      delay,
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 5000, // 5 seconds, 25 seconds, 125 seconds
       },
+      jobId: `auto-post-${job.userId}-${job.ideaId}-${job.connectionId}`,
+    });
+    this.logger.log(
+      `Scheduled auto-post: ${jobId.id} for ${scheduledDate.toISOString()}`,
     );
-    this.logger.log(`Scheduled auto-post: ${jobId.id} for ${scheduledDate.toISOString()}`);
     return jobId.id!;
   }
 
   /**
    * Cancel auto-post job
    */
-  async cancelAutoPost(userId: string, ideaId: string, connectionId: string): Promise<void> {
+  async cancelAutoPost(
+    userId: string,
+    ideaId: string,
+    connectionId: string,
+  ): Promise<void> {
     const jobId = `auto-post-${userId}-${ideaId}-${connectionId}`;
     const job = await this.autoPostsQueue.getJob(jobId);
     if (job) {
@@ -193,16 +189,23 @@ export class QueueService {
    * Get queue statistics
    */
   async getQueueStats() {
-    const [postingReminders, quotaReset, batchGenerations, analytics, email, trialExpiration, autoPosts] =
-      await Promise.all([
-        this.postingRemindersQueue.getJobCounts(),
-        this.quotaResetQueue.getJobCounts(),
-        this.batchGenerationsQueue.getJobCounts(),
-        this.analyticsQueue.getJobCounts(),
-        this.emailQueue.getJobCounts(),
-        this.trialExpirationQueue.getJobCounts(),
-        this.autoPostsQueue.getJobCounts(),
-      ]);
+    const [
+      postingReminders,
+      quotaReset,
+      batchGenerations,
+      analytics,
+      email,
+      trialExpiration,
+      autoPosts,
+    ] = await Promise.all([
+      this.postingRemindersQueue.getJobCounts(),
+      this.quotaResetQueue.getJobCounts(),
+      this.batchGenerationsQueue.getJobCounts(),
+      this.analyticsQueue.getJobCounts(),
+      this.emailQueue.getJobCounts(),
+      this.trialExpirationQueue.getJobCounts(),
+      this.autoPostsQueue.getJobCounts(),
+    ]);
 
     return {
       postingReminders,
@@ -215,4 +218,3 @@ export class QueueService {
     };
   }
 }
-

@@ -11,5 +11,3 @@ import { ConfigModule } from '@nestjs/config';
   exports: [SharingService],
 })
 export class SharingModule {}
-
-

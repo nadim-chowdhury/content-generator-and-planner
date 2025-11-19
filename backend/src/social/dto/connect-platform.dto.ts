@@ -50,4 +50,3 @@ export class ConnectPlatformDto {
   @IsOptional()
   isDefault?: boolean;
 }
-

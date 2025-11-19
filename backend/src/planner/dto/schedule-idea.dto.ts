@@ -5,4 +5,3 @@ export class ScheduleIdeaDto {
   @IsNotEmpty()
   scheduledAt: string;
 }
-

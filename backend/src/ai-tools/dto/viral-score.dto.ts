@@ -34,4 +34,3 @@ export class ViralScoreDto {
   @IsOptional()
   language?: string; // Language code (default: 'en')
 }
-

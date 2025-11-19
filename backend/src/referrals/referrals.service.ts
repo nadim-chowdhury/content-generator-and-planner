@@ -1,4 +1,9 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 import { randomBytes } from 'crypto';
@@ -49,7 +54,9 @@ export class ReferralsService {
       data: { referralCode },
     });
 
-    this.logger.log(`Generated referral code for user ${userId}: ${referralCode}`);
+    this.logger.log(
+      `Generated referral code for user ${userId}: ${referralCode}`,
+    );
     return referralCode;
   }
 
@@ -58,14 +65,18 @@ export class ReferralsService {
    */
   async getReferralLink(userId: string): Promise<string> {
     const code = await this.getOrCreateReferralCode(userId);
-    const frontendUrl = this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
+    const frontendUrl =
+      this.configService.get<string>('FRONTEND_URL') || 'http://localhost:3000';
     return `${frontendUrl}/signup?ref=${code}`;
   }
 
   /**
    * Process referral when a new user signs up
    */
-  async processReferralSignup(userId: string, referralCode?: string): Promise<void> {
+  async processReferralSignup(
+    userId: string,
+    referralCode?: string,
+  ): Promise<void> {
     if (!referralCode) {
       return; // No referral code provided
     }
@@ -175,7 +186,9 @@ export class ReferralsService {
 
     const stats = {
       totalReferrals: referrals.length,
-      convertedReferrals: referrals.filter((r) => r.status === 'CONVERTED' || r.status === 'REWARDED').length,
+      convertedReferrals: referrals.filter(
+        (r) => r.status === 'CONVERTED' || r.status === 'REWARDED',
+      ).length,
       pendingReferrals: referrals.filter((r) => r.status === 'PENDING').length,
       totalCreditsEarned: totalCredits?.referralCredits || 0,
       referrals: referrals.map((r) => ({
@@ -246,7 +259,10 @@ export class ReferralsService {
   /**
    * Track referral click (before signup)
    */
-  async trackReferralClick(referralCode: string, email?: string): Promise<void> {
+  async trackReferralClick(
+    referralCode: string,
+    email?: string,
+  ): Promise<void> {
     const referrer = await this.prisma.user.findUnique({
       where: { referralCode },
     });
@@ -280,4 +296,3 @@ export class ReferralsService {
     }
   }
 }
-

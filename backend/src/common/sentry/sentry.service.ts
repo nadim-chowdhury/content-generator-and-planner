@@ -6,7 +6,7 @@ import { nodeProfilingIntegration } from '@sentry/profiling-node';
 export class SentryService implements OnModuleInit {
   onModuleInit() {
     const dsn = process.env.SENTRY_DSN;
-    
+
     if (!dsn) {
       console.warn('⚠️  Sentry DSN not configured. Error monitoring disabled.');
       return;
@@ -15,9 +15,7 @@ export class SentryService implements OnModuleInit {
     Sentry.init({
       dsn,
       environment: process.env.NODE_ENV || 'development',
-      integrations: [
-        nodeProfilingIntegration(),
-      ],
+      integrations: [nodeProfilingIntegration()],
       // Performance Monitoring
       tracesSampleRate: process.env.NODE_ENV === 'production' ? 0.1 : 1.0,
       // Profiling
@@ -32,7 +30,10 @@ export class SentryService implements OnModuleInit {
       ],
       beforeSend(event, hint) {
         // Don't send events in development unless explicitly enabled
-        if (process.env.NODE_ENV === 'development' && !process.env.SENTRY_ENABLE_DEV) {
+        if (
+          process.env.NODE_ENV === 'development' &&
+          !process.env.SENTRY_ENABLE_DEV
+        ) {
           return null;
         }
         return event;
@@ -55,7 +56,11 @@ export class SentryService implements OnModuleInit {
     }
   }
 
-  captureMessage(message: string, level: Sentry.SeverityLevel = 'info', context?: Record<string, any>) {
+  captureMessage(
+    message: string,
+    level: Sentry.SeverityLevel = 'info',
+    context?: Record<string, any>,
+  ) {
     if (context) {
       Sentry.withScope((scope) => {
         Object.keys(context).forEach((key) => {
@@ -80,4 +85,3 @@ export class SentryService implements OnModuleInit {
     Sentry.addBreadcrumb(breadcrumb);
   }
 }
-

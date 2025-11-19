@@ -20,15 +20,12 @@ export class FacebookService {
    */
   async getUserPages(userAccessToken: string): Promise<FacebookPage[]> {
     try {
-      const response = await axios.get(
-        `${this.graphApiUrl}/me/accounts`,
-        {
-          params: {
-            access_token: userAccessToken,
-            fields: 'id,name,access_token,category',
-          },
+      const response = await axios.get(`${this.graphApiUrl}/me/accounts`, {
+        params: {
+          access_token: userAccessToken,
+          fields: 'id,name,access_token,category',
         },
-      );
+      });
 
       return response.data.data || [];
     } catch (error) {
@@ -42,15 +39,12 @@ export class FacebookService {
    */
   async getUserProfile(userAccessToken: string) {
     try {
-      const response = await axios.get(
-        `${this.graphApiUrl}/me`,
-        {
-          params: {
-            access_token: userAccessToken,
-            fields: 'id,name,email',
-          },
+      const response = await axios.get(`${this.graphApiUrl}/me`, {
+        params: {
+          access_token: userAccessToken,
+          fields: 'id,name,email',
         },
-      );
+      });
 
       return response.data;
     } catch (error) {
@@ -94,11 +88,7 @@ export class FacebookService {
   /**
    * Post to user's personal Facebook profile
    */
-  async postToProfile(
-    userAccessToken: string,
-    message: string,
-    link?: string,
-  ) {
+  async postToProfile(userAccessToken: string, message: string, link?: string) {
     try {
       const params: any = {
         access_token: userAccessToken,
@@ -109,11 +99,9 @@ export class FacebookService {
         params.link = link;
       }
 
-      const response = await axios.post(
-        `${this.graphApiUrl}/me/feed`,
-        null,
-        { params },
-      );
+      const response = await axios.post(`${this.graphApiUrl}/me/feed`, null, {
+        params,
+      });
 
       return response.data;
     } catch (error) {
@@ -122,4 +110,3 @@ export class FacebookService {
     }
   }
 }
-

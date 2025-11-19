@@ -1,45 +1,62 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { ideasApi, Idea } from '@/lib/ideas';
-import { plannerApi, CalendarEvent } from '@/lib/planner';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import CalendarView from '@/components/CalendarView';
-import PlatformBadge from '@/components/PlatformBadge';
-import AutomatedScheduling from '@/components/AutomatedScheduling';
-import CalendarAutofill from '@/components/CalendarAutofill';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  ChevronLeft, 
-  ChevronRight, 
-  Calendar as CalendarIcon, 
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/auth-store";
+import { ideasApi, Idea } from "@/lib/ideas";
+import { plannerApi, CalendarEvent } from "@/lib/planner";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import CalendarView from "@/components/CalendarView";
+import PlatformBadge from "@/components/PlatformBadge";
+import AutomatedScheduling from "@/components/AutomatedScheduling";
+import CalendarAutofill from "@/components/CalendarAutofill";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar as CalendarIcon,
   Lightbulb,
   Sparkles,
   X,
   Clock,
-  AlertCircle
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  AlertCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
-type ViewType = 'month' | 'week' | 'day' | 'list';
+type ViewType = "month" | "week" | "day" | "list";
 
 export default function PlannerPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [view, setView] = useState<ViewType>('month');
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [view, setView] = useState<ViewType>("month");
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(
+    null
+  );
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [suggestions, setSuggestions] = useState<Array<{ date: string; reason: string; score: number }>>([]);
+  const [suggestions, setSuggestions] = useState<
+    Array<{ date: string; reason: string; score: number }>
+  >([]);
   const [suggestingFor, setSuggestingFor] = useState<string | null>(null);
 
   useEffect(() => {
@@ -52,28 +69,31 @@ export default function PlannerPage() {
       const from = new Date(currentDate);
       const to = new Date(currentDate);
 
-      if (view === 'month') {
+      if (view === "month") {
         from.setDate(1);
         to.setMonth(to.getMonth() + 1);
         to.setDate(0);
-      } else if (view === 'week') {
+      } else if (view === "week") {
         const day = from.getDay();
         from.setDate(from.getDate() - day);
         to.setDate(from.getDate() + 6);
-      } else if (view === 'day') {
+      } else if (view === "day") {
         to.setDate(to.getDate() + 1);
       } else {
         to.setDate(to.getDate() + 30);
       }
 
       const [eventsData, ideasData] = await Promise.all([
-        plannerApi.getCalendar(from.toISOString().split('T')[0], to.toISOString().split('T')[0]),
-        ideasApi.getAll('DRAFT'),
+        plannerApi.getCalendar(
+          from.toISOString().split("T")[0],
+          to.toISOString().split("T")[0]
+        ),
+        ideasApi.getAll("DRAFT"),
       ]);
       setEvents(eventsData);
       setIdeas(ideasData);
     } catch (err) {
-      console.error('Failed to load data:', err);
+      console.error("Failed to load data:", err);
     } finally {
       setLoading(false);
     }
@@ -83,9 +103,9 @@ export default function PlannerPage() {
     try {
       await plannerApi.schedule(ideaId, date);
       await loadData();
-      alert('Idea scheduled!');
+      alert("Idea scheduled!");
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to schedule idea');
+      alert(err.response?.data?.message || "Failed to schedule idea");
     }
   };
 
@@ -95,7 +115,7 @@ export default function PlannerPage() {
       await loadData();
       setSelectedEvent(null);
     } catch (err) {
-      alert('Failed to unschedule idea');
+      alert("Failed to unschedule idea");
     }
   };
 
@@ -104,7 +124,7 @@ export default function PlannerPage() {
       await plannerApi.reschedule(eventId, newDate);
       await loadData();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to reschedule idea');
+      alert(err.response?.data?.message || "Failed to reschedule idea");
     }
   };
 
@@ -112,14 +132,21 @@ export default function PlannerPage() {
     setSelectedEvent(event);
   };
 
-  const handleGetSuggestions = async (ideaId: string, preferredDate: string) => {
+  const handleGetSuggestions = async (
+    ideaId: string,
+    preferredDate: string
+  ) => {
     try {
-      const data = await plannerApi.getAutoRescheduleSuggestions(ideaId, preferredDate, 7);
+      const data = await plannerApi.getAutoRescheduleSuggestions(
+        ideaId,
+        preferredDate,
+        7
+      );
       setSuggestions(data.suggestions);
       setSuggestingFor(ideaId);
       setShowSuggestions(true);
     } catch (err) {
-      alert('Failed to get suggestions');
+      alert("Failed to get suggestions");
     }
   };
 
@@ -130,19 +157,19 @@ export default function PlannerPage() {
       await loadData();
       setShowSuggestions(false);
       setSuggestingFor(null);
-      alert('Idea rescheduled!');
+      alert("Idea rescheduled!");
     } catch (err) {
-      alert('Failed to reschedule idea');
+      alert("Failed to reschedule idea");
     }
   };
 
   const navigateDate = (direction: number) => {
     const newDate = new Date(currentDate);
-    if (view === 'month') {
+    if (view === "month") {
       newDate.setMonth(newDate.getMonth() + direction);
-    } else if (view === 'week') {
-      newDate.setDate(newDate.getDate() + (direction * 7));
-    } else if (view === 'day') {
+    } else if (view === "week") {
+      newDate.setDate(newDate.getDate() + direction * 7);
+    } else if (view === "day") {
       newDate.setDate(newDate.getDate() + direction);
     }
     setCurrentDate(newDate);
@@ -153,19 +180,34 @@ export default function PlannerPage() {
   };
 
   const formatDateHeader = () => {
-    if (view === 'month') {
-      return currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-    } else if (view === 'week') {
+    if (view === "month") {
+      return currentDate.toLocaleDateString("en-US", {
+        month: "long",
+        year: "numeric",
+      });
+    } else if (view === "week") {
       const startOfWeek = new Date(currentDate);
       const day = startOfWeek.getDay();
       startOfWeek.setDate(startOfWeek.getDate() - day);
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(endOfWeek.getDate() + 6);
-      return `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
-    } else if (view === 'day') {
-      return currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      return `${startOfWeek.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })} - ${endOfWeek.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}`;
+    } else if (view === "day") {
+      return currentDate.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
     }
-    return 'All Scheduled Ideas';
+    return "All Scheduled Ideas";
   };
 
   return (
@@ -176,30 +218,40 @@ export default function PlannerPage() {
           <div className="mb-8">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h1 className="text-3xl font-bold tracking-tight">Content Planner</h1>
+                <h1 className="text-3xl font-bold tracking-tight">
+                  Content Planner
+                </h1>
                 <p className="text-muted-foreground mt-1">
                   Schedule and manage your content calendar
                 </p>
               </div>
             </div>
-            
+
             {/* Navigation Controls */}
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => navigateDate(-1)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateDate(-1)}
+                >
                   <ChevronLeft className="w-4 h-4" />
                 </Button>
                 <Button variant="default" size="sm" onClick={goToToday}>
                   Today
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => navigateDate(1)}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => navigateDate(1)}
+                >
                   <ChevronRight className="w-4 h-4" />
                 </Button>
                 <span className="text-lg font-semibold ml-4">
                   {formatDateHeader()}
                 </span>
               </div>
-              
+
               <Tabs value={view} onValueChange={(v) => setView(v as ViewType)}>
                 <TabsList>
                   <TabsTrigger value="month">Month</TabsTrigger>
@@ -244,19 +296,27 @@ export default function PlannerPage() {
                       Unscheduled Ideas
                     </CardTitle>
                     <CardDescription>
-                      {ideas.length} draft {ideas.length === 1 ? 'idea' : 'ideas'} available
+                      {ideas.length} draft{" "}
+                      {ideas.length === 1 ? "idea" : "ideas"} available
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3 max-h-96 overflow-y-auto">
                       {ideas.length === 0 ? (
-                        <p className="text-sm text-muted-foreground text-center py-4">No draft ideas</p>
+                        <p className="text-sm text-muted-foreground text-center py-4">
+                          No draft ideas
+                        </p>
                       ) : (
                         ideas.map((idea) => (
                           <Card key={idea.id} className="p-3">
-                            <h3 className="text-sm font-medium mb-2 line-clamp-2">{idea.title}</h3>
+                            <h3 className="text-sm font-medium mb-2 line-clamp-2">
+                              {idea.title}
+                            </h3>
                             <div className="flex items-center gap-2 mb-2">
-                              <PlatformBadge platform={idea.platform} size="sm" />
+                              <PlatformBadge
+                                platform={idea.platform}
+                                size="sm"
+                              />
                               {idea.viralScore && (
                                 <Badge variant="secondary" className="text-xs">
                                   <Sparkles className="w-3 h-3 mr-1" />
@@ -266,7 +326,9 @@ export default function PlannerPage() {
                             </div>
                             <Input
                               type="date"
-                              defaultValue={new Date().toISOString().split('T')[0]}
+                              defaultValue={
+                                new Date().toISOString().split("T")[0]
+                              }
                               className="text-xs mb-2"
                               onChange={(e) => {
                                 if (e.target.value) {
@@ -278,7 +340,12 @@ export default function PlannerPage() {
                               variant="outline"
                               size="sm"
                               className="w-full text-xs"
-                              onClick={() => handleGetSuggestions(idea.id, new Date().toISOString().split('T')[0])}
+                              onClick={() =>
+                                handleGetSuggestions(
+                                  idea.id,
+                                  new Date().toISOString().split("T")[0]
+                                )
+                              }
                             >
                               <Sparkles className="w-3 h-3 mr-1" />
                               Get Suggestions
@@ -309,7 +376,10 @@ export default function PlannerPage() {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
-                        <PlatformBadge platform={selectedEvent.platform} size="sm" />
+                        <PlatformBadge
+                          platform={selectedEvent.platform}
+                          size="sm"
+                        />
                         <Badge variant={getStatusVariant(selectedEvent.status)}>
                           {selectedEvent.status}
                         </Badge>
@@ -331,7 +401,12 @@ export default function PlannerPage() {
                           variant="outline"
                           size="sm"
                           className="flex-1"
-                          onClick={() => handleGetSuggestions(selectedEvent.id, selectedEvent.scheduledAt.split('T')[0])}
+                          onClick={() =>
+                            handleGetSuggestions(
+                              selectedEvent.id,
+                              selectedEvent.scheduledAt.split("T")[0]
+                            )
+                          }
                         >
                           <Sparkles className="w-3 h-3 mr-1" />
                           Suggestions
@@ -357,12 +432,19 @@ export default function PlannerPage() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
-                      {['DRAFT', 'SCHEDULED', 'POSTED', 'ARCHIVED'].map((status) => (
-                        <div key={status} className="flex items-center gap-2">
-                          <div className={cn("w-3 h-3 rounded-full", getStatusDotColor(status))} />
-                          <span className="text-sm">{status}</span>
-                        </div>
-                      ))}
+                      {["DRAFT", "SCHEDULED", "POSTED", "ARCHIVED"].map(
+                        (status) => (
+                          <div key={status} className="flex items-center gap-2">
+                            <div
+                              className={cn(
+                                "w-3 h-3 rounded-full",
+                                getStatusDotColor(status)
+                              )}
+                            />
+                            <span className="text-sm">{status}</span>
+                          </div>
+                        )
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -371,7 +453,9 @@ export default function PlannerPage() {
                 {selectedEvent && (
                   <Card>
                     <CardHeader>
-                      <CardTitle className="text-base">AI Posting Time Suggestions</CardTitle>
+                      <CardTitle className="text-base">
+                        AI Posting Time Suggestions
+                      </CardTitle>
                     </CardHeader>
                     <CardContent>
                       <AutomatedScheduling
@@ -417,16 +501,22 @@ export default function PlannerPage() {
                   </div>
                 ) : (
                   suggestions.map((suggestion, idx) => (
-                    <Card key={idx} className="p-3 hover:bg-accent transition-colors">
+                    <Card
+                      key={idx}
+                      className="p-3 hover:bg-accent transition-colors"
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           <div className="font-medium">
-                            {new Date(suggestion.date).toLocaleDateString('en-US', {
-                              weekday: 'long',
-                              month: 'long',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}
+                            {new Date(suggestion.date).toLocaleDateString(
+                              "en-US",
+                              {
+                                weekday: "long",
+                                month: "long",
+                                day: "numeric",
+                                year: "numeric",
+                              }
+                            )}
                           </div>
                           <div className="text-sm text-muted-foreground">
                             {suggestion.reason} (Score: {suggestion.score})
@@ -444,10 +534,13 @@ export default function PlannerPage() {
                 )}
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => {
-                  setShowSuggestions(false);
-                  setSuggestingFor(null);
-                }}>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setShowSuggestions(false);
+                    setSuggestingFor(null);
+                  }}
+                >
                   Close
                 </Button>
               </DialogFooter>
@@ -459,30 +552,32 @@ export default function PlannerPage() {
   );
 }
 
-function getStatusVariant(status: string): "default" | "secondary" | "destructive" | "outline" {
+function getStatusVariant(
+  status: string
+): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
-    case 'SCHEDULED':
-      return 'default';
-    case 'POSTED':
-      return 'secondary';
-    case 'ARCHIVED':
-      return 'outline';
+    case "SCHEDULED":
+      return "default";
+    case "POSTED":
+      return "secondary";
+    case "ARCHIVED":
+      return "outline";
     default:
-      return 'secondary';
+      return "secondary";
   }
 }
 
 function getStatusDotColor(status: string): string {
   switch (status) {
-    case 'DRAFT':
-      return 'bg-muted';
-    case 'SCHEDULED':
-      return 'bg-primary';
-    case 'POSTED':
-      return 'bg-green-500';
-    case 'ARCHIVED':
-      return 'bg-yellow-500';
+    case "DRAFT":
+      return "bg-muted";
+    case "SCHEDULED":
+      return "bg-primary";
+    case "POSTED":
+      return "bg-green-500";
+    case "ARCHIVED":
+      return "bg-yellow-500";
     default:
-      return 'bg-muted';
+      return "bg-muted";
   }
 }

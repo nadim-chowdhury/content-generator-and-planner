@@ -26,7 +26,12 @@ export class LanguageService {
     { code: 'tr', name: 'Turkish', nativeName: 'Türkçe', rtl: false },
     { code: 'vi', name: 'Vietnamese', nativeName: 'Tiếng Việt', rtl: false },
     { code: 'th', name: 'Thai', nativeName: 'ไทย', rtl: false },
-    { code: 'id', name: 'Indonesian', nativeName: 'Bahasa Indonesia', rtl: false },
+    {
+      code: 'id',
+      name: 'Indonesian',
+      nativeName: 'Bahasa Indonesia',
+      rtl: false,
+    },
     { code: 'nl', name: 'Dutch', nativeName: 'Nederlands', rtl: false },
     { code: 'pl', name: 'Polish', nativeName: 'Polski', rtl: false },
     { code: 'uk', name: 'Ukrainian', nativeName: 'Українська', rtl: false },
@@ -68,8 +73,10 @@ export class LanguageService {
   getLanguageInstruction(code: string): string {
     const lang = this.getLanguageInfo(code);
     if (!lang) return 'Generate all content in English.';
-    
-    const rtlNote = lang.rtl ? ' Note: This language uses right-to-left (RTL) script.' : '';
+
+    const rtlNote = lang.rtl
+      ? ' Note: This language uses right-to-left (RTL) script.'
+      : '';
     return `Generate ALL content (titles, descriptions, hooks, scripts, captions, hashtags, category tags, thumbnail suggestions, and platform optimization notes) in ${lang.name} (${lang.nativeName}).${rtlNote} Ensure all text is culturally appropriate and uses natural, native expressions.`;
   }
 
@@ -80,6 +87,3 @@ export class LanguageService {
     return 'en';
   }
 }
-
-
-

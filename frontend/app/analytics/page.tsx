@@ -1,30 +1,62 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { analyticsApi, AnalyticsSummary, PlatformPerformance, CategoryPerformance, ContentAnalytics } from '@/lib/analytics';
-import { ideasApi, Idea } from '@/lib/ideas';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import PlatformBadge from '@/components/PlatformBadge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { 
-  BarChart3, 
-  Plus, 
-  TrendingUp, 
+import { useEffect, useState } from "react";
+import {
+  analyticsApi,
+  AnalyticsSummary,
+  PlatformPerformance,
+  CategoryPerformance,
+  ContentAnalytics,
+} from "@/lib/analytics";
+import { ideasApi, Idea } from "@/lib/ideas";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PlatformBadge from "@/components/PlatformBadge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  BarChart3,
+  Plus,
+  TrendingUp,
   Calendar,
   Sparkles,
-  CheckCircle2
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
+  CheckCircle2,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export default function AnalyticsPage() {
   const [summary, setSummary] = useState<AnalyticsSummary | null>(null);
@@ -32,9 +64,11 @@ export default function AnalyticsPage() {
   const [categories, setCategories] = useState<CategoryPerformance[]>([]);
   const [analytics, setAnalytics] = useState<ContentAnalytics[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedTab, setSelectedTab] = useState<'overview' | 'platforms' | 'categories' | 'records'>('overview');
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
+  const [selectedTab, setSelectedTab] = useState<
+    "overview" | "platforms" | "categories" | "records"
+  >("overview");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -45,12 +79,23 @@ export default function AnalyticsPage() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const [summaryData, platformsData, categoriesData, analyticsData, ideasData] = await Promise.all([
+      const [
+        summaryData,
+        platformsData,
+        categoriesData,
+        analyticsData,
+        ideasData,
+      ] = await Promise.all([
         analyticsApi.getSummary(dateFrom || undefined, dateTo || undefined),
         analyticsApi.getAllPlatformsPerformance(),
         analyticsApi.getAllCategoriesPerformance(),
-        analyticsApi.getAll(undefined, undefined, dateFrom || undefined, dateTo || undefined),
-        ideasApi.getAll('POSTED'),
+        analyticsApi.getAll(
+          undefined,
+          undefined,
+          dateFrom || undefined,
+          dateTo || undefined
+        ),
+        ideasApi.getAll("POSTED"),
       ]);
       setSummary(summaryData);
       setPlatforms(platformsData);
@@ -58,16 +103,18 @@ export default function AnalyticsPage() {
       setAnalytics(analyticsData);
       setIdeas(ideasData);
     } catch (err) {
-      console.error('Failed to load analytics:', err);
+      console.error("Failed to load analytics:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const getScoreVariant = (score: number): "default" | "secondary" | "destructive" | "outline" => {
-    if (score >= 80) return 'default';
-    if (score >= 60) return 'secondary';
-    return 'destructive';
+  const getScoreVariant = (
+    score: number
+  ): "default" | "secondary" | "destructive" | "outline" => {
+    if (score >= 80) return "default";
+    if (score >= 60) return "secondary";
+    return "destructive";
   };
 
   return (
@@ -77,7 +124,9 @@ export default function AnalyticsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">Analytics & Reports</h1>
+              <h1 className="text-3xl font-bold tracking-tight">
+                Analytics & Reports
+              </h1>
               <p className="text-muted-foreground mt-1">
                 Track and analyze your content performance
               </p>
@@ -104,7 +153,11 @@ export default function AnalyticsPage() {
             </div>
           </div>
 
-          <Tabs value={selectedTab} onValueChange={(v) => setSelectedTab(v as any)} className="space-y-6">
+          <Tabs
+            value={selectedTab}
+            onValueChange={(v) => setSelectedTab(v as any)}
+            className="space-y-6"
+          >
             <TabsList>
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="platforms">Platform Performance</TabsTrigger>
@@ -129,7 +182,9 @@ export default function AnalyticsPage() {
                             <CardDescription>Total Posts</CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <div className="text-2xl font-bold">{summary.totalPosts}</div>
+                            <div className="text-2xl font-bold">
+                              {summary.totalPosts}
+                            </div>
                           </CardContent>
                         </Card>
                         <Card>
@@ -137,7 +192,9 @@ export default function AnalyticsPage() {
                             <CardDescription>Total Reach</CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <div className="text-2xl font-bold">{summary.totalReach.toLocaleString()}</div>
+                            <div className="text-2xl font-bold">
+                              {summary.totalReach.toLocaleString()}
+                            </div>
                           </CardContent>
                         </Card>
                         <Card>
@@ -145,18 +202,26 @@ export default function AnalyticsPage() {
                             <CardDescription>Total Engagement</CardDescription>
                           </CardHeader>
                           <CardContent>
-                            <div className="text-2xl font-bold">{summary.totalEngagement.toLocaleString()}</div>
+                            <div className="text-2xl font-bold">
+                              {summary.totalEngagement.toLocaleString()}
+                            </div>
                           </CardContent>
                         </Card>
                         <Card>
                           <CardHeader className="pb-2">
-                            <CardDescription>Avg Engagement Rate</CardDescription>
+                            <CardDescription>
+                              Avg Engagement Rate
+                            </CardDescription>
                           </CardHeader>
                           <CardContent>
                             <div className="text-2xl font-bold">
                               {summary.totalReach > 0
-                                ? ((summary.totalEngagement / summary.totalReach) * 100).toFixed(2)
-                                : '0.00'}
+                                ? (
+                                    (summary.totalEngagement /
+                                      summary.totalReach) *
+                                    100
+                                  ).toFixed(2)
+                                : "0.00"}
                               %
                             </div>
                           </CardContent>
@@ -174,20 +239,36 @@ export default function AnalyticsPage() {
                         <CardContent>
                           <div className="space-y-3">
                             {summary.platforms
-                              .sort((a, b) => b.engagementRate - a.engagementRate)
+                              .sort(
+                                (a, b) => b.engagementRate - a.engagementRate
+                              )
                               .slice(0, 5)
                               .map((platform) => (
-                                <div key={platform.platform} className="flex items-center justify-between p-3 rounded-lg border">
+                                <div
+                                  key={platform.platform}
+                                  className="flex items-center justify-between p-3 rounded-lg border"
+                                >
                                   <div className="flex items-center gap-3">
-                                    <PlatformBadge platform={platform.platform} size="sm" />
+                                    <PlatformBadge
+                                      platform={platform.platform}
+                                      size="sm"
+                                    />
                                     <div>
-                                      <div className="font-medium">{platform.platform}</div>
+                                      <div className="font-medium">
+                                        {platform.platform}
+                                      </div>
                                       <div className="text-sm text-muted-foreground">
-                                        {platform.totalPosts} posts • {platform.avgReach.toLocaleString()} avg reach
+                                        {platform.totalPosts} posts •{" "}
+                                        {platform.avgReach.toLocaleString()} avg
+                                        reach
                                       </div>
                                     </div>
                                   </div>
-                                  <Badge variant={getScoreVariant(platform.engagementRate * 100)}>
+                                  <Badge
+                                    variant={getScoreVariant(
+                                      platform.engagementRate * 100
+                                    )}
+                                  >
                                     {platform.engagementRate.toFixed(1)}%
                                   </Badge>
                                 </div>
@@ -204,17 +285,30 @@ export default function AnalyticsPage() {
                         <CardContent>
                           <div className="space-y-3">
                             {summary.categories
-                              .sort((a, b) => b.engagementRate - a.engagementRate)
+                              .sort(
+                                (a, b) => b.engagementRate - a.engagementRate
+                              )
                               .slice(0, 5)
                               .map((category) => (
-                                <div key={category.category} className="flex items-center justify-between p-3 rounded-lg border">
+                                <div
+                                  key={category.category}
+                                  className="flex items-center justify-between p-3 rounded-lg border"
+                                >
                                   <div>
-                                    <div className="font-medium">{category.category}</div>
+                                    <div className="font-medium">
+                                      {category.category}
+                                    </div>
                                     <div className="text-sm text-muted-foreground">
-                                      {category.totalPosts} posts • {category.avgEngagement.toLocaleString()} avg engagement
+                                      {category.totalPosts} posts •{" "}
+                                      {category.avgEngagement.toLocaleString()}{" "}
+                                      avg engagement
                                     </div>
                                   </div>
-                                  <Badge variant={getScoreVariant(category.engagementRate * 100)}>
+                                  <Badge
+                                    variant={getScoreVariant(
+                                      category.engagementRate * 100
+                                    )}
+                                  >
                                     {category.engagementRate.toFixed(1)}%
                                   </Badge>
                                 </div>
@@ -237,32 +331,60 @@ export default function AnalyticsPage() {
                           <Card key={platform.platform} className="p-4">
                             <div className="flex items-center justify-between mb-3">
                               <div className="flex items-center gap-3">
-                                <PlatformBadge platform={platform.platform} size="md" />
-                                <Badge variant={getScoreVariant(platform.engagementRate * 100)}>
-                                  Engagement: {platform.engagementRate.toFixed(1)}%
+                                <PlatformBadge
+                                  platform={platform.platform}
+                                  size="md"
+                                />
+                                <Badge
+                                  variant={getScoreVariant(
+                                    platform.engagementRate * 100
+                                  )}
+                                >
+                                  Engagement:{" "}
+                                  {platform.engagementRate.toFixed(1)}%
                                 </Badge>
                               </div>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                               <div>
-                                <div className="text-muted-foreground">Total Posts</div>
-                                <div className="font-semibold">{platform.totalPosts}</div>
+                                <div className="text-muted-foreground">
+                                  Total Posts
+                                </div>
+                                <div className="font-semibold">
+                                  {platform.totalPosts}
+                                </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Avg Reach</div>
-                                <div className="font-semibold">{platform.avgReach.toLocaleString()}</div>
+                                <div className="text-muted-foreground">
+                                  Avg Reach
+                                </div>
+                                <div className="font-semibold">
+                                  {platform.avgReach.toLocaleString()}
+                                </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Avg Engagement</div>
-                                <div className="font-semibold">{platform.avgEngagement.toLocaleString()}</div>
+                                <div className="text-muted-foreground">
+                                  Avg Engagement
+                                </div>
+                                <div className="font-semibold">
+                                  {platform.avgEngagement.toLocaleString()}
+                                </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Engagement Rate</div>
-                                <div className="font-semibold">{platform.engagementRate.toFixed(2)}%</div>
+                                <div className="text-muted-foreground">
+                                  Engagement Rate
+                                </div>
+                                <div className="font-semibold">
+                                  {platform.engagementRate.toFixed(2)}%
+                                </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Total Engagement</div>
-                                <div className="font-semibold">{platform.totalEngagement.toLocaleString()}</div>
+                                <div className="text-muted-foreground">
+                                  Total Engagement
+                                </div>
+                                <div className="font-semibold">
+                                  {platform.totalEngagement.toLocaleString()}
+                                </div>
                               </div>
                             </div>
                           </Card>
@@ -282,31 +404,58 @@ export default function AnalyticsPage() {
                         {categories.map((category) => (
                           <Card key={category.category} className="p-4">
                             <div className="flex items-center justify-between mb-3">
-                              <div className="font-semibold">{category.category}</div>
-                              <Badge variant={getScoreVariant(category.engagementRate * 100)}>
-                                Engagement: {category.engagementRate.toFixed(1)}%
+                              <div className="font-semibold">
+                                {category.category}
+                              </div>
+                              <Badge
+                                variant={getScoreVariant(
+                                  category.engagementRate * 100
+                                )}
+                              >
+                                Engagement: {category.engagementRate.toFixed(1)}
+                                %
                               </Badge>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
                               <div>
-                                <div className="text-muted-foreground">Total Posts</div>
-                                <div className="font-semibold">{category.totalPosts}</div>
+                                <div className="text-muted-foreground">
+                                  Total Posts
+                                </div>
+                                <div className="font-semibold">
+                                  {category.totalPosts}
+                                </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Avg Reach</div>
-                                <div className="font-semibold">{category.avgReach.toLocaleString()}</div>
+                                <div className="text-muted-foreground">
+                                  Avg Reach
+                                </div>
+                                <div className="font-semibold">
+                                  {category.avgReach.toLocaleString()}
+                                </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Avg Engagement</div>
-                                <div className="font-semibold">{category.avgEngagement.toLocaleString()}</div>
+                                <div className="text-muted-foreground">
+                                  Avg Engagement
+                                </div>
+                                <div className="font-semibold">
+                                  {category.avgEngagement.toLocaleString()}
+                                </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Engagement Rate</div>
-                                <div className="font-semibold">{category.engagementRate.toFixed(2)}%</div>
+                                <div className="text-muted-foreground">
+                                  Engagement Rate
+                                </div>
+                                <div className="font-semibold">
+                                  {category.engagementRate.toFixed(2)}%
+                                </div>
                               </div>
                               <div>
-                                <div className="text-muted-foreground">Total Engagement</div>
-                                <div className="font-semibold">{category.totalEngagement.toLocaleString()}</div>
+                                <div className="text-muted-foreground">
+                                  Total Engagement
+                                </div>
+                                <div className="font-semibold">
+                                  {category.totalEngagement.toLocaleString()}
+                                </div>
                               </div>
                             </div>
                           </Card>
@@ -328,10 +477,16 @@ export default function AnalyticsPage() {
                             <TableRow>
                               <TableHead>Platform</TableHead>
                               <TableHead>Category</TableHead>
-                              <TableHead className="text-right">Reach</TableHead>
-                              <TableHead className="text-right">Engagement</TableHead>
+                              <TableHead className="text-right">
+                                Reach
+                              </TableHead>
+                              <TableHead className="text-right">
+                                Engagement
+                              </TableHead>
                               <TableHead className="text-right">Rate</TableHead>
-                              <TableHead className="text-right">Score</TableHead>
+                              <TableHead className="text-right">
+                                Score
+                              </TableHead>
                               <TableHead>Date</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -339,25 +494,51 @@ export default function AnalyticsPage() {
                             {analytics.map((record) => {
                               const engagementRate =
                                 record.reach && record.reach > 0
-                                  ? ((record.engagement || 0) / record.reach) * 100
+                                  ? ((record.engagement || 0) / record.reach) *
+                                    100
                                   : 0;
                               return (
                                 <TableRow key={record.id}>
                                   <TableCell>
-                                    <PlatformBadge platform={record.platform} size="sm" />
+                                    <PlatformBadge
+                                      platform={record.platform}
+                                      size="sm"
+                                    />
                                   </TableCell>
-                                  <TableCell>{record.category || 'N/A'}</TableCell>
-                                  <TableCell className="text-right">{record.reach?.toLocaleString() || 'N/A'}</TableCell>
-                                  <TableCell className="text-right">{record.engagement?.toLocaleString() || 'N/A'}</TableCell>
-                                  <TableCell className="text-right">{engagementRate.toFixed(2)}%</TableCell>
+                                  <TableCell>
+                                    {record.category || "N/A"}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {record.reach?.toLocaleString() || "N/A"}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {record.engagement?.toLocaleString() ||
+                                      "N/A"}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {engagementRate.toFixed(2)}%
+                                  </TableCell>
                                   <TableCell className="text-right">
                                     {record.engagement && record.reach && (
-                                      <Badge variant={getScoreVariant((record.engagement / record.reach) * 100)}>
-                                        {((record.engagement / record.reach) * 100).toFixed(1)}%
+                                      <Badge
+                                        variant={getScoreVariant(
+                                          (record.engagement / record.reach) *
+                                            100
+                                        )}
+                                      >
+                                        {(
+                                          (record.engagement / record.reach) *
+                                          100
+                                        ).toFixed(1)}
+                                        %
                                       </Badge>
                                     )}
                                   </TableCell>
-                                  <TableCell>{new Date(record.recordedAt).toLocaleDateString()}</TableCell>
+                                  <TableCell>
+                                    {new Date(
+                                      record.recordedAt
+                                    ).toLocaleDateString()}
+                                  </TableCell>
                                 </TableRow>
                               );
                             })}
@@ -406,22 +587,22 @@ function AddAnalyticsForm({
   onSave: () => void;
 }) {
   const [form, setForm] = useState({
-    ideaId: '',
-    platform: '',
-    category: '',
-    reach: '',
-    engagement: '',
-    likes: '',
-    comments: '',
-    shares: '',
-    views: '',
-    clicks: '',
-    source: 'MANUAL' as 'MANUAL' | 'API' | 'PREDICTED',
+    ideaId: "",
+    platform: "",
+    category: "",
+    reach: "",
+    engagement: "",
+    likes: "",
+    comments: "",
+    shares: "",
+    views: "",
+    clicks: "",
+    source: "MANUAL" as "MANUAL" | "API" | "PREDICTED",
   });
 
   const handleSubmit = async () => {
     if (!form.ideaId) {
-      alert('Please select an idea');
+      alert("Please select an idea");
       return;
     }
     try {
@@ -439,7 +620,7 @@ function AddAnalyticsForm({
       });
       onSave();
     } catch (err) {
-      alert('Failed to create analytics record');
+      alert("Failed to create analytics record");
     }
   };
 
@@ -456,7 +637,10 @@ function AddAnalyticsForm({
         </div>
         <div className="space-y-2">
           <Label>Idea</Label>
-          <Select value={form.ideaId} onValueChange={(value) => setForm({ ...form, ideaId: value })}>
+          <Select
+            value={form.ideaId}
+            onValueChange={(value) => setForm({ ...form, ideaId: value })}
+          >
             <SelectTrigger>
               <SelectValue placeholder="None" />
             </SelectTrigger>
@@ -481,7 +665,12 @@ function AddAnalyticsForm({
         </div>
         <div className="space-y-2">
           <Label>Source</Label>
-          <Select value={form.source} onValueChange={(value) => setForm({ ...form, source: value as any })}>
+          <Select
+            value={form.source}
+            onValueChange={(value) =>
+              setForm({ ...form, source: value as any })
+            }
+          >
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -554,7 +743,9 @@ function AddAnalyticsForm({
         </div>
       </div>
       <DialogFooter>
-        <Button variant="outline" onClick={onClose}>Cancel</Button>
+        <Button variant="outline" onClick={onClose}>
+          Cancel
+        </Button>
         <Button onClick={handleSubmit}>
           <CheckCircle2 className="w-4 h-4 mr-2" />
           Save Record

@@ -13,7 +13,8 @@ export class QueueController {
   @UseGuards(JwtAuthGuard)
   async queueBatchGeneration(
     @CurrentUser() user: any,
-    @Body() data: {
+    @Body()
+    data: {
       count: number;
       niche: string;
       platform: string;
@@ -35,5 +36,3 @@ export class QueueController {
     return this.queueService.getQueueStats();
   }
 }
-
-

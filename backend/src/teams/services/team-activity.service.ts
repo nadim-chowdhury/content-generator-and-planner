@@ -116,7 +116,12 @@ export class TeamActivityService {
   /**
    * Log card created
    */
-  async logCardCreated(teamId: string, userId: string, cardTitle: string, cardId: string) {
+  async logCardCreated(
+    teamId: string,
+    userId: string,
+    cardTitle: string,
+    cardId: string,
+  ) {
     return this.logActivity(
       teamId,
       userId,
@@ -129,7 +134,12 @@ export class TeamActivityService {
   /**
    * Log card updated
    */
-  async logCardUpdated(teamId: string, userId: string, cardTitle: string, cardId: string) {
+  async logCardUpdated(
+    teamId: string,
+    userId: string,
+    cardTitle: string,
+    cardId: string,
+  ) {
     return this.logActivity(
       teamId,
       userId,
@@ -158,5 +168,3 @@ export class TeamActivityService {
     );
   }
 }
-
-

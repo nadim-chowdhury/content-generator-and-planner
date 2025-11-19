@@ -10,8 +10,12 @@ import { PrismaModule } from '../prisma/prisma.module';
 @Module({
   imports: [PrismaModule, ScheduleModule.forRoot()],
   controllers: [NotificationsController],
-  providers: [NotificationsService, EmailService, PushNotificationService, NotificationsScheduler],
+  providers: [
+    NotificationsService,
+    EmailService,
+    PushNotificationService,
+    NotificationsScheduler,
+  ],
   exports: [NotificationsService],
 })
 export class NotificationsModule {}
-

@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { authApi } from '@/lib/auth';
+import { useState, useEffect } from "react";
+import { authApi } from "@/lib/auth";
 
 interface TwoFactorSetupProps {
   onComplete: () => void;
 }
 
 export default function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
-  const [step, setStep] = useState<'setup' | 'verify'>('setup');
-  const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const [secret, setSecret] = useState('');
-  const [token, setToken] = useState('');
+  const [step, setStep] = useState<"setup" | "verify">("setup");
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const [secret, setSecret] = useState("");
+  const [token, setToken] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     loadSetup();
@@ -25,26 +25,28 @@ export default function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
       setSecret(secret);
       setQrCodeUrl(qrCodeUrl);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to setup 2FA');
+      setError(err.response?.data?.message || "Failed to setup 2FA");
     }
   };
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       await authApi.enable2FA(token);
       onComplete();
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid token. Please try again.');
+      setError(
+        err.response?.data?.message || "Invalid token. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  if (step === 'setup') {
+  if (step === "setup") {
     return (
       <div className="space-y-4">
         <div>
@@ -52,7 +54,8 @@ export default function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
             Set up Two-Factor Authentication
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)
+            Scan this QR code with your authenticator app (Google Authenticator,
+            Authy, etc.)
           </p>
         </div>
 
@@ -66,7 +69,9 @@ export default function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
 
         {secret && (
           <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md">
-            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">Manual entry code:</p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+              Manual entry code:
+            </p>
             <code className="text-sm font-mono text-gray-900 dark:text-white break-all">
               {secret}
             </code>
@@ -83,7 +88,7 @@ export default function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
         </div>
 
         <button
-          onClick={() => setStep('verify')}
+          onClick={() => setStep("verify")}
           className="w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
         >
           I've scanned the code
@@ -101,7 +106,10 @@ export default function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
       )}
 
       <div>
-        <label htmlFor="2fa-token" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+        <label
+          htmlFor="2fa-token"
+          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
+        >
           Enter 6-digit code from your authenticator app
         </label>
         <input
@@ -110,7 +118,7 @@ export default function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
           maxLength={6}
           required
           value={token}
-          onChange={(e) => setToken(e.target.value.replace(/\D/g, ''))}
+          onChange={(e) => setToken(e.target.value.replace(/\D/g, ""))}
           className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-700 placeholder-gray-500 dark:placeholder-gray-400 text-gray-900 dark:text-white bg-white dark:bg-gray-800 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm text-center text-2xl tracking-widest"
           placeholder="000000"
         />
@@ -119,7 +127,7 @@ export default function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={() => setStep('setup')}
+          onClick={() => setStep("setup")}
           className="flex-1 py-2 px-4 border border-gray-300 dark:border-gray-700 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700"
         >
           Back
@@ -129,10 +137,9 @@ export default function TwoFactorSetup({ onComplete }: TwoFactorSetupProps) {
           disabled={loading || token.length !== 6}
           className="flex-1 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {loading ? 'Verifying...' : 'Verify & Enable'}
+          {loading ? "Verifying..." : "Verify & Enable"}
         </button>
       </div>
     </form>
   );
 }
-

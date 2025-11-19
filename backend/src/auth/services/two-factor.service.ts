@@ -7,7 +7,10 @@ export class TwoFactorService {
   /**
    * Generate a secret for 2FA
    */
-  generateSecret(email: string, serviceName: string = 'Content Generator'): {
+  generateSecret(
+    email: string,
+    serviceName: string = 'Content Generator',
+  ): {
     secret: string;
     qrCodeUrl: string;
   } {
@@ -52,6 +55,3 @@ export class TwoFactorService {
     return codes;
   }
 }
-
-
-

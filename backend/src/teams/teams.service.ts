@@ -171,7 +171,12 @@ export class TeamsService {
   /**
    * Invite member to team
    */
-  async inviteMember(teamId: string, ownerId: string, userEmail: string, role: string = 'VIEWER') {
+  async inviteMember(
+    teamId: string,
+    ownerId: string,
+    userEmail: string,
+    role: string = 'VIEWER',
+  ) {
     const team = await this.prisma.team.findUnique({
       where: { id: teamId },
     });
@@ -272,7 +277,12 @@ export class TeamsService {
   /**
    * Update member role
    */
-  async updateMemberRole(teamId: string, ownerId: string, memberId: string, role: string) {
+  async updateMemberRole(
+    teamId: string,
+    ownerId: string,
+    memberId: string,
+    role: string,
+  ) {
     const team = await this.prisma.team.findUnique({
       where: { id: teamId },
     });
@@ -286,7 +296,9 @@ export class TeamsService {
     }
 
     if (!['VIEWER', 'EDITOR', 'MANAGER', 'ADMIN'].includes(role)) {
-      throw new BadRequestException('Invalid role. Must be VIEWER, EDITOR, MANAGER, or ADMIN');
+      throw new BadRequestException(
+        'Invalid role. Must be VIEWER, EDITOR, MANAGER, or ADMIN',
+      );
     }
 
     return this.prisma.teamMember.update({
@@ -332,7 +344,9 @@ export class TeamsService {
 
     // Cannot leave if you're the owner
     if (member.team.ownerId === userId) {
-      throw new BadRequestException('Team owner cannot leave. Transfer ownership or delete team first.');
+      throw new BadRequestException(
+        'Team owner cannot leave. Transfer ownership or delete team first.',
+      );
     }
 
     await this.prisma.teamMember.delete({
@@ -413,4 +427,3 @@ export class TeamsService {
     });
   }
 }
-

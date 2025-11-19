@@ -1,21 +1,33 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useAuthStore } from '@/store/auth-store';
-import { ideasApi, Idea, IdeaStats, GenerateIdeasDto } from '@/lib/ideas';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import IdeaCard from '@/components/IdeaCard';
-import PlatformSelector from '@/components/PlatformSelector';
-import LanguageSelector from '@/components/LanguageSelector';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Sparkles, Lightbulb, Calendar, Clock, X } from 'lucide-react';
+import { useEffect, useState } from "react";
+import { useAuthStore } from "@/store/auth-store";
+import { ideasApi, Idea, IdeaStats, GenerateIdeasDto } from "@/lib/ideas";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import IdeaCard from "@/components/IdeaCard";
+import PlatformSelector from "@/components/PlatformSelector";
+import LanguageSelector from "@/components/LanguageSelector";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Sparkles, Lightbulb, Calendar, Clock, X } from "lucide-react";
 
 export default function DashboardPage() {
   const { user } = useAuthStore();
@@ -24,12 +36,12 @@ export default function DashboardPage() {
   const [generating, setGenerating] = useState(false);
   const [generatedIdeas, setGeneratedIdeas] = useState<Idea[]>([]);
   const [formData, setFormData] = useState({
-    niche: '',
-    platform: 'TikTok',
-    tone: 'motivational',
+    niche: "",
+    platform: "TikTok",
+    tone: "motivational",
     count: 10,
-    additionalContext: '',
-    language: 'en',
+    additionalContext: "",
+    language: "en",
   });
 
   useEffect(() => {
@@ -41,7 +53,7 @@ export default function DashboardPage() {
       const data = await ideasApi.getStats();
       setStats(data);
     } catch (err) {
-      console.error('Failed to load stats:', err);
+      console.error("Failed to load stats:", err);
     } finally {
       setLoading(false);
     }
@@ -65,7 +77,7 @@ export default function DashboardPage() {
       setGeneratedIdeas(ideas);
       await loadStats();
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to generate ideas');
+      alert(err.response?.data?.message || "Failed to generate ideas");
     } finally {
       setGenerating(false);
     }
@@ -74,10 +86,10 @@ export default function DashboardPage() {
   const handleSaveIdea = async (idea: Idea) => {
     try {
       await ideasApi.create(idea);
-      alert('Idea saved!');
+      alert("Idea saved!");
       await loadStats();
     } catch (err) {
-      alert('Failed to save idea');
+      alert("Failed to save idea");
     }
   };
 
@@ -138,7 +150,9 @@ export default function DashboardPage() {
                   <CardDescription>Today Generated</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">{stats.todayGenerated}</div>
+                  <div className="text-2xl font-bold">
+                    {stats.todayGenerated}
+                  </div>
                 </CardContent>
               </Card>
             </div>
@@ -152,7 +166,8 @@ export default function DashboardPage() {
                 <CardTitle>Generate Content Ideas</CardTitle>
               </div>
               <CardDescription>
-                Create AI-powered content ideas tailored to your niche and platform
+                Create AI-powered content ideas tailored to your niche and
+                platform
               </CardDescription>
             </CardHeader>
             <CardContent>
@@ -163,7 +178,9 @@ export default function DashboardPage() {
                     id="niche"
                     type="text"
                     value={formData.niche}
-                    onChange={(e) => setFormData({ ...formData, niche: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, niche: e.target.value })
+                    }
                     placeholder="e.g., Fitness, Cooking, Tech Reviews"
                     required
                   />
@@ -174,7 +191,9 @@ export default function DashboardPage() {
                     <Label>Platform</Label>
                     <PlatformSelector
                       value={formData.platform}
-                      onChange={(platform) => setFormData({ ...formData, platform })}
+                      onChange={(platform) =>
+                        setFormData({ ...formData, platform })
+                      }
                       showInfo={true}
                     />
                   </div>
@@ -182,19 +201,29 @@ export default function DashboardPage() {
                     <Label htmlFor="tone">Tone</Label>
                     <Select
                       value={formData.tone}
-                      onValueChange={(value) => setFormData({ ...formData, tone: value })}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, tone: value })
+                      }
                     >
                       <SelectTrigger id="tone">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="motivational">Motivational</SelectItem>
+                        <SelectItem value="motivational">
+                          Motivational
+                        </SelectItem>
                         <SelectItem value="humorous">Humorous</SelectItem>
                         <SelectItem value="educational">Educational</SelectItem>
-                        <SelectItem value="entertaining">Entertaining</SelectItem>
-                        <SelectItem value="inspirational">Inspirational</SelectItem>
+                        <SelectItem value="entertaining">
+                          Entertaining
+                        </SelectItem>
+                        <SelectItem value="inspirational">
+                          Inspirational
+                        </SelectItem>
                         <SelectItem value="casual">Casual</SelectItem>
-                        <SelectItem value="professional">Professional</SelectItem>
+                        <SelectItem value="professional">
+                          Professional
+                        </SelectItem>
                         <SelectItem value="trendy">Trendy</SelectItem>
                       </SelectContent>
                     </Select>
@@ -210,14 +239,21 @@ export default function DashboardPage() {
                       min="10"
                       max="30"
                       value={formData.count}
-                      onChange={(e) => setFormData({ ...formData, count: parseInt(e.target.value) || 10 })}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          count: parseInt(e.target.value) || 10,
+                        })
+                      }
                     />
                   </div>
                   <div className="space-y-2">
                     <Label>Language</Label>
                     <LanguageSelector
                       value={formData.language}
-                      onChange={(language) => setFormData({ ...formData, language })}
+                      onChange={(language) =>
+                        setFormData({ ...formData, language })
+                      }
                       showPopular={true}
                     />
                   </div>
@@ -228,13 +264,23 @@ export default function DashboardPage() {
                   <Textarea
                     id="context"
                     value={formData.additionalContext}
-                    onChange={(e) => setFormData({ ...formData, additionalContext: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        additionalContext: e.target.value,
+                      })
+                    }
                     rows={3}
                     placeholder="Any specific requirements, target audience, or additional context..."
                   />
                 </div>
 
-                <Button type="submit" className="w-full" disabled={generating} size="lg">
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={generating}
+                  size="lg"
+                >
                   {generating ? (
                     <>
                       <Sparkles className="mr-2 h-4 w-4 animate-spin" />

@@ -16,7 +16,10 @@ export class PredictionService {
   /**
    * Predict reach potential for an idea
    */
-  async predictReach(ideaId: string, userId: string): Promise<{ reach: number; score: number; reasoning: string }> {
+  async predictReach(
+    ideaId: string,
+    userId: string,
+  ): Promise<{ reach: number; score: number; reasoning: string }> {
     const idea = await this.prisma.idea.findFirst({
       where: { id: ideaId, userId },
     });
@@ -49,8 +52,12 @@ Viral Score: ${idea.viralScore || 'N/A'}
 Hashtags: ${idea.hashtags.join(', ') || 'None'}
 Category Tags: ${idea.categoryTags.join(', ') || 'None'}
 
-${similarAnalytics.length > 0 ? `Historical Performance (similar content):
-${similarAnalytics.map(a => `- Reach: ${a.reach}, Engagement: ${a.engagement || 'N/A'}`).join('\n')}` : 'No historical data available.'}
+${
+  similarAnalytics.length > 0
+    ? `Historical Performance (similar content):
+${similarAnalytics.map((a) => `- Reach: ${a.reach}, Engagement: ${a.engagement || 'N/A'}`).join('\n')}`
+    : 'No historical data available.'
+}
 
 Predict the potential reach (number of people who will see this content) and provide:
 1. Estimated reach (realistic number)
@@ -64,7 +71,8 @@ Return a JSON object with: reach (number), score (0-100), reasoning (string).`;
         messages: [
           {
             role: 'system',
-            content: 'I need realistic predictions about how this content will perform. Be honest - not everything goes viral. Give me numbers that make sense based on what actually happens, not inflated estimates.',
+            content:
+              'I need realistic predictions about how this content will perform. Be honest - not everything goes viral. Give me numbers that make sense based on what actually happens, not inflated estimates.',
           },
           {
             role: 'user',
@@ -99,7 +107,10 @@ Return a JSON object with: reach (number), score (0-100), reasoning (string).`;
   /**
    * Predict engagement for an idea
    */
-  async predictEngagement(ideaId: string, userId: string): Promise<{ engagement: number; score: number; reasoning: string }> {
+  async predictEngagement(
+    ideaId: string,
+    userId: string,
+  ): Promise<{ engagement: number; score: number; reasoning: string }> {
     const idea = await this.prisma.idea.findFirst({
       where: { id: ideaId, userId },
     });
@@ -132,11 +143,20 @@ Viral Score: ${idea.viralScore || 'N/A'}
 Hashtags: ${idea.hashtags.join(', ') || 'None'}
 Hook: ${idea.hook || 'N/A'}
 
-${similarAnalytics.length > 0 ? `Historical Engagement Rates (similar content):
-${similarAnalytics.map(a => {
-  const rate = a.reach && a.reach > 0 ? ((a.engagement || 0) / a.reach * 100).toFixed(2) : 'N/A';
-  return `- Engagement Rate: ${rate}% (Reach: ${a.reach}, Engagement: ${a.engagement})`;
-}).join('\n')}` : 'No historical data available.'}
+${
+  similarAnalytics.length > 0
+    ? `Historical Engagement Rates (similar content):
+${similarAnalytics
+  .map((a) => {
+    const rate =
+      a.reach && a.reach > 0
+        ? (((a.engagement || 0) / a.reach) * 100).toFixed(2)
+        : 'N/A';
+    return `- Engagement Rate: ${rate}% (Reach: ${a.reach}, Engagement: ${a.engagement})`;
+  })
+  .join('\n')}`
+    : 'No historical data available.'
+}
 
 Predict the potential engagement (likes, comments, shares, saves combined) and provide:
 1. Estimated engagement (realistic number)
@@ -150,7 +170,8 @@ Return a JSON object with: engagement (number), score (0-100), reasoning (string
         messages: [
           {
             role: 'system',
-            content: 'I need realistic predictions about how this content will perform. Be honest - not everything goes viral. Give me numbers that make sense based on what actually happens, not inflated estimates.',
+            content:
+              'I need realistic predictions about how this content will perform. Be honest - not everything goes viral. Give me numbers that make sense based on what actually happens, not inflated estimates.',
           },
           {
             role: 'user',
@@ -168,7 +189,8 @@ Return a JSON object with: engagement (number), score (0-100), reasoning (string
 
       const data = JSON.parse(content);
       return {
-        engagement: data.engagement || this.getFallbackEngagement(idea.platform),
+        engagement:
+          data.engagement || this.getFallbackEngagement(idea.platform),
         score: data.score || 50,
         reasoning: data.reasoning || 'Prediction based on content analysis.',
       };
@@ -187,14 +209,14 @@ Return a JSON object with: engagement (number), score (0-100), reasoning (string
    */
   private getFallbackReach(platform: string): number {
     const platformDefaults: Record<string, number> = {
-      'Instagram': 1000,
+      Instagram: 1000,
       'Instagram Reels': 5000,
-      'Facebook': 2000,
+      Facebook: 2000,
       'Facebook Reels': 3000,
-      'Twitter': 500,
-      'LinkedIn': 800,
-      'TikTok': 10000,
-      'YouTube': 2000,
+      Twitter: 500,
+      LinkedIn: 800,
+      TikTok: 10000,
+      YouTube: 2000,
       'YouTube Shorts': 5000,
     };
     return platformDefaults[platform] || 1000;
@@ -205,19 +227,16 @@ Return a JSON object with: engagement (number), score (0-100), reasoning (string
    */
   private getFallbackEngagement(platform: string): number {
     const platformDefaults: Record<string, number> = {
-      'Instagram': 50,
+      Instagram: 50,
       'Instagram Reels': 250,
-      'Facebook': 100,
+      Facebook: 100,
       'Facebook Reels': 150,
-      'Twitter': 25,
-      'LinkedIn': 40,
-      'TikTok': 500,
-      'YouTube': 100,
+      Twitter: 25,
+      LinkedIn: 40,
+      TikTok: 500,
+      YouTube: 100,
       'YouTube Shorts': 250,
     };
     return platformDefaults[platform] || 50;
   }
 }
-
-
-

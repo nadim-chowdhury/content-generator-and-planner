@@ -16,7 +16,7 @@ import { PrismaService } from '../prisma/prisma.service';
 /**
  * Collaboration Gateway
  * Handles real-time WebSocket connections for collaboration
- * 
+ *
  * Events:
  * - join-workspace: Join a workspace room
  * - leave-workspace: Leave a workspace room
@@ -31,12 +31,17 @@ import { PrismaService } from '../prisma/prisma.service';
   },
   namespace: '/collaboration',
 })
-export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class CollaborationGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   @WebSocketServer()
   server: Server;
 
   private readonly logger = new Logger(CollaborationGateway.name);
-  private connectedUsers: Map<string, { userId: string; workspaceId: string | null }> = new Map();
+  private connectedUsers: Map<
+    string,
+    { userId: string; workspaceId: string | null }
+  > = new Map();
 
   constructor(
     private jwtService: JwtService,
@@ -44,18 +49,21 @@ export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisco
     private prisma: PrismaService,
   ) {}
 
-  async handleConnection(client: Socket) {
+  handleConnection(client: Socket) {
     try {
       // Authenticate via token
-      const token = client.handshake.auth?.token || client.handshake.headers?.authorization?.replace('Bearer ', '');
-      
+      const token =
+        client.handshake.auth?.token ||
+        client.handshake.headers?.authorization?.replace('Bearer ', '');
+
       if (!token) {
         client.disconnect();
         return;
       }
 
       const payload = this.jwtService.verify(token, {
-        secret: this.configService.get<string>('JWT_SECRET') || 'your-secret-key',
+        secret:
+          this.configService.get<string>('JWT_SECRET') || 'your-secret-key',
       });
 
       const userId = payload.userId;
@@ -74,7 +82,7 @@ export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   @SubscribeMessage('join-workspace')
-  async handleJoinWorkspace(
+  handleJoinWorkspace(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { workspaceId: string },
   ) {
@@ -102,7 +110,7 @@ export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   @SubscribeMessage('leave-workspace')
-  async handleLeaveWorkspace(@ConnectedSocket() client: Socket) {
+  handleLeaveWorkspace(@ConnectedSocket() client: Socket) {
     const user = this.connectedUsers.get(client.id);
     if (!user || !user.workspaceId) {
       return { error: 'Not in a workspace' };
@@ -120,7 +128,7 @@ export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   @SubscribeMessage('card-updated')
-  async handleCardUpdated(
+  handleCardUpdated(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { workspaceId: string; cardId: string; updates: any },
   ) {
@@ -141,7 +149,7 @@ export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   @SubscribeMessage('comment-added')
-  async handleCommentAdded(
+  handleCommentAdded(
     @ConnectedSocket() client: Socket,
     @MessageBody() data: { workspaceId: string; cardId: string; comment: any },
   ) {
@@ -162,9 +170,10 @@ export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisco
   }
 
   @SubscribeMessage('user-typing')
-  async handleUserTyping(
+  handleUserTyping(
     @ConnectedSocket() client: Socket,
-    @MessageBody() data: { workspaceId: string; cardId: string; isTyping: boolean },
+    @MessageBody()
+    data: { workspaceId: string; cardId: string; isTyping: boolean },
   ) {
     const user = this.connectedUsers.get(client.id);
     if (!user) {
@@ -184,7 +193,12 @@ export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisco
   /**
    * Broadcast card update to workspace
    */
-  broadcastCardUpdate(workspaceId: string, cardId: string, updates: any, userId: string) {
+  broadcastCardUpdate(
+    workspaceId: string,
+    cardId: string,
+    updates: any,
+    userId: string,
+  ) {
     this.server.to(`workspace:${workspaceId}`).emit('card-updated', {
       cardId,
       updates,
@@ -196,7 +210,12 @@ export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisco
   /**
    * Broadcast comment to workspace
    */
-  broadcastComment(workspaceId: string, cardId: string, comment: any, userId: string) {
+  broadcastComment(
+    workspaceId: string,
+    cardId: string,
+    comment: any,
+    userId: string,
+  ) {
     this.server.to(`workspace:${workspaceId}`).emit('comment-added', {
       cardId,
       comment,
@@ -205,5 +224,3 @@ export class CollaborationGateway implements OnGatewayConnection, OnGatewayDisco
     });
   }
 }
-
-

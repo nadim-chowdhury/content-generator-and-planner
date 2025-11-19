@@ -44,10 +44,7 @@ export class TeamsController {
   }
 
   @Get(':teamId')
-  async getTeam(
-    @Param('teamId') teamId: string,
-    @CurrentUser() user: any,
-  ) {
+  async getTeam(@Param('teamId') teamId: string, @CurrentUser() user: any) {
     return this.teamsService.getTeam(teamId, user.id);
   }
 
@@ -61,10 +58,7 @@ export class TeamsController {
   }
 
   @Delete(':teamId')
-  async deleteTeam(
-    @Param('teamId') teamId: string,
-    @CurrentUser() user: any,
-  ) {
+  async deleteTeam(@Param('teamId') teamId: string, @CurrentUser() user: any) {
     return this.teamsService.deleteTeam(teamId, user.id);
   }
 
@@ -107,10 +101,7 @@ export class TeamsController {
   }
 
   @Post(':teamId/leave')
-  async leaveTeam(
-    @Param('teamId') teamId: string,
-    @CurrentUser() user: any,
-  ) {
+  async leaveTeam(@Param('teamId') teamId: string, @CurrentUser() user: any) {
     return this.teamsService.leaveTeam(teamId, user.id);
   }
 
@@ -144,5 +135,3 @@ export class TeamsController {
     return this.teamActivityService.getTeamActivities(teamId);
   }
 }
-
-

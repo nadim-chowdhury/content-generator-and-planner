@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -144,7 +149,11 @@ export class BlogService {
   /**
    * Get published blog posts (public)
    */
-  async getPublishedPosts(page: number = 1, limit: number = 10, category?: string) {
+  async getPublishedPosts(
+    page: number = 1,
+    limit: number = 10,
+    category?: string,
+  ) {
     const skip = (page - 1) * limit;
 
     const where: any = {
@@ -235,10 +244,13 @@ export class BlogService {
       .map((p) => p.category)
       .filter((c): c is string => !!c);
 
-    const categoryCounts = categories.reduce((acc, cat) => {
-      acc[cat] = (acc[cat] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const categoryCounts = categories.reduce(
+      (acc, cat) => {
+        acc[cat] = (acc[cat] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return Object.entries(categoryCounts).map(([category, count]) => ({
       category,
@@ -289,5 +301,3 @@ export class BlogService {
     return { message: 'Blog post deleted' };
   }
 }
-
-

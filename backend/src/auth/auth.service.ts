@@ -82,7 +82,10 @@ export class AuthService {
     // Process referral if code provided
     if (referralCode) {
       try {
-        await this.referralsService.processReferralSignup(user.id, referralCode);
+        await this.referralsService.processReferralSignup(
+          user.id,
+          referralCode,
+        );
       } catch (error) {
         // Log but don't fail signup if referral processing fails
         console.error('Failed to process referral:', error);
@@ -231,7 +234,13 @@ export class AuthService {
     const token = this.generateToken(user.id, user.email);
 
     // Create session with device info and refresh token
-    const refreshToken = await this.createSession(user.id, token, ipAddress, userAgent, deviceInfo);
+    const refreshToken = await this.createSession(
+      user.id,
+      token,
+      ipAddress,
+      userAgent,
+      deviceInfo,
+    );
 
     // Log successful login
     await this.loginActivityService.logActivity({
@@ -406,7 +415,10 @@ export class AuthService {
     }
 
     // Check if refresh token is expired
-    if (session.refreshTokenExpiresAt && session.refreshTokenExpiresAt < new Date()) {
+    if (
+      session.refreshTokenExpiresAt &&
+      session.refreshTokenExpiresAt < new Date()
+    ) {
       // Delete expired session
       await this.prisma.session.delete({
         where: { id: session.id },
@@ -446,7 +458,7 @@ export class AuthService {
     userAgent?: string,
     deviceInfo?: string,
   ) {
-    const providerIdField = `${provider}Id` as 'googleId' | 'facebookId' | 'githubId';
+    const providerIdField = `${provider}Id`;
     const providerId = profile[providerIdField] || profile.id;
 
     // Find user by provider ID
@@ -482,7 +494,13 @@ export class AuthService {
 
     // Generate token
     const token = this.generateToken(user.id, user.email);
-    const refreshToken = await this.createSession(user.id, token, ipAddress, userAgent, deviceInfo);
+    const refreshToken = await this.createSession(
+      user.id,
+      token,
+      ipAddress,
+      userAgent,
+      deviceInfo,
+    );
 
     // Log activity
     await this.loginActivityService.logActivity({
@@ -533,7 +551,13 @@ export class AuthService {
     }
 
     const jwtToken = this.generateToken(user.id, user.email);
-    const refreshToken = await this.createSession(user.id, jwtToken, ipAddress, userAgent, deviceInfo);
+    const refreshToken = await this.createSession(
+      user.id,
+      jwtToken,
+      ipAddress,
+      userAgent,
+      deviceInfo,
+    );
 
     await this.loginActivityService.logActivity({
       userId: user.id,
@@ -571,7 +595,9 @@ export class AuthService {
       throw new NotFoundException('User not found');
     }
 
-    const { secret, qrCodeUrl } = this.twoFactorService.generateSecret(user.email);
+    const { secret, qrCodeUrl } = this.twoFactorService.generateSecret(
+      user.email,
+    );
     const qrCode = await this.twoFactorService.generateQRCode(qrCodeUrl);
 
     // Store secret temporarily (user needs to verify before enabling)
@@ -596,7 +622,10 @@ export class AuthService {
       throw new BadRequestException('2FA not set up. Please set it up first.');
     }
 
-    const isValid = this.twoFactorService.verifyToken(user.twoFactorSecret, token);
+    const isValid = this.twoFactorService.verifyToken(
+      user.twoFactorSecret,
+      token,
+    );
 
     if (!isValid) {
       throw new UnauthorizedException('Invalid 2FA token');
@@ -711,7 +740,10 @@ export class AuthService {
     return result.count;
   }
 
-  async revokeSessionsByDevice(userId: string, deviceInfo: string): Promise<number> {
+  async revokeSessionsByDevice(
+    userId: string,
+    deviceInfo: string,
+  ): Promise<number> {
     const result = await this.prisma.session.deleteMany({
       where: {
         userId,
@@ -732,7 +764,10 @@ export class AuthService {
   /**
    * Update user profile
    */
-  async updateProfile(userId: string, updateData: { name?: string; email?: string; profileImage?: string }) {
+  async updateProfile(
+    userId: string,
+    updateData: { name?: string; email?: string; profileImage?: string },
+  ) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -772,7 +807,9 @@ export class AuthService {
     // Encrypt sensitive fields before storing
     const encryptedData: any = { ...updateData };
     if (updateData.name) {
-      encryptedData.name = await this.encryptionService.encrypt(updateData.name);
+      encryptedData.name = await this.encryptionService.encrypt(
+        updateData.name,
+      );
     }
 
     // Update profile without email change
@@ -790,17 +827,26 @@ export class AuthService {
   /**
    * Change password
    */
-  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+  async changePassword(
+    userId: string,
+    currentPassword: string,
+    newPassword: string,
+  ) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
 
     if (!user || !user.passwordHash) {
-      throw new BadRequestException('Password authentication not available for this account');
+      throw new BadRequestException(
+        'Password authentication not available for this account',
+      );
     }
 
     // Verify current password
-    const isValidPassword = await argon2.verify(user.passwordHash, currentPassword);
+    const isValidPassword = await argon2.verify(
+      user.passwordHash,
+      currentPassword,
+    );
 
     if (!isValidPassword) {
       throw new UnauthorizedException('Current password is incorrect');
@@ -825,7 +871,11 @@ export class AuthService {
   /**
    * Delete account (GDPR-compliant)
    */
-  async deleteAccount(userId: string, password?: string, hardDelete: boolean = false) {
+  async deleteAccount(
+    userId: string,
+    password?: string,
+    hardDelete: boolean = false,
+  ) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -837,7 +887,9 @@ export class AuthService {
     // Check if user can be deleted (business constraints)
     const canDelete = await this.gdprDeletionService.canDeleteUser(userId);
     if (!canDelete.canDelete) {
-      throw new BadRequestException(canDelete.reason || 'Cannot delete account');
+      throw new BadRequestException(
+        canDelete.reason || 'Cannot delete account',
+      );
     }
 
     // If user has password, require it for deletion
@@ -972,4 +1024,3 @@ export class AuthService {
     ]);
   }
 }
-

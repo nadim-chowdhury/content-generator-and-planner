@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import PlatformBadge from './PlatformBadge';
+import PlatformBadge from "./PlatformBadge";
 
 interface PlatformComparisonProps {
   selectedPlatform?: string;
@@ -9,71 +9,74 @@ interface PlatformComparisonProps {
 
 const platforms = [
   {
-    value: 'YouTube',
+    value: "YouTube",
     specs: {
-      duration: '5-60+ min',
-      format: '16:9',
-      hashtags: '0-15',
-      bestFor: 'Tutorials, Vlogs, Educational',
+      duration: "5-60+ min",
+      format: "16:9",
+      hashtags: "0-15",
+      bestFor: "Tutorials, Vlogs, Educational",
     },
   },
   {
-    value: 'YouTube Shorts',
+    value: "YouTube Shorts",
     specs: {
-      duration: '15-60s',
-      format: '9:16',
-      hashtags: '3-10',
-      bestFor: 'Quick Tips, Trends, Viral',
+      duration: "15-60s",
+      format: "9:16",
+      hashtags: "3-10",
+      bestFor: "Quick Tips, Trends, Viral",
     },
   },
   {
-    value: 'TikTok',
+    value: "TikTok",
     specs: {
-      duration: '15-60s',
-      format: '9:16',
-      hashtags: '3-10',
-      bestFor: 'Trending, Challenges, Entertainment',
+      duration: "15-60s",
+      format: "9:16",
+      hashtags: "3-10",
+      bestFor: "Trending, Challenges, Entertainment",
     },
   },
   {
-    value: 'Instagram Reels',
+    value: "Instagram Reels",
     specs: {
-      duration: '15-90s',
-      format: '9:16',
-      hashtags: '5-10',
-      bestFor: 'Trending Audio, Visual Storytelling',
+      duration: "15-90s",
+      format: "9:16",
+      hashtags: "5-10",
+      bestFor: "Trending Audio, Visual Storytelling",
     },
   },
   {
-    value: 'Facebook Reels',
+    value: "Facebook Reels",
     specs: {
-      duration: '15-90s',
-      format: '9:16',
-      hashtags: '3-10',
-      bestFor: 'Community Engagement, Relatable',
+      duration: "15-90s",
+      format: "9:16",
+      hashtags: "3-10",
+      bestFor: "Community Engagement, Relatable",
     },
   },
   {
-    value: 'Twitter',
+    value: "Twitter",
     specs: {
-      duration: 'Text/Threads',
-      format: '16:9 or 1:1',
-      hashtags: '1-2',
-      bestFor: 'Timely Content, Conversations',
+      duration: "Text/Threads",
+      format: "16:9 or 1:1",
+      hashtags: "1-2",
+      bestFor: "Timely Content, Conversations",
     },
   },
   {
-    value: 'LinkedIn',
+    value: "LinkedIn",
     specs: {
-      duration: 'Text/Video',
-      format: '16:9 or 1:1',
-      hashtags: '3-5',
-      bestFor: 'Professional, Thought Leadership',
+      duration: "Text/Video",
+      format: "16:9 or 1:1",
+      hashtags: "3-5",
+      bestFor: "Professional, Thought Leadership",
     },
   },
 ];
 
-export default function PlatformComparison({ selectedPlatform, onSelect }: PlatformComparisonProps) {
+export default function PlatformComparison({
+  selectedPlatform,
+  onSelect,
+}: PlatformComparisonProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -107,8 +110,8 @@ export default function PlatformComparison({ selectedPlatform, onSelect }: Platf
                 onClick={() => onSelect?.(platform.value)}
                 className={`hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer ${
                   selectedPlatform === platform.value
-                    ? 'bg-indigo-50 dark:bg-indigo-900/20'
-                    : ''
+                    ? "bg-indigo-50 dark:bg-indigo-900/20"
+                    : ""
                 }`}
               >
                 <td className="px-4 py-3 whitespace-nowrap">
@@ -134,6 +137,3 @@ export default function PlatformComparison({ selectedPlatform, onSelect }: Platf
     </div>
   );
 }
-
-
-

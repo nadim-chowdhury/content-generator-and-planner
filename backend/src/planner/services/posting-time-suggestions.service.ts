@@ -59,7 +59,8 @@ Provide 3-5 suggestions per day, focusing on the most optimal times.`;
         messages: [
           {
             role: 'system',
-            content: 'I need help figuring out the best times to post. Give me realistic suggestions based on what actually works, not generic advice. Think about when real people in this niche are actually active.',
+            content:
+              'I need help figuring out the best times to post. Give me realistic suggestions based on what actually works, not generic advice. Think about when real people in this niche are actually active.',
           },
           {
             role: 'user',
@@ -87,25 +88,68 @@ Provide 3-5 suggestions per day, focusing on the most optimal times.`;
   /**
    * Get fallback suggestions based on platform best practices
    */
-  private getFallbackSuggestions(daysAhead: number, platform?: string): PostingTimeSuggestion[] {
+  private getFallbackSuggestions(
+    daysAhead: number,
+    platform?: string,
+  ): PostingTimeSuggestion[] {
     const suggestions: PostingTimeSuggestion[] = [];
     const now = new Date();
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayNames = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
 
     // Platform-specific default times (in UTC, can be adjusted)
-    const platformDefaults: Record<string, { times: string[]; bestDays: number[] }> = {
-      'Instagram': { times: ['11:00', '14:00', '17:00'], bestDays: [1, 2, 3, 4, 5] }, // Mon-Fri
-      'Instagram Reels': { times: ['09:00', '12:00', '19:00'], bestDays: [1, 2, 3, 4, 5, 6] },
-      'Facebook': { times: ['13:00', '15:00', '18:00'], bestDays: [1, 2, 3, 4, 5] },
-      'Facebook Reels': { times: ['10:00', '14:00', '20:00'], bestDays: [1, 2, 3, 4, 5, 6] },
-      'Twitter': { times: ['08:00', '12:00', '17:00'], bestDays: [1, 2, 3, 4, 5] },
-      'LinkedIn': { times: ['08:00', '12:00', '17:00'], bestDays: [1, 2, 3, 4, 5] },
-      'TikTok': { times: ['09:00', '12:00', '19:00'], bestDays: [1, 2, 3, 4, 5, 6] },
-      'YouTube': { times: ['14:00', '18:00', '20:00'], bestDays: [1, 2, 3, 4, 5, 6] },
-      'YouTube Shorts': { times: ['09:00', '12:00', '19:00'], bestDays: [1, 2, 3, 4, 5, 6] },
+    const platformDefaults: Record<
+      string,
+      { times: string[]; bestDays: number[] }
+    > = {
+      Instagram: {
+        times: ['11:00', '14:00', '17:00'],
+        bestDays: [1, 2, 3, 4, 5],
+      }, // Mon-Fri
+      'Instagram Reels': {
+        times: ['09:00', '12:00', '19:00'],
+        bestDays: [1, 2, 3, 4, 5, 6],
+      },
+      Facebook: {
+        times: ['13:00', '15:00', '18:00'],
+        bestDays: [1, 2, 3, 4, 5],
+      },
+      'Facebook Reels': {
+        times: ['10:00', '14:00', '20:00'],
+        bestDays: [1, 2, 3, 4, 5, 6],
+      },
+      Twitter: {
+        times: ['08:00', '12:00', '17:00'],
+        bestDays: [1, 2, 3, 4, 5],
+      },
+      LinkedIn: {
+        times: ['08:00', '12:00', '17:00'],
+        bestDays: [1, 2, 3, 4, 5],
+      },
+      TikTok: {
+        times: ['09:00', '12:00', '19:00'],
+        bestDays: [1, 2, 3, 4, 5, 6],
+      },
+      YouTube: {
+        times: ['14:00', '18:00', '20:00'],
+        bestDays: [1, 2, 3, 4, 5, 6],
+      },
+      'YouTube Shorts': {
+        times: ['09:00', '12:00', '19:00'],
+        bestDays: [1, 2, 3, 4, 5, 6],
+      },
     };
 
-    const defaults = platformDefaults[platform || 'Instagram'] || platformDefaults['Instagram'];
+    const defaults =
+      platformDefaults[platform || 'Instagram'] ||
+      platformDefaults['Instagram'];
 
     for (let i = 0; i < daysAhead; i++) {
       const date = new Date(now);
@@ -114,16 +158,22 @@ Provide 3-5 suggestions per day, focusing on the most optimal times.`;
       const dayName = dayNames[dayOfWeek];
 
       // Only suggest times for best days, or all days if no specific best days
-      if (defaults.bestDays.includes(dayOfWeek) || defaults.bestDays.length === 0) {
+      if (
+        defaults.bestDays.includes(dayOfWeek) ||
+        defaults.bestDays.length === 0
+      ) {
         defaults.times.forEach((time, index) => {
-          const score = defaults.bestDays.includes(dayOfWeek) ? 80 - (index * 10) : 60 - (index * 10);
+          const score = defaults.bestDays.includes(dayOfWeek)
+            ? 80 - index * 10
+            : 60 - index * 10;
           suggestions.push({
             date: date.toISOString().split('T')[0],
             time,
             dayOfWeek: dayName,
             score: Math.max(50, score),
             reason: `Optimal posting time for ${platform || 'social media'} based on audience engagement patterns. ${dayName} typically shows good engagement.`,
-            expectedEngagement: score >= 70 ? 'High' : score >= 60 ? 'Medium' : 'Low',
+            expectedEngagement:
+              score >= 70 ? 'High' : score >= 60 ? 'Medium' : 'Low',
           });
         });
       }
@@ -142,13 +192,15 @@ Provide 3-5 suggestions per day, focusing on the most optimal times.`;
     niche: string,
     timezone?: string,
   ): Promise<PostingTimeSuggestion | null> {
-    const suggestions = await this.getOptimalPostingTimes(platform, niche, timezone, 7);
+    const suggestions = await this.getOptimalPostingTimes(
+      platform,
+      niche,
+      timezone,
+      7,
+    );
     if (suggestions.length === 0) return null;
 
     // Return the highest scoring suggestion
     return suggestions[0];
   }
 }
-
-
-

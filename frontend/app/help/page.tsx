@@ -1,19 +1,25 @@
-'use client';
+"use client";
 
-import Navbar from '@/components/Navbar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { 
-  BookOpen, 
-  Rocket, 
-  Brain, 
-  CreditCard, 
+import Navbar from "@/components/Navbar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  BookOpen,
+  Rocket,
+  Brain,
+  CreditCard,
   Wrench,
   Mail,
   ArrowRight,
-  CheckCircle2
-} from 'lucide-react';
-import Link from 'next/link';
+  CheckCircle2,
+} from "lucide-react";
+import Link from "next/link";
 
 export default function HelpPage() {
   return (
@@ -44,25 +50,37 @@ export default function HelpPage() {
             <CardContent>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#getting-started" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#getting-started"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Creating your account
                   </Link>
                 </li>
                 <li>
-                  <Link href="#first-idea" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#first-idea"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Generating your first idea
                   </Link>
                 </li>
                 <li>
-                  <Link href="#planner" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#planner"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Using the planner
                   </Link>
                 </li>
                 <li>
-                  <Link href="#teams" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#teams"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Setting up teams
                   </Link>
@@ -77,32 +95,42 @@ export default function HelpPage() {
                 <Brain className="w-5 h-5 text-primary" />
                 <CardTitle>AI Features</CardTitle>
               </div>
-              <CardDescription>
-                Master our AI-powered tools
-              </CardDescription>
+              <CardDescription>Master our AI-powered tools</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#ai-generation" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#ai-generation"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     AI idea generation
                   </Link>
                 </li>
                 <li>
-                  <Link href="#viral-score" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#viral-score"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Viral score prediction
                   </Link>
                 </li>
                 <li>
-                  <Link href="#ai-tools" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#ai-tools"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     AI tools overview
                   </Link>
                 </li>
                 <li>
-                  <Link href="#quotas" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#quotas"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Understanding quotas
                   </Link>
@@ -117,32 +145,42 @@ export default function HelpPage() {
                 <CreditCard className="w-5 h-5 text-primary" />
                 <CardTitle>Billing & Plans</CardTitle>
               </div>
-              <CardDescription>
-                Manage your subscription
-              </CardDescription>
+              <CardDescription>Manage your subscription</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#pricing" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#pricing"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Pricing plans
                   </Link>
                 </li>
                 <li>
-                  <Link href="#subscription" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#subscription"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Managing subscriptions
                   </Link>
                 </li>
                 <li>
-                  <Link href="#trial" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#trial"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Free trial
                   </Link>
                 </li>
                 <li>
-                  <Link href="#refunds" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#refunds"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Refunds & cancellations
                   </Link>
@@ -157,32 +195,42 @@ export default function HelpPage() {
                 <Wrench className="w-5 h-5 text-primary" />
                 <CardTitle>Troubleshooting</CardTitle>
               </div>
-              <CardDescription>
-                Solve common issues
-              </CardDescription>
+              <CardDescription>Solve common issues</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
                 <li>
-                  <Link href="#login-issues" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#login-issues"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Login problems
                   </Link>
                 </li>
                 <li>
-                  <Link href="#email-verification" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#email-verification"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Email verification
                   </Link>
                 </li>
                 <li>
-                  <Link href="#api-errors" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#api-errors"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     API errors
                   </Link>
                 </li>
                 <li>
-                  <Link href="#contact" className="text-primary hover:underline flex items-center gap-2">
+                  <Link
+                    href="#contact"
+                    className="text-primary hover:underline flex items-center gap-2"
+                  >
                     <ArrowRight className="w-4 h-4" />
                     Contact support
                   </Link>
@@ -193,7 +241,9 @@ export default function HelpPage() {
         </div>
 
         <section id="getting-started" className="mb-12">
-          <h2 className="text-3xl font-bold tracking-tight mb-6">Getting Started</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-6">
+            Getting Started
+          </h2>
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>Creating Your Account</CardTitle>
@@ -227,17 +277,26 @@ export default function HelpPage() {
         </section>
 
         <section id="ai-generation" className="mb-12">
-          <h2 className="text-3xl font-bold tracking-tight mb-6">AI Features</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-6">
+            AI Features
+          </h2>
           <Card className="mb-6">
             <CardHeader>
               <CardTitle>AI Idea Generation</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="mb-4">
-                Our AI-powered generator creates unique content ideas tailored to your niche and platform. Each idea includes:
+                Our AI-powered generator creates unique content ideas tailored
+                to your niche and platform. Each idea includes:
               </p>
               <ul className="space-y-2">
-                {['Engaging title and description', 'Platform-specific optimization', 'Viral score prediction (0-100)', 'Hashtag suggestions', 'Caption and script options'].map((item) => (
+                {[
+                  "Engaging title and description",
+                  "Platform-specific optimization",
+                  "Viral score prediction (0-100)",
+                  "Hashtag suggestions",
+                  "Caption and script options",
+                ].map((item) => (
                   <li key={item} className="flex items-center gap-2">
                     <CheckCircle2 className="w-4 h-4 text-primary" />
                     {item}
@@ -253,14 +312,17 @@ export default function HelpPage() {
             </CardHeader>
             <CardContent>
               <p>
-                Free plan users can generate 5 ideas per day. Quotas reset daily at midnight UTC. Pro plan users have unlimited generation.
+                Free plan users can generate 5 ideas per day. Quotas reset daily
+                at midnight UTC. Pro plan users have unlimited generation.
               </p>
             </CardContent>
           </Card>
         </section>
 
         <section id="pricing" className="mb-12">
-          <h2 className="text-3xl font-bold tracking-tight mb-6">Billing & Plans</h2>
+          <h2 className="text-3xl font-bold tracking-tight mb-6">
+            Billing & Plans
+          </h2>
           <Card>
             <CardHeader>
               <CardTitle>Pricing Plans</CardTitle>
@@ -276,13 +338,15 @@ export default function HelpPage() {
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-primary mt-0.5" />
                   <div>
-                    <strong>Pro:</strong> Unlimited ideas, all AI tools, team collaboration
+                    <strong>Pro:</strong> Unlimited ideas, all AI tools, team
+                    collaboration
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="w-5 h-5 text-primary mt-0.5" />
                   <div>
-                    <strong>Agency:</strong> Everything in Pro, plus multiple workspaces, priority support
+                    <strong>Agency:</strong> Everything in Pro, plus multiple
+                    workspaces, priority support
                   </div>
                 </li>
               </ul>
@@ -300,7 +364,8 @@ export default function HelpPage() {
             </CardHeader>
             <CardContent>
               <p className="mb-4">
-                If you can't find the answer you're looking for, our support team is here to help.
+                If you can't find the answer you're looking for, our support
+                team is here to help.
               </p>
               <ul className="space-y-2 mb-6">
                 <li>Email: support@genplan.com</li>

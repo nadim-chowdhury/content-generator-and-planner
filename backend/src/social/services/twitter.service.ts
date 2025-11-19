@@ -17,17 +17,17 @@ export class TwitterService {
 
       // Build tweet text
       let tweetText = content.caption || '';
-      
+
       // Add hashtags if provided
       if (content.hashtags && content.hashtags.length > 0) {
         const hashtagsText = content.hashtags
-          .map(tag => tag.startsWith('#') ? tag : `#${tag}`)
+          .map((tag) => (tag.startsWith('#') ? tag : `#${tag}`))
           .join(' ');
-        
+
         // Twitter has 280 character limit
         const maxLength = 280;
         const hashtagsLength = hashtagsText.length + 1; // +1 for space
-        
+
         if (tweetText.length + hashtagsLength <= maxLength) {
           tweetText = `${tweetText} ${hashtagsText}`.trim();
         } else {
@@ -45,7 +45,10 @@ export class TwitterService {
       this.logger.log(`Successfully posted tweet: ${tweet.data.id}`);
       return { success: true, postId: tweet.data.id };
     } catch (error: any) {
-      this.logger.error(`Failed to post to Twitter: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to post to Twitter: ${error.message}`,
+        error.stack,
+      );
       return { success: false, error: error.message };
     }
   }
@@ -73,4 +76,3 @@ export class TwitterService {
     return null;
   }
 }
-

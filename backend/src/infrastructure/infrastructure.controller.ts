@@ -25,7 +25,7 @@ export class InfrastructureController {
 
   // DDOS Protection Endpoints
   @Get('ddos/stats')
-  async getDdosStats() {
+  getDdosStats() {
     return this.ddosProtectionService.getProtectionStats();
   }
 
@@ -49,7 +49,9 @@ export class InfrastructureController {
   // Backup Endpoints
   @Post('backups/create')
   @HttpCode(HttpStatus.CREATED)
-  async createBackup(@Body('type') type?: 'daily' | 'weekly' | 'monthly' | 'manual') {
+  async createBackup(
+    @Body('type') type?: 'daily' | 'weekly' | 'monthly' | 'manual',
+  ) {
     return this.backupService.createBackup(type || 'manual');
   }
 
@@ -70,7 +72,7 @@ export class InfrastructureController {
   }
 
   @Delete('backups/:filename')
-  async deleteBackup(@Param('filename') filename: string) {
+  deleteBackup(@Param('filename') filename: string) {
     // Implementation would delete the backup file
     return { message: `Backup ${filename} deletion not implemented yet` };
   }
@@ -107,5 +109,3 @@ export class InfrastructureController {
     return this.pitrService.getWalArchiveStats();
   }
 }
-
-

@@ -10,6 +10,3 @@ import { IdeasModule } from '../ideas/ideas.module'; // Import to use LanguageSe
   exports: [AiToolsService],
 })
 export class AiToolsModule {}
-
-
-

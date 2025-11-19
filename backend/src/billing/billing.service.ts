@@ -1,4 +1,9 @@
-import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import Stripe from 'stripe';
@@ -28,12 +33,20 @@ export class BillingService {
     private notificationsService: NotificationsService,
     private emailService: EmailService,
   ) {
-    this.stripe = new Stripe(this.configService.get<string>('STRIPE_SECRET_KEY') || '', {
-      apiVersion: '2025-10-29.clover',
-    });
+    this.stripe = new Stripe(
+      this.configService.get<string>('STRIPE_SECRET_KEY') || '',
+      {
+        apiVersion: '2025-10-29.clover',
+      },
+    );
   }
 
-  async createCheckoutSession(userId: string, userEmail: string, planType: PlanType, couponCode?: string) {
+  async createCheckoutSession(
+    userId: string,
+    userEmail: string,
+    planType: PlanType,
+    couponCode?: string,
+  ) {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -44,13 +57,17 @@ export class BillingService {
 
     // Check if user already has lifetime deal
     if (user.lifetimeDeal) {
-      throw new BadRequestException('You already have a lifetime deal activated');
+      throw new BadRequestException(
+        'You already have a lifetime deal activated',
+      );
     }
 
     // Get Stripe price ID based on plan type
     const priceId = this.getPriceIdForPlan(planType);
     if (!priceId) {
-      throw new BadRequestException(`Price ID not configured for plan: ${planType}`);
+      throw new BadRequestException(
+        `Price ID not configured for plan: ${planType}`,
+      );
     }
 
     // Create or retrieve Stripe customer
@@ -73,10 +90,12 @@ export class BillingService {
     }
 
     // Determine plan based on planType
-    const targetPlan = planType === PlanType.AGENCY ? UserPlan.AGENCY : UserPlan.PRO;
+    const targetPlan =
+      planType === PlanType.AGENCY ? UserPlan.AGENCY : UserPlan.PRO;
 
     // Check if user is eligible for free trial
-    const isEligibleForTrial = !user.freeTrialUsed && user.plan === UserPlan.FREE;
+    const isEligibleForTrial =
+      !user.freeTrialUsed && user.plan === UserPlan.FREE;
 
     // Create checkout session
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
@@ -100,7 +119,10 @@ export class BillingService {
 
     // Add free trial if eligible
     if (isEligibleForTrial) {
-      const trialDays = parseInt(this.configService.get<string>('FREE_TRIAL_DAYS') || '14', 10);
+      const trialDays = parseInt(
+        this.configService.get<string>('FREE_TRIAL_DAYS') || '14',
+        10,
+      );
       sessionParams.subscription_data = {
         trial_period_days: trialDays,
       };
@@ -121,9 +143,12 @@ export class BillingService {
 
   private getPriceIdForPlan(planType: PlanType): string | null {
     const configMap: Record<PlanType, string> = {
-      [PlanType.PRO_MONTHLY]: this.configService.get<string>('STRIPE_PRO_MONTHLY_PRICE_ID') || '',
-      [PlanType.PRO_YEARLY]: this.configService.get<string>('STRIPE_PRO_YEARLY_PRICE_ID') || '',
-      [PlanType.AGENCY]: this.configService.get<string>('STRIPE_AGENCY_PRICE_ID') || '',
+      [PlanType.PRO_MONTHLY]:
+        this.configService.get<string>('STRIPE_PRO_MONTHLY_PRICE_ID') || '',
+      [PlanType.PRO_YEARLY]:
+        this.configService.get<string>('STRIPE_PRO_YEARLY_PRICE_ID') || '',
+      [PlanType.AGENCY]:
+        this.configService.get<string>('STRIPE_AGENCY_PRICE_ID') || '',
     };
     return configMap[planType] || null;
   }
@@ -135,38 +160,38 @@ export class BillingService {
     try {
       switch (event.type) {
         case 'checkout.session.completed': {
-          const session = event.data.object as Stripe.Checkout.Session;
+          const session = event.data.object;
           await this.handleCheckoutCompleted(session);
           break;
         }
 
         case 'customer.subscription.created':
         case 'customer.subscription.updated': {
-          const subscription = event.data.object as Stripe.Subscription;
+          const subscription = event.data.object;
           await this.handleSubscriptionActivated(subscription);
           break;
         }
 
         case 'customer.subscription.deleted': {
-          const subscription = event.data.object as Stripe.Subscription;
+          const subscription = event.data.object;
           await this.handleSubscriptionCanceled(subscription);
           break;
         }
 
         case 'invoice.payment_succeeded': {
-          const invoice = event.data.object as Stripe.Invoice;
+          const invoice = event.data.object;
           await this.handlePaymentSucceeded(invoice);
           break;
         }
 
         case 'invoice.payment_failed': {
-          const invoice = event.data.object as Stripe.Invoice;
+          const invoice = event.data.object;
           await this.handlePaymentFailed(invoice);
           break;
         }
 
         case 'customer.subscription.trial_will_end': {
-          const subscription = event.data.object as Stripe.Subscription;
+          const subscription = event.data.object;
           await this.handleTrialEnding(subscription);
           break;
         }
@@ -188,13 +213,22 @@ export class BillingService {
     try {
       // Extract userId from event metadata if available
       let userId: string | null = null;
-      if (event.data.object && typeof event.data.object === 'object' && 'metadata' in event.data.object) {
+      if (
+        event.data.object &&
+        typeof event.data.object === 'object' &&
+        'metadata' in event.data.object
+      ) {
         const metadata = (event.data.object as any).metadata;
         userId = metadata?.userId || null;
       }
 
       // Also try to get from customer
-      if (!userId && event.data.object && typeof event.data.object === 'object' && 'customer' in event.data.object) {
+      if (
+        !userId &&
+        event.data.object &&
+        typeof event.data.object === 'object' &&
+        'customer' in event.data.object
+      ) {
         const customerId = (event.data.object as any).customer as string;
         const user = await this.prisma.user.findUnique({
           where: { stripeCustomerId: customerId },
@@ -285,7 +319,8 @@ export class BillingService {
         const subscription = await this.stripe.subscriptions.retrieve(
           session.subscription as string,
         );
-        const subscriptionAmount = subscription.items.data[0]?.price?.unit_amount
+        const subscriptionAmount = subscription.items.data[0]?.price
+          ?.unit_amount
           ? subscription.items.data[0].price.unit_amount / 100
           : 0;
 
@@ -297,7 +332,9 @@ export class BillingService {
           );
         }
       } catch (error: any) {
-        this.logger.error(`Failed to create affiliate commission: ${error.message}`);
+        this.logger.error(
+          `Failed to create affiliate commission: ${error.message}`,
+        );
       }
     }
   }
@@ -322,14 +359,19 @@ export class BillingService {
       return;
     }
 
-    if (subscription.status === 'active' || subscription.status === 'trialing') {
+    if (
+      subscription.status === 'active' ||
+      subscription.status === 'trialing'
+    ) {
       // Determine plan from subscription items
       const items = subscription.items.data;
       let targetPlan: UserPlan = UserPlan.PRO;
 
       for (const item of items) {
         const priceId = item.price.id;
-        if (priceId === this.configService.get<string>('STRIPE_AGENCY_PRICE_ID')) {
+        if (
+          priceId === this.configService.get<string>('STRIPE_AGENCY_PRICE_ID')
+        ) {
           targetPlan = UserPlan.AGENCY;
           break;
         }
@@ -341,9 +383,15 @@ export class BillingService {
       };
 
       // Update trial info if trialing
-      if (subscription.status === 'trialing' && subscription.trial_start && subscription.trial_end) {
+      if (
+        subscription.status === 'trialing' &&
+        subscription.trial_start &&
+        subscription.trial_end
+      ) {
         updateData.freeTrialUsed = true;
-        updateData.freeTrialStartedAt = new Date(subscription.trial_start * 1000);
+        updateData.freeTrialStartedAt = new Date(
+          subscription.trial_start * 1000,
+        );
         updateData.freeTrialEndsAt = new Date(subscription.trial_end * 1000);
       }
 
@@ -355,7 +403,8 @@ export class BillingService {
       // Create affiliate commission if user was referred by an affiliate
       if (user.referredByAffiliate) {
         try {
-          const subscriptionAmount = subscription.items.data[0]?.price?.unit_amount
+          const subscriptionAmount = subscription.items.data[0]?.price
+            ?.unit_amount
             ? subscription.items.data[0].price.unit_amount / 100
             : 0;
 
@@ -367,12 +416,18 @@ export class BillingService {
             );
           }
         } catch (error: any) {
-          this.logger.error(`Failed to create affiliate commission: ${error.message}`);
+          this.logger.error(
+            `Failed to create affiliate commission: ${error.message}`,
+          );
         }
       }
 
       // Send notification
-      await this.sendSubscriptionActivatedNotification(user.id, targetPlan, subscription.status === 'trialing');
+      await this.sendSubscriptionActivatedNotification(
+        user.id,
+        targetPlan,
+        subscription.status === 'trialing',
+      );
     }
   }
 
@@ -406,7 +461,9 @@ export class BillingService {
       },
     });
 
-    this.logger.log(`Affiliate commission created: ${affiliateId} - $${commissionAmount}`);
+    this.logger.log(
+      `Affiliate commission created: ${affiliateId} - $${commissionAmount}`,
+    );
   }
 
   /**
@@ -491,7 +548,11 @@ export class BillingService {
     let subscriptionId: string | null = null;
     if (typeof subscription === 'string') {
       subscriptionId = subscription;
-    } else if (subscription && typeof subscription === 'object' && 'id' in subscription) {
+    } else if (
+      subscription &&
+      typeof subscription === 'object' &&
+      'id' in subscription
+    ) {
       subscriptionId = subscription.id;
     }
     if (subscriptionId) {
@@ -512,7 +573,12 @@ export class BillingService {
     }
 
     // Send notification
-    await this.sendPaymentFailedNotification(user.id, invoice.amount_due, invoice.currency, invoice.hosted_invoice_url);
+    await this.sendPaymentFailedNotification(
+      user.id,
+      invoice.amount_due,
+      invoice.currency,
+      invoice.hosted_invoice_url,
+    );
   }
 
   /**
@@ -532,14 +598,18 @@ export class BillingService {
     }
 
     // Send notification
-    const trialEnd = subscription.trial_end ? new Date(subscription.trial_end * 1000) : null;
+    const trialEnd = subscription.trial_end
+      ? new Date(subscription.trial_end * 1000)
+      : null;
     await this.sendTrialEndingNotification(user.id, trialEnd);
 
     // Send email
     if (user.freeTrialEndsAt) {
       const now = new Date();
       const trialEndDate = new Date(user.freeTrialEndsAt);
-      const daysRemaining = Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const daysRemaining = Math.ceil(
+        (trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24),
+      );
 
       if (daysRemaining > 0 && daysRemaining <= 3) {
         await this.emailService.queueEmail(
@@ -581,18 +651,21 @@ export class BillingService {
     }
 
     try {
-      const subscription = await this.stripe.subscriptions.retrieve(
+      const subscription = (await this.stripe.subscriptions.retrieve(
         user.stripeSubscriptionId,
-      ) as any;
+      )) as any;
 
-      const isOnTrial = subscription.status === 'trialing' || 
+      const isOnTrial =
+        subscription.status === 'trialing' ||
         (user.freeTrialEndsAt && new Date() < user.freeTrialEndsAt);
 
       return {
         plan: user.plan,
-        active: subscription.status === 'active' || subscription.status === 'trialing',
+        active:
+          subscription.status === 'active' ||
+          subscription.status === 'trialing',
         status: subscription.status,
-        currentPeriodEnd: subscription.current_period_end 
+        currentPeriodEnd: subscription.current_period_end
           ? new Date(subscription.current_period_end * 1000)
           : undefined,
         onTrial: isOnTrial,
@@ -639,7 +712,9 @@ export class BillingService {
 
     // Don't allow portal access for lifetime deals
     if (user.lifetimeDeal) {
-      throw new BadRequestException('Lifetime deal users cannot access billing portal');
+      throw new BadRequestException(
+        'Lifetime deal users cannot access billing portal',
+      );
     }
 
     const session = await this.stripe.billingPortal.sessions.create({
@@ -676,8 +751,12 @@ export class BillingService {
       currency: invoice.currency,
       status: invoice.status,
       created: new Date(invoice.created * 1000),
-      periodStart: invoice.period_start ? new Date(invoice.period_start * 1000) : null,
-      periodEnd: invoice.period_end ? new Date(invoice.period_end * 1000) : null,
+      periodStart: invoice.period_start
+        ? new Date(invoice.period_start * 1000)
+        : null,
+      periodEnd: invoice.period_end
+        ? new Date(invoice.period_end * 1000)
+        : null,
       invoicePdf: invoice.invoice_pdf,
       hostedInvoiceUrl: invoice.hosted_invoice_url,
       description: invoice.description,
@@ -710,7 +789,8 @@ export class BillingService {
         cancel_at_period_end: true,
       });
       return {
-        message: 'Subscription will be cancelled at the end of the billing period',
+        message:
+          'Subscription will be cancelled at the end of the billing period',
         cancelAtPeriodEnd: true,
       };
     } else {
@@ -748,30 +828,40 @@ export class BillingService {
     }
 
     if (user.lifetimeDeal) {
-      throw new BadRequestException('Cannot change plan for lifetime deal users');
+      throw new BadRequestException(
+        'Cannot change plan for lifetime deal users',
+      );
     }
 
     const newPriceId = this.getPriceIdForPlan(newPlanType);
     if (!newPriceId) {
-      throw new BadRequestException(`Price ID not configured for plan: ${newPlanType}`);
+      throw new BadRequestException(
+        `Price ID not configured for plan: ${newPlanType}`,
+      );
     }
 
     // Get current subscription
-    const subscription = await this.stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+    const subscription = await this.stripe.subscriptions.retrieve(
+      user.stripeSubscriptionId,
+    );
 
     // Update subscription with new price
-    const updatedSubscription = await this.stripe.subscriptions.update(user.stripeSubscriptionId, {
-      items: [
-        {
-          id: subscription.items.data[0].id,
-          price: newPriceId,
-        },
-      ],
-      proration_behavior: 'always_invoice', // Prorate the difference
-    });
+    const updatedSubscription = await this.stripe.subscriptions.update(
+      user.stripeSubscriptionId,
+      {
+        items: [
+          {
+            id: subscription.items.data[0].id,
+            price: newPriceId,
+          },
+        ],
+        proration_behavior: 'always_invoice', // Prorate the difference
+      },
+    );
 
     // Determine new plan
-    const newPlan = newPlanType === PlanType.AGENCY ? UserPlan.AGENCY : UserPlan.PRO;
+    const newPlan =
+      newPlanType === PlanType.AGENCY ? UserPlan.AGENCY : UserPlan.PRO;
 
     await this.prisma.user.update({
       where: { id: userId },
@@ -793,7 +883,7 @@ export class BillingService {
   async validateCoupon(couponCode: string) {
     try {
       const coupon = await this.stripe.coupons.retrieve(couponCode);
-      
+
       if (!coupon.valid) {
         throw new BadRequestException('Coupon is not valid');
       }
@@ -837,7 +927,9 @@ export class BillingService {
     // Reset daily count if needed
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const lastReset = user.lastGenerationReset ? new Date(user.lastGenerationReset) : null;
+    const lastReset = user.lastGenerationReset
+      ? new Date(user.lastGenerationReset)
+      : null;
 
     if (!lastReset || lastReset < today) {
       await this.prisma.user.update({
@@ -856,7 +948,9 @@ export class BillingService {
     return {
       dailyGenerations: user.dailyAiGenerations,
       dailyLimit: isUnlimited ? null : limit,
-      remaining: isUnlimited ? null : Math.max(0, limit - user.dailyAiGenerations),
+      remaining: isUnlimited
+        ? null
+        : Math.max(0, limit - user.dailyAiGenerations),
       isUnlimited,
       plan: user.plan,
     };
@@ -865,10 +959,16 @@ export class BillingService {
   /**
    * Send subscription activated notification
    */
-  private async sendSubscriptionActivatedNotification(userId: string, plan: UserPlan, isTrial: boolean) {
+  private async sendSubscriptionActivatedNotification(
+    userId: string,
+    plan: UserPlan,
+    isTrial: boolean,
+  ) {
     try {
       const planName = plan === UserPlan.AGENCY ? 'Agency' : 'Pro';
-      const title = isTrial ? `Free Trial Started - ${planName} Plan` : `Subscription Activated - ${planName} Plan`;
+      const title = isTrial
+        ? `Free Trial Started - ${planName} Plan`
+        : `Subscription Activated - ${planName} Plan`;
       const message = isTrial
         ? `Your free trial for the ${planName} plan has started! Enjoy unlimited features during your trial period.`
         : `Your ${planName} subscription has been activated successfully. Enjoy all premium features!`;
@@ -881,7 +981,10 @@ export class BillingService {
         { plan, isTrial },
       );
     } catch (error) {
-      this.logger.error('Failed to send subscription activated notification:', error);
+      this.logger.error(
+        'Failed to send subscription activated notification:',
+        error,
+      );
     }
   }
 
@@ -891,7 +994,8 @@ export class BillingService {
   private async sendSubscriptionCanceledNotification(userId: string) {
     try {
       const title = 'Subscription Canceled';
-      const message = 'Your subscription has been canceled. You will continue to have access until the end of your billing period.';
+      const message =
+        'Your subscription has been canceled. You will continue to have access until the end of your billing period.';
 
       await this.notificationsService.createNotification(
         userId,
@@ -901,14 +1005,22 @@ export class BillingService {
         { type: 'subscription_canceled' },
       );
     } catch (error) {
-      this.logger.error('Failed to send subscription canceled notification:', error);
+      this.logger.error(
+        'Failed to send subscription canceled notification:',
+        error,
+      );
     }
   }
 
   /**
    * Send payment succeeded notification
    */
-  private async sendPaymentSucceededNotification(userId: string, amount: number, currency: string, invoiceUrl?: string | null) {
+  private async sendPaymentSucceededNotification(
+    userId: string,
+    amount: number,
+    currency: string,
+    invoiceUrl?: string | null,
+  ) {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id: userId },
@@ -924,7 +1036,12 @@ export class BillingService {
         currency: currency.toUpperCase(),
       }).format(amount / 100);
 
-      const planName = user.plan === UserPlan.AGENCY ? 'Agency' : user.plan === UserPlan.PRO ? 'Pro' : 'Premium';
+      const planName =
+        user.plan === UserPlan.AGENCY
+          ? 'Agency'
+          : user.plan === UserPlan.PRO
+            ? 'Pro'
+            : 'Premium';
       const title = 'Payment Successful';
       const message = `Your payment of ${formattedAmount} has been processed successfully. Thank you for your subscription!`;
 
@@ -949,14 +1066,22 @@ export class BillingService {
         },
       );
     } catch (error) {
-      this.logger.error('Failed to send payment succeeded notification:', error);
+      this.logger.error(
+        'Failed to send payment succeeded notification:',
+        error,
+      );
     }
   }
 
   /**
    * Send payment failed notification
    */
-  private async sendPaymentFailedNotification(userId: string, amount: number, currency: string, invoiceUrl?: string | null) {
+  private async sendPaymentFailedNotification(
+    userId: string,
+    amount: number,
+    currency: string,
+    invoiceUrl?: string | null,
+  ) {
     try {
       const formattedAmount = new Intl.NumberFormat('en-US', {
         style: 'currency',
@@ -981,10 +1106,19 @@ export class BillingService {
   /**
    * Send trial ending notification
    */
-  private async sendTrialEndingNotification(userId: string, trialEndDate: Date | null) {
+  private async sendTrialEndingNotification(
+    userId: string,
+    trialEndDate: Date | null,
+  ) {
     try {
       const title = 'Free Trial Ending Soon';
-      const endDate = trialEndDate ? trialEndDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }) : 'soon';
+      const endDate = trialEndDate
+        ? trialEndDate.toLocaleDateString('en-US', {
+            month: 'long',
+            day: 'numeric',
+            year: 'numeric',
+          })
+        : 'soon';
       const message = `Your free trial ends on ${endDate}. Update your payment method to continue enjoying premium features after the trial.`;
 
       await this.notificationsService.createNotification(
@@ -1058,13 +1192,17 @@ export class BillingService {
    * Validate AppSumo license key
    * In production, this should validate against AppSumo API
    */
-  private async validateAppSumoLicense(licenseKey: string): Promise<boolean> {
+  private validateAppSumoLicense(licenseKey: string): Promise<boolean> {
     // Get secret from environment
     const appSumoSecret = this.configService.get<string>('APPSUMO_SECRET');
-    
+
     if (!appSumoSecret) {
       // Development mode: accept any key that matches pattern
-      return /^[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}$/i.test(licenseKey);
+      return Promise.resolve(
+        /^[A-Z0-9]{8}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{12}$/i.test(
+          licenseKey,
+        ),
+      );
     }
 
     // Production: Validate with AppSumo API
@@ -1076,16 +1214,16 @@ export class BillingService {
         .createHash('sha256')
         .update(licenseKey + appSumoSecret)
         .digest('hex');
-      
+
       // In real implementation, you would:
       // 1. Call AppSumo API to verify license
       // 2. Check if license is valid and not expired
       // 3. Check if license has available activations
-      
-      return true; // Placeholder - implement actual validation
+
+      return Promise.resolve(true); // Placeholder - implement actual validation
     } catch (error) {
       console.error('Error validating AppSumo license:', error);
-      return false;
+      return Promise.resolve(false);
     }
   }
 
@@ -1172,4 +1310,3 @@ export class BillingService {
     };
   }
 }
-

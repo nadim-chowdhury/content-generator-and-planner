@@ -1,10 +1,15 @@
-import { Injectable, NestMiddleware, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  NestMiddleware,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import { DdosProtectionService } from '../services/ddos-protection.service';
 
 /**
  * DDOS Protection Middleware
- * 
+ *
  * Applies rate limiting and request size checks to all incoming requests
  */
 @Injectable()
@@ -29,7 +34,8 @@ export class DdosProtectionMiddleware implements NestMiddleware {
 
     // Check request size
     const contentLength = parseInt(req.headers['content-length'] || '0', 10);
-    const sizeCheck = this.ddosProtectionService.checkRequestSize(contentLength);
+    const sizeCheck =
+      this.ddosProtectionService.checkRequestSize(contentLength);
     if (!sizeCheck.allowed) {
       throw new HttpException(
         sizeCheck.reason || 'Request too large',
@@ -38,7 +44,8 @@ export class DdosProtectionMiddleware implements NestMiddleware {
     }
 
     // Check rate limits
-    const rateLimit = await this.ddosProtectionService.checkRateLimit(ipAddress);
+    const rateLimit =
+      await this.ddosProtectionService.checkRateLimit(ipAddress);
     if (!rateLimit.allowed) {
       // Set rate limit headers
       res.setHeader('X-RateLimit-Limit', '100');
@@ -74,5 +81,3 @@ export class DdosProtectionMiddleware implements NestMiddleware {
     );
   }
 }
-
-

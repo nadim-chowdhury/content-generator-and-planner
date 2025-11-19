@@ -65,7 +65,9 @@ export class IdeasService {
     // Reset daily count if needed
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const lastReset = user.lastGenerationReset ? new Date(user.lastGenerationReset) : null;
+    const lastReset = user.lastGenerationReset
+      ? new Date(user.lastGenerationReset)
+      : null;
 
     if (!lastReset || lastReset < today) {
       await this.prisma.user.update({
@@ -106,7 +108,11 @@ export class IdeasService {
     });
   }
 
-  async generateIdeas(userPlan: UserPlan, userId: string, dto: GenerateIdeasDto) {
+  async generateIdeas(
+    userPlan: UserPlan,
+    userId: string,
+    dto: GenerateIdeasDto,
+  ) {
     // Check quota
     const canGenerate = await this.checkQuota(userId, userPlan);
 
@@ -117,12 +123,14 @@ export class IdeasService {
     }
 
     // Determine count (10-30, default 10)
-    const count = dto.count && dto.count >= 10 && dto.count <= 30 ? dto.count : 10;
+    const count =
+      dto.count && dto.count >= 10 && dto.count <= 30 ? dto.count : 10;
 
     // Determine language (default: English)
-    const language = dto.language && this.languageService.isSupported(dto.language) 
-      ? dto.language 
-      : this.languageService.getDefaultLanguage();
+    const language =
+      dto.language && this.languageService.isSupported(dto.language)
+        ? dto.language
+        : this.languageService.getDefaultLanguage();
 
     // Build human-like AI prompt
     const prompt = this.buildPrompt(dto, count, language);
@@ -209,22 +217,33 @@ Write everything naturally - like you're a real creator brainstorming ideas, not
         hook: idea.hook || idea.openingHook || '',
         script: idea.script || idea.shortScript || idea.content || '',
         caption: idea.caption || idea.postCaption || '',
-        hashtags: Array.isArray(idea.hashtags) 
-          ? idea.hashtags.map((h: string) => h.startsWith('#') ? h : `#${h}`)
+        hashtags: Array.isArray(idea.hashtags)
+          ? idea.hashtags.map((h: string) => (h.startsWith('#') ? h : `#${h}`))
           : [],
-        categoryTags: Array.isArray(idea.categoryTags) 
-          ? idea.categoryTags 
-          : (idea.categories ? (Array.isArray(idea.categories) ? idea.categories : [idea.categories]) : []),
+        categoryTags: Array.isArray(idea.categoryTags)
+          ? idea.categoryTags
+          : idea.categories
+            ? Array.isArray(idea.categories)
+              ? idea.categories
+              : [idea.categories]
+            : [],
         platform: dto.platform,
         niche: dto.niche,
         tone: dto.tone,
         language: language,
-        duration: idea.estimatedDuration || idea.duration || idea.videoLength || null,
-        viralScore: idea.viralScore !== undefined 
-          ? Math.max(0, Math.min(100, parseInt(idea.viralScore) || 0))
-          : null,
-        thumbnailSuggestion: idea.thumbnailSuggestion || idea.thumbnailDescription || idea.imageSuggestion || '',
-        platformOptimization: idea.platformOptimization || idea.optimizationNotes || '',
+        duration:
+          idea.estimatedDuration || idea.duration || idea.videoLength || null,
+        viralScore:
+          idea.viralScore !== undefined
+            ? Math.max(0, Math.min(100, parseInt(idea.viralScore) || 0))
+            : null,
+        thumbnailSuggestion:
+          idea.thumbnailSuggestion ||
+          idea.thumbnailDescription ||
+          idea.imageSuggestion ||
+          '',
+        platformOptimization:
+          idea.platformOptimization || idea.optimizationNotes || '',
       }));
 
       // Create ideas in database
@@ -244,22 +263,31 @@ Write everything naturally - like you're a real creator brainstorming ideas, not
 
       return createdIdeas;
     } catch (error) {
-      if (error instanceof ForbiddenException || error instanceof BadRequestException) {
+      if (
+        error instanceof ForbiddenException ||
+        error instanceof BadRequestException
+      ) {
         throw error;
       }
       console.error('OpenAI API Error:', error);
-      throw new BadRequestException('Failed to generate ideas. Please try again.');
+      throw new BadRequestException(
+        'Failed to generate ideas. Please try again.',
+      );
     }
   }
 
-  private buildPrompt(dto: GenerateIdeasDto, count: number, language: string): string {
+  private buildPrompt(
+    dto: GenerateIdeasDto,
+    count: number,
+    language: string,
+  ): string {
     const platformSpecific = this.getPlatformSpecificGuidance(dto.platform);
     const platformSpecs = this.platformOptimizer.getPlatformSpecs(dto.platform);
     const optimalDuration = platformSpecs?.optimalDuration.recommended || 30;
     const recommendedHashtags = platformSpecs?.hashtagCount.recommended || 5;
     const bestPractices = platformSpecs?.bestPractices.join(', ') || '';
-    
-    let prompt = `I'm looking for ${count} really solid content ideas for ${dto.platform}. My niche is ${dto.niche}, and I want the tone to be ${dto.tone} - like I'm talking to friends, not giving a formal presentation.
+
+    const prompt = `I'm looking for ${count} really solid content ideas for ${dto.platform}. My niche is ${dto.niche}, and I want the tone to be ${dto.tone} - like I'm talking to friends, not giving a formal presentation.
 
 ${platformSpecific}
 
@@ -288,22 +316,38 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
 
   private getPlatformSpecificGuidance(platform: string): string {
     const guidance: Record<string, string> = {
-      'YouTube': 'Platform: YouTube - Long-form video content (5-60+ minutes). Focus on in-depth tutorials, vlogs, educational content. Include detailed thumbnail descriptions with text overlays. Optimal aspect ratio: 16:9. Captions should include timestamps, chapters, and strong CTAs.',
-      'YouTube Shorts': 'Platform: YouTube Shorts - Short-form vertical video content (15-60 seconds). Focus on quick hooks, trending sounds, and viral-worthy moments. Vertical format (9:16). Thumbnail suggestions should describe the first frame. Use trending hashtags and music. Optimize for discovery in Shorts feed.',
-      'TikTok': 'Platform: TikTok - Short-form vertical video content (15-60 seconds, up to 10 minutes for some creators). Focus on trending sounds, challenges, quick hooks, and authentic content. Vertical format (9:16). Thumbnail suggestions should describe the first frame. Use trending hashtags and participate in challenges.',
-      'Instagram Reels': 'Platform: Instagram Reels - Short-form vertical video content (15-90 seconds, up to 15 minutes for some accounts). Focus on trending audio, visual storytelling, and engagement. Vertical format (9:16). Include visual descriptions for thumbnails. Use 5-10 relevant hashtags. Optimize for Instagram algorithm (engagement, saves, shares).',
-      'Facebook Reels': 'Platform: Facebook Reels - Short-form vertical video content (15-90 seconds). Similar to Instagram Reels but optimized for Facebook audience. Vertical format (9:16). Focus on community engagement, relatable content, and shareable moments. Use Facebook-specific hashtags.',
-      'Twitter': 'Platform: Twitter/X - Text-based content (280 characters), threads, or short video clips (up to 2:20). Focus on timely, conversational content. For video: horizontal or square format. Captions should be tweet-optimized with engagement hooks. Use trending hashtags sparingly (1-2). Thread format for longer content.',
-      'LinkedIn': 'Platform: LinkedIn - Professional content, thought leadership, B2B focus. Text posts (up to 3000 characters), articles, or short videos (up to 10 minutes). Professional tone required. Include industry-specific hashtags (3-5). Optimize for LinkedIn algorithm (comments, shares, reactions).',
-      'Instagram': 'Platform: Instagram - Feed posts, Stories, or IGTV. Square (1:1) or vertical (4:5) format. Focus on visual storytelling, aesthetic consistency. Include detailed image descriptions. Use 5-10 relevant hashtags. Optimize for engagement (likes, comments, saves).',
-      'Facebook': 'Platform: Facebook - Posts, videos, or Stories. Various formats supported. Focus on community engagement, shareable content. Include engagement-focused captions with questions. Use Facebook-specific features (polls, events).',
-      'Threads': 'Platform: Threads - Text-based conversational content (up to 500 characters) or short videos. Similar to Twitter but with Instagram integration. Focus on authentic, conversational content. Use relevant hashtags (1-3).',
-      'Pinterest': 'Platform: Pinterest - Visual content with detailed descriptions. Vertical format (2:3 or 9:16). Focus on searchable keywords, detailed descriptions, and vertical images. Include rich pins metadata. Optimize for Pinterest SEO.',
-      'Reddit': 'Platform: Reddit - Subreddit-specific content. Text posts, images, or videos. Focus on discussion-worthy topics, community engagement, and following subreddit rules. No hashtags. Format depends on subreddit.',
-      'Quora': 'Platform: Quora - Question-answer format. Focus on informative, detailed responses. Text-based with optional images. Professional and helpful tone. No hashtags. Optimize for upvotes and expert answers.',
+      YouTube:
+        'Platform: YouTube - Long-form video content (5-60+ minutes). Focus on in-depth tutorials, vlogs, educational content. Include detailed thumbnail descriptions with text overlays. Optimal aspect ratio: 16:9. Captions should include timestamps, chapters, and strong CTAs.',
+      'YouTube Shorts':
+        'Platform: YouTube Shorts - Short-form vertical video content (15-60 seconds). Focus on quick hooks, trending sounds, and viral-worthy moments. Vertical format (9:16). Thumbnail suggestions should describe the first frame. Use trending hashtags and music. Optimize for discovery in Shorts feed.',
+      TikTok:
+        'Platform: TikTok - Short-form vertical video content (15-60 seconds, up to 10 minutes for some creators). Focus on trending sounds, challenges, quick hooks, and authentic content. Vertical format (9:16). Thumbnail suggestions should describe the first frame. Use trending hashtags and participate in challenges.',
+      'Instagram Reels':
+        'Platform: Instagram Reels - Short-form vertical video content (15-90 seconds, up to 15 minutes for some accounts). Focus on trending audio, visual storytelling, and engagement. Vertical format (9:16). Include visual descriptions for thumbnails. Use 5-10 relevant hashtags. Optimize for Instagram algorithm (engagement, saves, shares).',
+      'Facebook Reels':
+        'Platform: Facebook Reels - Short-form vertical video content (15-90 seconds). Similar to Instagram Reels but optimized for Facebook audience. Vertical format (9:16). Focus on community engagement, relatable content, and shareable moments. Use Facebook-specific hashtags.',
+      Twitter:
+        'Platform: Twitter/X - Text-based content (280 characters), threads, or short video clips (up to 2:20). Focus on timely, conversational content. For video: horizontal or square format. Captions should be tweet-optimized with engagement hooks. Use trending hashtags sparingly (1-2). Thread format for longer content.',
+      LinkedIn:
+        'Platform: LinkedIn - Professional content, thought leadership, B2B focus. Text posts (up to 3000 characters), articles, or short videos (up to 10 minutes). Professional tone required. Include industry-specific hashtags (3-5). Optimize for LinkedIn algorithm (comments, shares, reactions).',
+      Instagram:
+        'Platform: Instagram - Feed posts, Stories, or IGTV. Square (1:1) or vertical (4:5) format. Focus on visual storytelling, aesthetic consistency. Include detailed image descriptions. Use 5-10 relevant hashtags. Optimize for engagement (likes, comments, saves).',
+      Facebook:
+        'Platform: Facebook - Posts, videos, or Stories. Various formats supported. Focus on community engagement, shareable content. Include engagement-focused captions with questions. Use Facebook-specific features (polls, events).',
+      Threads:
+        'Platform: Threads - Text-based conversational content (up to 500 characters) or short videos. Similar to Twitter but with Instagram integration. Focus on authentic, conversational content. Use relevant hashtags (1-3).',
+      Pinterest:
+        'Platform: Pinterest - Visual content with detailed descriptions. Vertical format (2:3 or 9:16). Focus on searchable keywords, detailed descriptions, and vertical images. Include rich pins metadata. Optimize for Pinterest SEO.',
+      Reddit:
+        'Platform: Reddit - Subreddit-specific content. Text posts, images, or videos. Focus on discussion-worthy topics, community engagement, and following subreddit rules. No hashtags. Format depends on subreddit.',
+      Quora:
+        'Platform: Quora - Question-answer format. Focus on informative, detailed responses. Text-based with optional images. Professional and helpful tone. No hashtags. Optimize for upvotes and expert answers.',
     };
 
-    return guidance[platform] || `Platform: ${platform} - Optimize content for this platform's best practices.`;
+    return (
+      guidance[platform] ||
+      `Platform: ${platform} - Optimize content for this platform's best practices.`
+    );
   }
 
   async create(userId: string, dto: CreateIdeaDto) {
@@ -331,7 +375,7 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
     viralScoreMax?: number,
   ) {
     const where: any = { userId };
-    
+
     if (status) {
       where.status = status;
     } else {
@@ -396,13 +440,10 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
         { description: { contains: search, mode: 'insensitive' } },
         { niche: { contains: search, mode: 'insensitive' } },
       ];
-      
+
       if (where.OR) {
         // Combine with existing OR conditions
-        where.AND = [
-          { OR: where.OR },
-          { OR: searchConditions },
-        ];
+        where.AND = [{ OR: where.OR }, { OR: searchConditions }];
         delete where.OR;
       } else {
         where.OR = searchConditions;
@@ -471,7 +512,12 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
   /**
    * Duplicate an idea
    */
-  async duplicate(id: string, userId: string, newTitle?: string, folderId?: string) {
+  async duplicate(
+    id: string,
+    userId: string,
+    newTitle?: string,
+    folderId?: string,
+  ) {
     const idea = await this.findOne(id, userId);
 
     const duplicateData: any = {
@@ -514,7 +560,7 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
    */
   async archive(id: string, userId: string) {
     const idea = await this.findOne(id, userId);
-    
+
     return this.prisma.idea.update({
       where: { id: idea.id },
       data: {
@@ -529,7 +575,7 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
    */
   async unarchive(id: string, userId: string) {
     const idea = await this.findOne(id, userId);
-    
+
     if (idea.status !== IdeaStatus.ARCHIVED) {
       throw new BadRequestException('Idea is not archived');
     }
@@ -546,7 +592,12 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
   /**
    * Bulk operations
    */
-  async bulkOperations(userId: string, ideaIds: string[], operation: string, folderId?: string) {
+  async bulkOperations(
+    userId: string,
+    ideaIds: string[],
+    operation: string,
+    folderId?: string,
+  ) {
     // Verify all ideas belong to user
     const ideas = await this.prisma.idea.findMany({
       where: {
@@ -626,7 +677,13 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
   /**
    * Bulk export
    */
-  async bulkExport(userId: string, ideaIds: string[], format: string = 'json', googleSheetsId?: string, notionDatabaseId?: string) {
+  async bulkExport(
+    userId: string,
+    ideaIds: string[],
+    format: string = 'json',
+    googleSheetsId?: string,
+    notionDatabaseId?: string,
+  ) {
     const ideas = await this.prisma.idea.findMany({
       where: {
         id: { in: ideaIds },
@@ -649,25 +706,25 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
     switch (format) {
       case 'csv':
         return this.exportToCSV(ideas);
-      
+
       case 'pdf':
         return this.exportToPDF(ideas);
-      
+
       case 'text':
         return this.exportToText(ideas);
-      
+
       case 'google_sheets':
         if (!googleSheetsId) {
           throw new BadRequestException('Google Sheets ID is required');
         }
         return this.exportToGoogleSheets(ideas, googleSheetsId, userId);
-      
+
       case 'notion':
         if (!notionDatabaseId) {
           throw new BadRequestException('Notion Database ID is required');
         }
         return this.exportToNotion(ideas, notionDatabaseId, userId);
-      
+
       default:
         // JSON format
         return { format: 'json', data: ideas, count: ideas.length };
@@ -678,7 +735,24 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
    * Export to CSV
    */
   private exportToCSV(ideas: any[]) {
-    const headers = ['Title', 'Description', 'Hook', 'Script', 'Caption', 'Hashtags', 'Platform', 'Niche', 'Tone', 'Language', 'Duration', 'Status', 'Viral Score', 'Folder', 'Scheduled At', 'Created At'];
+    const headers = [
+      'Title',
+      'Description',
+      'Hook',
+      'Script',
+      'Caption',
+      'Hashtags',
+      'Platform',
+      'Niche',
+      'Tone',
+      'Language',
+      'Duration',
+      'Status',
+      'Viral Score',
+      'Folder',
+      'Scheduled At',
+      'Created At',
+    ];
     const rows = ideas.map((idea) => [
       idea.title,
       idea.description || '',
@@ -700,7 +774,9 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
 
     const csv = [
       headers.join(','),
-      ...rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')),
+      ...rows.map((row) =>
+        row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','),
+      ),
     ].join('\n');
 
     return { format: 'csv', data: csv, count: ideas.length };
@@ -713,7 +789,7 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
     // For PDF generation, we'll return HTML that can be converted to PDF on the frontend
     // Or use a library like pdfkit or puppeteer on the backend
     // For now, we'll return structured data that frontend can convert
-    
+
     const htmlContent = `
 <!DOCTYPE html>
 <html>
@@ -734,7 +810,9 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
   <h1>Content Ideas Export</h1>
   <p>Generated on: ${new Date().toLocaleString()}</p>
   <p>Total Ideas: ${ideas.length}</p>
-  ${ideas.map((idea, index) => `
+  ${ideas
+    .map(
+      (idea, index) => `
     <div class="idea">
       <div class="idea-title">${index + 1}. ${idea.title}</div>
       ${idea.description ? `<div class="idea-field"><span class="idea-label">Description:</span> ${idea.description}</div>` : ''}
@@ -750,20 +828,28 @@ ${dto.additionalContext ? `Oh, and here's some extra context: ${dto.additionalCo
       <div class="idea-field"><span class="idea-label">Status:</span> ${idea.status}</div>
       ${idea.scheduledAt ? `<div class="idea-field"><span class="idea-label">Scheduled:</span> ${new Date(idea.scheduledAt).toLocaleString()}</div>` : ''}
     </div>
-  `).join('')}
+  `,
+    )
+    .join('')}
 </body>
 </html>
     `;
 
-    return { format: 'pdf', data: htmlContent, count: ideas.length, type: 'html' }; // Return HTML for frontend conversion
+    return {
+      format: 'pdf',
+      data: htmlContent,
+      count: ideas.length,
+      type: 'html',
+    }; // Return HTML for frontend conversion
   }
 
   /**
    * Export to Text
    */
   private exportToText(ideas: any[]) {
-    const textContent = ideas.map((idea, index) => {
-      return `
+    const textContent = ideas
+      .map((idea, index) => {
+        return `
 ${index + 1}. ${idea.title}
 ${idea.description ? `Description: ${idea.description}` : ''}
 ${idea.hook ? `Hook: ${idea.hook}` : ''}
@@ -778,7 +864,8 @@ ${idea.scheduledAt ? `Scheduled: ${new Date(idea.scheduledAt).toLocaleString()}`
 Created: ${new Date(idea.createdAt).toLocaleString()}
 ---
 `;
-    }).join('\n');
+      })
+      .join('\n');
 
     return { format: 'text', data: textContent, count: ideas.length };
   }
@@ -786,13 +873,18 @@ Created: ${new Date(idea.createdAt).toLocaleString()}
   /**
    * Export to Google Sheets
    */
-  private async exportToGoogleSheets(ideas: any[], spreadsheetId: string, userId: string) {
+  private exportToGoogleSheets(
+    ideas: any[],
+    spreadsheetId: string,
+    userId: string,
+  ) {
     // This would require Google Sheets API integration
     // For now, return CSV data that can be imported
     const csvExport = this.exportToCSV(ideas);
     return {
       format: 'google_sheets',
-      message: 'Google Sheets export initiated. Use the CSV data to import manually, or configure Google Sheets API.',
+      message:
+        'Google Sheets export initiated. Use the CSV data to import manually, or configure Google Sheets API.',
       csvData: csvExport.data,
       spreadsheetId,
       count: ideas.length,
@@ -802,13 +894,14 @@ Created: ${new Date(idea.createdAt).toLocaleString()}
   /**
    * Export to Notion
    */
-  private async exportToNotion(ideas: any[], databaseId: string, userId: string) {
+  private exportToNotion(ideas: any[], databaseId: string, userId: string) {
     // This would require Notion API integration
     // For now, return structured data
     return {
       format: 'notion',
-      message: 'Notion export initiated. Use the structured data to import manually, or configure Notion API.',
-      data: ideas.map(idea => ({
+      message:
+        'Notion export initiated. Use the structured data to import manually, or configure Notion API.',
+      data: ideas.map((idea) => ({
         title: idea.title,
         description: idea.description,
         platform: idea.platform,
@@ -826,7 +919,10 @@ Created: ${new Date(idea.createdAt).toLocaleString()}
   /**
    * Folder management
    */
-  async createFolder(userId: string, dto: { name: string; description?: string; color?: string; icon?: string }) {
+  async createFolder(
+    userId: string,
+    dto: { name: string; description?: string; color?: string; icon?: string },
+  ) {
     return this.prisma.ideaFolder.create({
       data: {
         ...dto,
@@ -867,7 +963,11 @@ Created: ${new Date(idea.createdAt).toLocaleString()}
     return folder;
   }
 
-  async updateFolder(id: string, userId: string, dto: { name?: string; description?: string; color?: string; icon?: string }) {
+  async updateFolder(
+    id: string,
+    userId: string,
+    dto: { name?: string; description?: string; color?: string; icon?: string },
+  ) {
     const folder = await this.prisma.ideaFolder.findFirst({
       where: { id, userId },
     });
@@ -927,20 +1027,27 @@ Created: ${new Date(idea.createdAt).toLocaleString()}
   }
 
   async getStats(userId: string) {
-    const [total, saved, scheduled, archived, todayGenerated] = await Promise.all([
-      this.prisma.idea.count({ where: { userId, status: { not: IdeaStatus.ARCHIVED } } }),
-      this.prisma.idea.count({ where: { userId, status: IdeaStatus.DRAFT } }),
-      this.prisma.idea.count({ where: { userId, status: IdeaStatus.SCHEDULED } }),
-      this.prisma.idea.count({ where: { userId, status: IdeaStatus.ARCHIVED } }),
-      this.prisma.idea.count({
-        where: {
-          userId,
-          createdAt: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
+    const [total, saved, scheduled, archived, todayGenerated] =
+      await Promise.all([
+        this.prisma.idea.count({
+          where: { userId, status: { not: IdeaStatus.ARCHIVED } },
+        }),
+        this.prisma.idea.count({ where: { userId, status: IdeaStatus.DRAFT } }),
+        this.prisma.idea.count({
+          where: { userId, status: IdeaStatus.SCHEDULED },
+        }),
+        this.prisma.idea.count({
+          where: { userId, status: IdeaStatus.ARCHIVED },
+        }),
+        this.prisma.idea.count({
+          where: {
+            userId,
+            createdAt: {
+              gte: new Date(new Date().setHours(0, 0, 0, 0)),
+            },
           },
-        },
-      }),
-    ]);
+        }),
+      ]);
 
     return {
       total,
@@ -951,4 +1058,3 @@ Created: ${new Date(idea.createdAt).toLocaleString()}
     };
   }
 }
-

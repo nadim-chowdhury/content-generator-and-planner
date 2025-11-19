@@ -7,4 +7,3 @@ export class UpdateIdeaDto extends PartialType(CreateIdeaDto) {
   @IsOptional()
   scheduledAt?: string;
 }
-

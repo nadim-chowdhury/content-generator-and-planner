@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import { kanbanApi } from '@/lib/kanban';
-import { teamsApi, Team } from '@/lib/teams';
-import { useAuthStore } from '@/store/auth-store';
+import { useState, useRef, useEffect } from "react";
+import { kanbanApi } from "@/lib/kanban";
+import { teamsApi, Team } from "@/lib/teams";
+import { useAuthStore } from "@/store/auth-store";
 
 interface Comment {
   id: string;
@@ -30,10 +30,10 @@ export default function CommentWithMentions({
   onCommentAdded,
 }: CommentWithMentionsProps) {
   const { user } = useAuthStore();
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [showMentions, setShowMentions] = useState(false);
-  const [mentionQuery, setMentionQuery] = useState('');
+  const [mentionQuery, setMentionQuery] = useState("");
   const [mentionIndex, setMentionIndex] = useState(-1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [currentWorkspace, setCurrentWorkspace] = useState<Team | null>(null);
@@ -60,7 +60,7 @@ export default function CommentWithMentions({
         setTeamMembers(allMembers);
       }
     } catch (err) {
-      console.error('Failed to load workspace:', err);
+      console.error("Failed to load workspace:", err);
     }
   };
 
@@ -71,13 +71,15 @@ export default function CommentWithMentions({
     // Check for @ mentions
     const cursorPos = e.target.selectionStart;
     const textBeforeCursor = value.substring(0, cursorPos);
-    const lastAtIndex = textBeforeCursor.lastIndexOf('@');
+    const lastAtIndex = textBeforeCursor.lastIndexOf("@");
 
     if (lastAtIndex !== -1) {
       const query = textBeforeCursor.substring(lastAtIndex + 1);
-      const spaceIndex = query.indexOf(' ');
+      const spaceIndex = query.indexOf(" ");
       if (spaceIndex === -1 || spaceIndex > 0) {
-        setMentionQuery(spaceIndex === -1 ? query : query.substring(0, spaceIndex));
+        setMentionQuery(
+          spaceIndex === -1 ? query : query.substring(0, spaceIndex)
+        );
         setMentionIndex(lastAtIndex);
         setShowMentions(true);
         return;
@@ -87,17 +89,23 @@ export default function CommentWithMentions({
     setShowMentions(false);
   };
 
-  const handleMentionSelect = (member: { id: string; name?: string; email: string }) => {
+  const handleMentionSelect = (member: {
+    id: string;
+    name?: string;
+    email: string;
+  }) => {
     if (mentionIndex === -1) return;
 
     const beforeMention = newComment.substring(0, mentionIndex);
-    const afterMention = newComment.substring(mentionIndex + 1 + mentionQuery.length);
+    const afterMention = newComment.substring(
+      mentionIndex + 1 + mentionQuery.length
+    );
     const mentionText = `@${member.name || member.email} `;
     const updatedComment = beforeMention + mentionText + afterMention;
 
     setNewComment(updatedComment);
     setShowMentions(false);
-    setMentionQuery('');
+    setMentionQuery("");
     setMentionIndex(-1);
 
     // Focus back on textarea
@@ -114,17 +122,17 @@ export default function CommentWithMentions({
 
     try {
       const comment = await kanbanApi.addComment(cardId, newComment);
-      setNewComment('');
+      setNewComment("");
       onCommentAdded(comment);
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to add comment');
+      alert(err.response?.data?.message || "Failed to add comment");
     }
   };
 
   const filteredMembers = teamMembers.filter(
     (member) =>
       member.name?.toLowerCase().includes(mentionQuery.toLowerCase()) ||
-      member.email.toLowerCase().includes(mentionQuery.toLowerCase()),
+      member.email.toLowerCase().includes(mentionQuery.toLowerCase())
   );
 
   const renderCommentContent = (content: string, mentions?: string[]) => {
@@ -142,7 +150,8 @@ export default function CommentWithMentions({
 
       // Find mentioned user
       const mentionedUser = teamMembers.find(
-        (m) => m.id === match![1] || m.name === match![1] || m.email === match![1],
+        (m) =>
+          m.id === match![1] || m.name === match![1] || m.email === match![1]
       );
 
       if (mentionedUser) {
@@ -152,7 +161,7 @@ export default function CommentWithMentions({
             className="font-semibold text-blue-600 dark:text-blue-400"
           >
             @{mentionedUser.name || mentionedUser.email}
-          </span>,
+          </span>
         );
       } else {
         parts.push(match[0]);
@@ -177,7 +186,9 @@ export default function CommentWithMentions({
         {/* Comments List */}
         <div className="space-y-3 mb-4 max-h-96 overflow-y-auto">
           {comments.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">No comments yet</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              No comments yet
+            </p>
           ) : (
             comments.map((comment) => (
               <div
@@ -193,7 +204,8 @@ export default function CommentWithMentions({
                     />
                   ) : (
                     <div className="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-sm font-medium">
-                      {(comment.user.name || comment.user.email)[0].toUpperCase()}
+                      {(comment.user.name ||
+                        comment.user.email)[0].toUpperCase()}
                     </div>
                   )}
                   <div className="flex-1">
@@ -222,10 +234,14 @@ export default function CommentWithMentions({
             value={newComment}
             onChange={handleCommentChange}
             onKeyDown={(e) => {
-              if (showMentions && e.key === 'ArrowDown') {
+              if (showMentions && e.key === "ArrowDown") {
                 e.preventDefault();
                 // Handle arrow navigation
-              } else if (showMentions && e.key === 'Enter' && filteredMembers.length > 0) {
+              } else if (
+                showMentions &&
+                e.key === "Enter" &&
+                filteredMembers.length > 0
+              ) {
                 e.preventDefault();
                 handleMentionSelect(filteredMembers[0]);
               }
@@ -251,7 +267,9 @@ export default function CommentWithMentions({
                       {member.name || member.email}
                     </div>
                     {member.name && (
-                      <div className="text-xs text-gray-500">{member.email}</div>
+                      <div className="text-xs text-gray-500">
+                        {member.email}
+                      </div>
                     )}
                   </div>
                 </button>
@@ -270,4 +288,3 @@ export default function CommentWithMentions({
     </div>
   );
 }
-

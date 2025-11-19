@@ -5,6 +5,3 @@ export class ActivateLifetimeDto {
   @IsNotEmpty()
   licenseKey: string;
 }
-
-
-

@@ -10,6 +10,3 @@ export class MoveIdeasDto {
   @IsOptional()
   folderId?: string; // null to remove from folder
 }
-
-
-

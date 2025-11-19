@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { User } from '@/lib/auth';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { User } from "@/lib/auth";
 
 interface AuthState {
   user: User | null;
@@ -21,32 +21,36 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       refreshToken: null,
       setAuth: (user, token, refreshToken) => {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('token', token);
-          localStorage.setItem('user', JSON.stringify(user));
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", token);
+          localStorage.setItem("user", JSON.stringify(user));
           if (refreshToken) {
-            localStorage.setItem('refreshToken', refreshToken);
+            localStorage.setItem("refreshToken", refreshToken);
           }
           // Also set cookie for middleware access
-          document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+          document.cookie = `token=${token}; path=/; max-age=${
+            7 * 24 * 60 * 60
+          }; SameSite=Lax`;
         }
         set({ user, token, refreshToken: refreshToken || null });
       },
       setTokens: (token, refreshToken) => {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('token', token);
-          localStorage.setItem('refreshToken', refreshToken);
-          document.cookie = `token=${token}; path=/; max-age=${7 * 24 * 60 * 60}; SameSite=Lax`;
+        if (typeof window !== "undefined") {
+          localStorage.setItem("token", token);
+          localStorage.setItem("refreshToken", refreshToken);
+          document.cookie = `token=${token}; path=/; max-age=${
+            7 * 24 * 60 * 60
+          }; SameSite=Lax`;
         }
         set({ token, refreshToken });
       },
       clearAuth: () => {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('token');
-          localStorage.removeItem('refreshToken');
-          localStorage.removeItem('user');
+        if (typeof window !== "undefined") {
+          localStorage.removeItem("token");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
           // Clear cookie
-          document.cookie = 'token=; path=/; max-age=0';
+          document.cookie = "token=; path=/; max-age=0";
         }
         set({ user: null, token: null, refreshToken: null });
       },
@@ -56,8 +60,7 @@ export const useAuthStore = create<AuthState>()(
         })),
     }),
     {
-      name: 'auth-storage',
-    },
-  ),
+      name: "auth-storage",
+    }
+  )
 );
-

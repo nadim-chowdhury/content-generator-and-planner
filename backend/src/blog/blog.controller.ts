@@ -46,7 +46,8 @@ export class BlogController {
   @UseGuards(JwtAuthGuard)
   async createPost(
     @CurrentUser() user: any,
-    @Body() data: {
+    @Body()
+    data: {
       title: string;
       excerpt?: string;
       content: string;
@@ -68,7 +69,8 @@ export class BlogController {
   async updatePost(
     @Param('id') postId: string,
     @CurrentUser() user: any,
-    @Body() data: {
+    @Body()
+    data: {
       title?: string;
       excerpt?: string;
       content?: string;
@@ -97,5 +99,3 @@ export class BlogController {
     return this.blogService.deletePost(postId, user.id);
   }
 }
-
-

@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsOptional, IsIn, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsIn,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class GenerateIdeasDto {
   @IsString()
@@ -26,7 +34,16 @@ export class GenerateIdeasDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsIn(['motivational', 'humorous', 'educational', 'entertaining', 'inspirational', 'casual', 'professional', 'trendy'])
+  @IsIn([
+    'motivational',
+    'humorous',
+    'educational',
+    'entertaining',
+    'inspirational',
+    'casual',
+    'professional',
+    'trendy',
+  ])
   tone: string;
 
   @IsInt()
@@ -49,7 +66,27 @@ export class GenerateIdeasDto {
 
   @IsString()
   @IsOptional()
-  @IsIn(['en', 'bn', 'hi', 'ar', 'es', 'fr', 'de', 'pt', 'ru', 'ja', 'ko', 'zh', 'it', 'tr', 'vi', 'th', 'id', 'nl', 'pl', 'uk'])
+  @IsIn([
+    'en',
+    'bn',
+    'hi',
+    'ar',
+    'es',
+    'fr',
+    'de',
+    'pt',
+    'ru',
+    'ja',
+    'ko',
+    'zh',
+    'it',
+    'tr',
+    'vi',
+    'th',
+    'id',
+    'nl',
+    'pl',
+    'uk',
+  ])
   language?: string; // Language code (default: 'en')
 }
-

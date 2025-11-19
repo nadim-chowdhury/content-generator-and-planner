@@ -88,7 +88,8 @@ export class KanbanController {
   updateChecklist(
     @CurrentUser() user: any,
     @Param('id') checklistId: string,
-    @Body('items') items: Array<{ id: string; text: string; completed: boolean }>,
+    @Body('items')
+    items: Array<{ id: string; text: string; completed: boolean }>,
   ) {
     return this.kanbanService.updateChecklist(user.id, checklistId, items);
   }
@@ -117,4 +118,3 @@ export class KanbanController {
     return this.aiTasksService.generateTasksForCard(cardId, user.id);
   }
 }
-

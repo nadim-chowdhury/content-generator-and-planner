@@ -7,7 +7,7 @@ export class LoggerService implements NestLoggerService {
 
   constructor() {
     const isDevelopment = process.env.NODE_ENV === 'development';
-    
+
     this.logger = pino({
       level: process.env.LOG_LEVEL || (isDevelopment ? 'debug' : 'info'),
       transport: isDevelopment
@@ -58,4 +58,3 @@ export class LoggerService implements NestLoggerService {
     this.logger.fatal({ context, ...meta }, message);
   }
 }
-

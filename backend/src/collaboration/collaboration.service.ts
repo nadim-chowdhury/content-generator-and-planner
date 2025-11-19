@@ -20,18 +20,21 @@ export class CollaborationService {
     const mentionRegex = /@(\w+)/g;
     const matches = text.matchAll(mentionRegex);
     const mentions: string[] = [];
-    
+
     for (const match of matches) {
       mentions.push(match[1]);
     }
-    
+
     return [...new Set(mentions)]; // Remove duplicates
   }
 
   /**
    * Resolve mentions to user IDs
    */
-  async resolveMentions(mentions: string[], workspaceId: string | null): Promise<string[]> {
+  async resolveMentions(
+    mentions: string[],
+    workspaceId: string | null,
+  ): Promise<string[]> {
     if (!workspaceId || mentions.length === 0) {
       return [];
     }
@@ -135,5 +138,3 @@ export class CollaborationService {
     }
   }
 }
-
-

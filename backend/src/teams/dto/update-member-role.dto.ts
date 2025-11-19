@@ -7,5 +7,3 @@ export class UpdateMemberRoleDto {
   @IsIn(['VIEWER', 'EDITOR', 'MANAGER', 'ADMIN'])
   role: TeamRole;
 }
-
-

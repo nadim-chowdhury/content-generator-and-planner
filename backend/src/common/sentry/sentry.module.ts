@@ -7,4 +7,3 @@ import { SentryService } from './sentry.service';
   exports: [SentryService],
 })
 export class SentryModule {}
-

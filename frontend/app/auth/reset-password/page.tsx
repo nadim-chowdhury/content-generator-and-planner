@@ -1,46 +1,46 @@
-'use client';
+"use client";
 
-import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { authApi } from '@/lib/auth';
-import Navbar from '@/components/Navbar';
-import Link from 'next/link';
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { authApi } from "@/lib/auth";
+import Navbar from "@/components/Navbar";
+import Link from "next/link";
 
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    const tokenParam = searchParams.get('token');
+    const tokenParam = searchParams.get("token");
     if (tokenParam) {
       setToken(tokenParam);
     } else {
-      setError('Reset token is missing');
+      setError("Reset token is missing");
     }
   }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       return;
     }
 
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
+      setError("Password must be at least 8 characters long");
       return;
     }
 
     if (!token) {
-      setError('Reset token is missing');
+      setError("Reset token is missing");
       return;
     }
 
@@ -50,10 +50,13 @@ function ResetPasswordContent() {
       await authApi.resetPassword(token, password);
       setSuccess(true);
       setTimeout(() => {
-        router.push('/login');
+        router.push("/login");
       }, 3000);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to reset password. The link may have expired.');
+      setError(
+        err.response?.data?.message ||
+          "Failed to reset password. The link may have expired."
+      );
     } finally {
       setLoading(false);
     }
@@ -102,7 +105,8 @@ function ResetPasswordContent() {
                 Password Reset Successful!
               </h2>
               <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Your password has been reset successfully. You can now log in with your new password.
+                Your password has been reset successfully. You can now log in
+                with your new password.
               </p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
                 Redirecting to login page...
@@ -165,7 +169,7 @@ function ResetPasswordContent() {
                 disabled={loading || !token}
                 className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Resetting...' : 'Reset Password'}
+                {loading ? "Resetting..." : "Reset Password"}
               </button>
 
               <div className="text-center">
@@ -186,17 +190,19 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <Navbar />
-        <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
-            <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+          <Navbar />
+          <div className="max-w-md mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-8 text-center">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mb-4"></div>
+              <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+            </div>
           </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   );

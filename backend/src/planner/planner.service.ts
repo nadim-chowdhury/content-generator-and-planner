@@ -1,4 +1,11 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Inject, forwardRef } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+  Inject,
+  forwardRef,
+} from '@nestjs/common';
 import { SocialPlatform } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { ScheduleIdeaDto } from './dto/schedule-idea.dto';
@@ -60,8 +67,9 @@ export class PlannerService {
 
       if (connections.length > 0) {
         // Use default connection or first available
-        const connectionToUse = connections.find(c => c.isDefault) || connections[0];
-        
+        const connectionToUse =
+          connections.find((c) => c.isDefault) || connections[0];
+
         await this.queueService.scheduleAutoPost(
           {
             userId,
@@ -218,7 +226,12 @@ export class PlannerService {
    * Get auto-reschedule suggestions
    * Suggests alternative dates when scheduling conflicts occur
    */
-  async getAutoRescheduleSuggestions(userId: string, ideaId: string, preferredDate: string, lookAheadDays: number = 7) {
+  async getAutoRescheduleSuggestions(
+    userId: string,
+    ideaId: string,
+    preferredDate: string,
+    lookAheadDays: number = 7,
+  ) {
     const preferred = new Date(preferredDate);
     const endDate = new Date(preferred);
     endDate.setDate(endDate.getDate() + lookAheadDays);
@@ -251,11 +264,12 @@ export class PlannerService {
     }
 
     // Find available time slots
-    const suggestions: Array<{ date: Date; reason: string; score: number }> = [];
+    const suggestions: Array<{ date: Date; reason: string; score: number }> =
+      [];
     const scheduledDates = scheduledIdeas
-      .filter(i => i.scheduledAt !== null)
-      .map(i => i.scheduledAt!.toISOString().split('T')[0]);
-    
+      .filter((i) => i.scheduledAt !== null)
+      .map((i) => i.scheduledAt!.toISOString().split('T')[0]);
+
     // Check each day in the range
     for (let i = 0; i <= lookAheadDays; i++) {
       const checkDate = new Date(preferred);
@@ -269,11 +283,16 @@ export class PlannerService {
 
       // Calculate score based on proximity to preferred date
       const daysDiff = Math.abs(i);
-      const score = 100 - (daysDiff * 10); // Higher score for closer dates
+      const score = 100 - daysDiff * 10; // Higher score for closer dates
 
       suggestions.push({
         date: checkDate,
-        reason: daysDiff === 0 ? 'Preferred date' : daysDiff === 1 ? 'Next day' : `${daysDiff} days from preferred`,
+        reason:
+          daysDiff === 0
+            ? 'Preferred date'
+            : daysDiff === 1
+              ? 'Next day'
+              : `${daysDiff} days from preferred`,
         score: Math.max(0, score),
       });
     }
@@ -282,7 +301,7 @@ export class PlannerService {
     suggestions.sort((a, b) => b.score - a.score);
 
     return {
-      suggestions: suggestions.slice(0, 5).map(s => ({
+      suggestions: suggestions.slice(0, 5).map((s) => ({
         date: s.date.toISOString(),
         reason: s.reason,
         score: s.score,
@@ -323,7 +342,7 @@ export class PlannerService {
             scheduledAt: date,
             status: IdeaStatus.SCHEDULED,
           },
-        })
+        }),
       );
     }
 
@@ -331,4 +350,3 @@ export class PlannerService {
     return { message: `${ideaIds.length} ideas rescheduled successfully` };
   }
 }
-

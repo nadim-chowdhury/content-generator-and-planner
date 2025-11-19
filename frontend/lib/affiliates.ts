@@ -1,4 +1,4 @@
-import api from './api';
+import api from "./api";
 
 export interface AffiliateDashboard {
   affiliateCode: string;
@@ -35,27 +35,37 @@ export interface AffiliateDashboard {
 
 export const affiliatesApi = {
   applyForAffiliate: async (): Promise<{ affiliateCode: string }> => {
-    const { data } = await api.post<{ affiliateCode: string }>('/api/affiliates/apply');
+    const { data } = await api.post<{ affiliateCode: string }>(
+      "/api/affiliates/apply"
+    );
     return data;
   },
 
   getAffiliateLink: async (): Promise<{ code: string; link: string }> => {
-    const { data } = await api.get<{ code: string; link: string }>('/api/affiliates/link');
+    const { data } = await api.get<{ code: string; link: string }>(
+      "/api/affiliates/link"
+    );
     return data;
   },
 
   getDashboard: async (): Promise<AffiliateDashboard> => {
-    const { data } = await api.get<AffiliateDashboard>('/api/affiliates/dashboard');
+    const { data } = await api.get<AffiliateDashboard>(
+      "/api/affiliates/dashboard"
+    );
     return data;
   },
 
-  requestPayout: async (paymentMethod: string, paymentDetails: string): Promise<{ payoutId: string; amount: number }> => {
-    const { data } = await api.post<{ payoutId: string; amount: number }>('/api/affiliates/payout/request', {
-      paymentMethod,
-      paymentDetails,
-    });
+  requestPayout: async (
+    paymentMethod: string,
+    paymentDetails: string
+  ): Promise<{ payoutId: string; amount: number }> => {
+    const { data } = await api.post<{ payoutId: string; amount: number }>(
+      "/api/affiliates/payout/request",
+      {
+        paymentMethod,
+        paymentDetails,
+      }
+    );
     return data;
   },
 };
-
-

@@ -26,6 +26,3 @@ export class NotificationsScheduler {
     await this.notificationsService.checkTaskReminders();
   }
 }
-
-
-

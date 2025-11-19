@@ -48,7 +48,7 @@ export class IdeasController {
   }
 
   @Get('languages')
-  async getSupportedLanguages() {
+  getSupportedLanguages() {
     return {
       languages: this.languageService.getSupportedLanguages(),
       default: this.languageService.getDefaultLanguage(),
@@ -77,8 +77,12 @@ export class IdeasController {
     @Query('viralScoreMax') viralScoreMax?: string,
   ) {
     const tagArray = tags ? tags.split(',').map((t) => t.trim()) : undefined;
-    const viralScoreMinNum = viralScoreMin ? parseInt(viralScoreMin, 10) : undefined;
-    const viralScoreMaxNum = viralScoreMax ? parseInt(viralScoreMax, 10) : undefined;
+    const viralScoreMinNum = viralScoreMin
+      ? parseInt(viralScoreMin, 10)
+      : undefined;
+    const viralScoreMaxNum = viralScoreMax
+      ? parseInt(viralScoreMax, 10)
+      : undefined;
     return this.ideasService.findAll(
       user.id,
       status,
@@ -157,10 +161,7 @@ export class IdeasController {
   }
 
   @Post('export')
-  async exportIdeas(
-    @CurrentUser() user: any,
-    @Body() dto: ExportIdeasDto,
-  ) {
+  async exportIdeas(@CurrentUser() user: any, @Body() dto: ExportIdeasDto) {
     return this.ideasService.bulkExport(
       user.id,
       dto.ideaIds,
@@ -171,10 +172,7 @@ export class IdeasController {
   }
 
   @Post('move')
-  async moveIdeas(
-    @CurrentUser() user: any,
-    @Body() dto: MoveIdeasDto,
-  ) {
+  async moveIdeas(@CurrentUser() user: any, @Body() dto: MoveIdeasDto) {
     return this.ideasService.bulkOperations(
       user.id,
       dto.ideaIds,
@@ -190,10 +188,7 @@ export class IdeasController {
 
   // Folder Management
   @Post('folders')
-  async createFolder(
-    @CurrentUser() user: any,
-    @Body() dto: CreateFolderDto,
-  ) {
+  async createFolder(@CurrentUser() user: any, @Body() dto: CreateFolderDto) {
     return this.ideasService.createFolder(user.id, dto);
   }
 
@@ -203,10 +198,7 @@ export class IdeasController {
   }
 
   @Get('folders/:id')
-  async getFolder(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async getFolder(@CurrentUser() user: any, @Param('id') id: string) {
     return this.ideasService.getFolder(id, user.id);
   }
 
@@ -220,10 +212,7 @@ export class IdeasController {
   }
 
   @Delete('folders/:id')
-  async deleteFolder(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
-  ) {
+  async deleteFolder(@CurrentUser() user: any, @Param('id') id: string) {
     return this.ideasService.deleteFolder(id, user.id);
   }
 

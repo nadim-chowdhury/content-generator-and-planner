@@ -1,6 +1,12 @@
-import api from './api';
+import api from "./api";
 
-export type KanbanStage = 'IDEAS' | 'DRAFTING' | 'EDITING' | 'READY' | 'SCHEDULED' | 'POSTED';
+export type KanbanStage =
+  | "IDEAS"
+  | "DRAFTING"
+  | "EDITING"
+  | "READY"
+  | "SCHEDULED"
+  | "POSTED";
 
 export interface KanbanChecklistItem {
   id: string;
@@ -88,7 +94,7 @@ export interface MoveCardDto {
 
 export const kanbanApi = {
   getBoard: async (): Promise<KanbanBoard> => {
-    const { data } = await api.get<KanbanBoard>('/api/kanban/board');
+    const { data } = await api.get<KanbanBoard>("/api/kanban/board");
     return data;
   },
 
@@ -98,22 +104,34 @@ export const kanbanApi = {
   },
 
   createCard: async (dto: CreateKanbanCardDto): Promise<KanbanCard> => {
-    const { data } = await api.post<KanbanCard>('/api/kanban/cards', dto);
+    const { data } = await api.post<KanbanCard>("/api/kanban/cards", dto);
     return data;
   },
 
-  createCardFromIdea: async (ideaId: string, stage?: KanbanStage): Promise<KanbanCard> => {
-    const { data } = await api.post<KanbanCard>(`/api/kanban/cards/from-idea/${ideaId}`, { stage });
+  createCardFromIdea: async (
+    ideaId: string,
+    stage?: KanbanStage
+  ): Promise<KanbanCard> => {
+    const { data } = await api.post<KanbanCard>(
+      `/api/kanban/cards/from-idea/${ideaId}`,
+      { stage }
+    );
     return data;
   },
 
-  updateCard: async (id: string, dto: UpdateKanbanCardDto): Promise<KanbanCard> => {
+  updateCard: async (
+    id: string,
+    dto: UpdateKanbanCardDto
+  ): Promise<KanbanCard> => {
     const { data } = await api.put<KanbanCard>(`/api/kanban/cards/${id}`, dto);
     return data;
   },
 
   moveCard: async (id: string, dto: MoveCardDto): Promise<KanbanCard> => {
-    const { data } = await api.patch<KanbanCard>(`/api/kanban/cards/${id}/move`, dto);
+    const { data } = await api.patch<KanbanCard>(
+      `/api/kanban/cards/${id}/move`,
+      dto
+    );
     return data;
   },
 
@@ -121,13 +139,26 @@ export const kanbanApi = {
     await api.delete(`/api/kanban/cards/${id}`);
   },
 
-  addChecklist: async (cardId: string, title: string, items?: KanbanChecklistItem[]): Promise<KanbanChecklist> => {
-    const { data } = await api.post<KanbanChecklist>(`/api/kanban/cards/${cardId}/checklists`, { title, items });
+  addChecklist: async (
+    cardId: string,
+    title: string,
+    items?: KanbanChecklistItem[]
+  ): Promise<KanbanChecklist> => {
+    const { data } = await api.post<KanbanChecklist>(
+      `/api/kanban/cards/${cardId}/checklists`,
+      { title, items }
+    );
     return data;
   },
 
-  updateChecklist: async (checklistId: string, items: KanbanChecklistItem[]): Promise<KanbanChecklist> => {
-    const { data } = await api.put<KanbanChecklist>(`/api/kanban/checklists/${checklistId}`, { items });
+  updateChecklist: async (
+    checklistId: string,
+    items: KanbanChecklistItem[]
+  ): Promise<KanbanChecklist> => {
+    const { data } = await api.put<KanbanChecklist>(
+      `/api/kanban/checklists/${checklistId}`,
+      { items }
+    );
     return data;
   },
 
@@ -135,8 +166,14 @@ export const kanbanApi = {
     await api.delete(`/api/kanban/checklists/${checklistId}`);
   },
 
-  addComment: async (cardId: string, content: string): Promise<KanbanComment> => {
-    const { data } = await api.post<KanbanComment>(`/api/kanban/cards/${cardId}/comments`, { content });
+  addComment: async (
+    cardId: string,
+    content: string
+  ): Promise<KanbanComment> => {
+    const { data } = await api.post<KanbanComment>(
+      `/api/kanban/cards/${cardId}/comments`,
+      { content }
+    );
     return data;
   },
 
@@ -144,9 +181,10 @@ export const kanbanApi = {
     await api.delete(`/api/kanban/comments/${commentId}`);
   },
 
-  generateAiTasks: async (cardId: string): Promise<Array<{ text: string; priority: string }>> => {
+  generateAiTasks: async (
+    cardId: string
+  ): Promise<Array<{ text: string; priority: string }>> => {
     const { data } = await api.get(`/api/kanban/cards/${cardId}/ai-tasks`);
     return data;
   },
 };
-

@@ -8,7 +8,10 @@ export class PerformanceCalculatorService {
   /**
    * Calculate platform performance score (0-100)
    */
-  async calculatePlatformScore(userId: string, platform: string): Promise<number> {
+  async calculatePlatformScore(
+    userId: string,
+    platform: string,
+  ): Promise<number> {
     const analytics = await this.prisma.contentAnalytics.findMany({
       where: {
         userId,
@@ -26,14 +29,15 @@ export class PerformanceCalculatorService {
 
     // Calculate average engagement rate
     const engagementRates = analytics
-      .filter(a => a.reach && a.reach > 0 && a.engagement)
-      .map(a => (a.engagement! / a.reach!) * 100);
+      .filter((a) => a.reach && a.reach > 0 && a.engagement)
+      .map((a) => (a.engagement! / a.reach!) * 100);
 
     if (engagementRates.length === 0) {
       return 50;
     }
 
-    const avgEngagementRate = engagementRates.reduce((a, b) => a + b, 0) / engagementRates.length;
+    const avgEngagementRate =
+      engagementRates.reduce((a, b) => a + b, 0) / engagementRates.length;
 
     // Normalize to 0-100 scale
     // Typical engagement rates: 1-5% is good, 5%+ is excellent
@@ -45,7 +49,10 @@ export class PerformanceCalculatorService {
   /**
    * Calculate category performance score (0-100)
    */
-  async calculateCategoryScore(userId: string, category: string): Promise<number> {
+  async calculateCategoryScore(
+    userId: string,
+    category: string,
+  ): Promise<number> {
     const analytics = await this.prisma.contentAnalytics.findMany({
       where: {
         userId,
@@ -62,14 +69,15 @@ export class PerformanceCalculatorService {
     }
 
     const engagementRates = analytics
-      .filter(a => a.reach && a.reach > 0 && a.engagement)
-      .map(a => (a.engagement! / a.reach!) * 100);
+      .filter((a) => a.reach && a.reach > 0 && a.engagement)
+      .map((a) => (a.engagement! / a.reach!) * 100);
 
     if (engagementRates.length === 0) {
       return 50;
     }
 
-    const avgEngagementRate = engagementRates.reduce((a, b) => a + b, 0) / engagementRates.length;
+    const avgEngagementRate =
+      engagementRates.reduce((a, b) => a + b, 0) / engagementRates.length;
     const score = Math.min(100, Math.max(0, (avgEngagementRate / 5) * 100));
 
     return Math.round(score);
@@ -99,26 +107,36 @@ export class PerformanceCalculatorService {
       };
     }
 
-    const validReach = analytics.filter(a => a.reach && a.reach > 0);
-    const validEngagement = analytics.filter(a => a.engagement && a.engagement > 0);
+    const validReach = analytics.filter((a) => a.reach && a.reach > 0);
+    const validEngagement = analytics.filter(
+      (a) => a.engagement && a.engagement > 0,
+    );
 
-    const avgReach = validReach.length > 0
-      ? validReach.reduce((sum, a) => sum + (a.reach || 0), 0) / validReach.length
-      : 0;
+    const avgReach =
+      validReach.length > 0
+        ? validReach.reduce((sum, a) => sum + (a.reach || 0), 0) /
+          validReach.length
+        : 0;
 
-    const avgEngagement = validEngagement.length > 0
-      ? validEngagement.reduce((sum, a) => sum + (a.engagement || 0), 0) / validEngagement.length
-      : 0;
+    const avgEngagement =
+      validEngagement.length > 0
+        ? validEngagement.reduce((sum, a) => sum + (a.engagement || 0), 0) /
+          validEngagement.length
+        : 0;
 
-    const totalEngagement = analytics.reduce((sum, a) => sum + (a.engagement || 0), 0);
+    const totalEngagement = analytics.reduce(
+      (sum, a) => sum + (a.engagement || 0),
+      0,
+    );
 
     const engagementRates = validReach
-      .filter(a => a.engagement && a.engagement > 0)
-      .map(a => (a.engagement! / a.reach!) * 100);
+      .filter((a) => a.engagement && a.engagement > 0)
+      .map((a) => (a.engagement! / a.reach!) * 100);
 
-    const avgEngagementRate = engagementRates.length > 0
-      ? engagementRates.reduce((a, b) => a + b, 0) / engagementRates.length
-      : 0;
+    const avgEngagementRate =
+      engagementRates.length > 0
+        ? engagementRates.reduce((a, b) => a + b, 0) / engagementRates.length
+        : 0;
 
     const score = await this.calculatePlatformScore(userId, platform);
 
@@ -156,26 +174,36 @@ export class PerformanceCalculatorService {
       };
     }
 
-    const validReach = analytics.filter(a => a.reach && a.reach > 0);
-    const validEngagement = analytics.filter(a => a.engagement && a.engagement > 0);
+    const validReach = analytics.filter((a) => a.reach && a.reach > 0);
+    const validEngagement = analytics.filter(
+      (a) => a.engagement && a.engagement > 0,
+    );
 
-    const avgReach = validReach.length > 0
-      ? validReach.reduce((sum, a) => sum + (a.reach || 0), 0) / validReach.length
-      : 0;
+    const avgReach =
+      validReach.length > 0
+        ? validReach.reduce((sum, a) => sum + (a.reach || 0), 0) /
+          validReach.length
+        : 0;
 
-    const avgEngagement = validEngagement.length > 0
-      ? validEngagement.reduce((sum, a) => sum + (a.engagement || 0), 0) / validEngagement.length
-      : 0;
+    const avgEngagement =
+      validEngagement.length > 0
+        ? validEngagement.reduce((sum, a) => sum + (a.engagement || 0), 0) /
+          validEngagement.length
+        : 0;
 
-    const totalEngagement = analytics.reduce((sum, a) => sum + (a.engagement || 0), 0);
+    const totalEngagement = analytics.reduce(
+      (sum, a) => sum + (a.engagement || 0),
+      0,
+    );
 
     const engagementRates = validReach
-      .filter(a => a.engagement && a.engagement > 0)
-      .map(a => (a.engagement! / a.reach!) * 100);
+      .filter((a) => a.engagement && a.engagement > 0)
+      .map((a) => (a.engagement! / a.reach!) * 100);
 
-    const avgEngagementRate = engagementRates.length > 0
-      ? engagementRates.reduce((a, b) => a + b, 0) / engagementRates.length
-      : 0;
+    const avgEngagementRate =
+      engagementRates.length > 0
+        ? engagementRates.reduce((a, b) => a + b, 0) / engagementRates.length
+        : 0;
 
     const score = await this.calculateCategoryScore(userId, category);
 
@@ -189,6 +217,3 @@ export class PerformanceCalculatorService {
     };
   }
 }
-
-
-

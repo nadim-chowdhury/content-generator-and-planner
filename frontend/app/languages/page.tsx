@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import LanguageBadge from '@/components/LanguageBadge';
-import { ideasApi } from '@/lib/ideas';
+import { useState, useEffect } from "react";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import LanguageBadge from "@/components/LanguageBadge";
+import { ideasApi } from "@/lib/ideas";
 
 interface LanguageInfo {
   code: string;
@@ -16,7 +16,7 @@ interface LanguageInfo {
 export default function LanguagesPage() {
   const [languages, setLanguages] = useState<LanguageInfo[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('');
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("");
 
   useEffect(() => {
     loadLanguages();
@@ -27,15 +27,19 @@ export default function LanguagesPage() {
       const response = await ideasApi.getSupportedLanguages();
       setLanguages(response.languages || []);
     } catch (err) {
-      console.error('Failed to load languages:', err);
+      console.error("Failed to load languages:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const popularLanguages = ['en', 'bn', 'hi', 'ar', 'es'];
-  const popularLangs = languages.filter((lang) => popularLanguages.includes(lang.code));
-  const otherLangs = languages.filter((lang) => !popularLanguages.includes(lang.code));
+  const popularLanguages = ["en", "bn", "hi", "ar", "es"];
+  const popularLangs = languages.filter((lang) =>
+    popularLanguages.includes(lang.code)
+  );
+  const otherLangs = languages.filter(
+    (lang) => !popularLanguages.includes(lang.code)
+  );
 
   const selectedLang = languages.find((lang) => lang.code === selectedLanguage);
 
@@ -45,7 +49,9 @@ export default function LanguagesPage() {
         <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
           <Navbar />
           <div className="flex items-center justify-center h-64">
-            <div className="text-gray-600 dark:text-gray-400">Loading languages...</div>
+            <div className="text-gray-600 dark:text-gray-400">
+              Loading languages...
+            </div>
           </div>
         </div>
       </ProtectedRoute>
@@ -74,15 +80,23 @@ export default function LanguagesPage() {
                     {popularLangs.map((lang) => (
                       <button
                         key={lang.code}
-                        onClick={() => setSelectedLanguage(lang.code === selectedLanguage ? '' : lang.code)}
+                        onClick={() =>
+                          setSelectedLanguage(
+                            lang.code === selectedLanguage ? "" : lang.code
+                          )
+                        }
                         className={`p-4 rounded-lg border-2 transition-all text-left ${
                           selectedLanguage === lang.code
-                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                            ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
+                            : "border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700"
                         }`}
                       >
                         <div className="flex items-center gap-3">
-                          <LanguageBadge languageCode={lang.code} size="md" showNativeName={true} />
+                          <LanguageBadge
+                            languageCode={lang.code}
+                            size="md"
+                            showNativeName={true}
+                          />
                           <div>
                             <p className="font-medium text-gray-900 dark:text-white">
                               {lang.name}
@@ -110,15 +124,23 @@ export default function LanguagesPage() {
                     {otherLangs.map((lang) => (
                       <button
                         key={lang.code}
-                        onClick={() => setSelectedLanguage(lang.code === selectedLanguage ? '' : lang.code)}
+                        onClick={() =>
+                          setSelectedLanguage(
+                            lang.code === selectedLanguage ? "" : lang.code
+                          )
+                        }
                         className={`p-3 rounded-lg border-2 transition-all text-left ${
                           selectedLanguage === lang.code
-                            ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
-                            : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                            ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
+                            : "border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <LanguageBadge languageCode={lang.code} size="sm" showNativeName={true} />
+                          <LanguageBadge
+                            languageCode={lang.code}
+                            size="sm"
+                            showNativeName={true}
+                          />
                           <div>
                             <p className="text-sm font-medium text-gray-900 dark:text-white">
                               {lang.name}
@@ -145,19 +167,35 @@ export default function LanguagesPage() {
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <LanguageBadge languageCode={selectedLang.code} size="lg" showNativeName={true} />
+                    <LanguageBadge
+                      languageCode={selectedLang.code}
+                      size="lg"
+                      showNativeName={true}
+                    />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Language Code</p>
-                    <p className="font-mono text-sm text-gray-900 dark:text-white">{selectedLang.code}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      Language Code
+                    </p>
+                    <p className="font-mono text-sm text-gray-900 dark:text-white">
+                      {selectedLang.code}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">English Name</p>
-                    <p className="text-gray-900 dark:text-white">{selectedLang.name}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      English Name
+                    </p>
+                    <p className="text-gray-900 dark:text-white">
+                      {selectedLang.name}
+                    </p>
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Native Name</p>
-                    <p className="text-gray-900 dark:text-white">{selectedLang.nativeName}</p>
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
+                      Native Name
+                    </p>
+                    <p className="text-gray-900 dark:text-white">
+                      {selectedLang.nativeName}
+                    </p>
                   </div>
                   {selectedLang.rtl && (
                     <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md">
@@ -165,7 +203,8 @@ export default function LanguagesPage() {
                         ⚠️ Right-to-Left (RTL) Language
                       </p>
                       <p className="text-xs text-yellow-700 dark:text-yellow-300 mt-1">
-                        Content generated in this language will be formatted for right-to-left reading.
+                        Content generated in this language will be formatted for
+                        right-to-left reading.
                       </p>
                     </div>
                   )}
@@ -174,7 +213,9 @@ export default function LanguagesPage() {
                       📝 Content Generation
                     </p>
                     <p className="text-xs text-blue-700 dark:text-blue-300">
-                      All generated content (titles, descriptions, hooks, scripts, captions, hashtags, etc.) will be in {selectedLang.name} ({selectedLang.nativeName}).
+                      All generated content (titles, descriptions, hooks,
+                      scripts, captions, hashtags, etc.) will be in{" "}
+                      {selectedLang.name} ({selectedLang.nativeName}).
                     </p>
                   </div>
                 </div>
@@ -186,6 +227,3 @@ export default function LanguagesPage() {
     </ProtectedRoute>
   );
 }
-
-
-

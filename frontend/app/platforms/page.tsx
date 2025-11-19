@@ -1,24 +1,24 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Navbar from '@/components/Navbar';
-import ProtectedRoute from '@/components/ProtectedRoute';
-import PlatformComparison from '@/components/PlatformComparison';
-import PlatformInfo from '@/components/PlatformInfo';
-import PlatformBadge from '@/components/PlatformBadge';
+import { useState } from "react";
+import Navbar from "@/components/Navbar";
+import ProtectedRoute from "@/components/ProtectedRoute";
+import PlatformComparison from "@/components/PlatformComparison";
+import PlatformInfo from "@/components/PlatformInfo";
+import PlatformBadge from "@/components/PlatformBadge";
 
 const platforms = [
-  'YouTube',
-  'YouTube Shorts',
-  'TikTok',
-  'Instagram Reels',
-  'Facebook Reels',
-  'Twitter',
-  'LinkedIn',
+  "YouTube",
+  "YouTube Shorts",
+  "TikTok",
+  "Instagram Reels",
+  "Facebook Reels",
+  "Twitter",
+  "LinkedIn",
 ];
 
 export default function PlatformsPage() {
-  const [selectedPlatform, setSelectedPlatform] = useState<string>('');
+  const [selectedPlatform, setSelectedPlatform] = useState<string>("");
 
   return (
     <ProtectedRoute>
@@ -34,7 +34,7 @@ export default function PlatformsPage() {
               selectedPlatform={selectedPlatform}
               onSelect={setSelectedPlatform}
             />
-            
+
             {selectedPlatform && (
               <div>
                 <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -59,8 +59,8 @@ export default function PlatformsPage() {
                   onClick={() => setSelectedPlatform(platform)}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     selectedPlatform === platform
-                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20'
-                      : 'border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700'
+                      ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
+                      : "border-gray-200 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-700"
                   }`}
                 >
                   <div className="text-center">
@@ -75,6 +75,3 @@ export default function PlatformsPage() {
     </ProtectedRoute>
   );
 }
-
-
-

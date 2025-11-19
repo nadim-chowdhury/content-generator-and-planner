@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-const Papa = require('papaparse');
+import * as Papa from 'papaparse';
 
 interface CSVRow {
   Title?: string;
@@ -57,16 +57,27 @@ export class ImportService {
 
                 // Parse arrays
                 const hashtags = row.Hashtags
-                  ? row.Hashtags.split(',').map((tag) => tag.trim()).filter(Boolean)
+                  ? row.Hashtags.split(',')
+                      .map((tag) => tag.trim())
+                      .filter(Boolean)
                   : [];
                 const categoryTags = row['Category Tags']
-                  ? row['Category Tags'].split(',').map((tag) => tag.trim()).filter(Boolean)
+                  ? row['Category Tags']
+                      .split(',')
+                      .map((tag) => tag.trim())
+                      .filter(Boolean)
                   : [];
                 const customTags = row['Custom Tags']
-                  ? row['Custom Tags'].split(',').map((tag) => tag.trim()).filter(Boolean)
+                  ? row['Custom Tags']
+                      .split(',')
+                      .map((tag) => tag.trim())
+                      .filter(Boolean)
                   : [];
                 const postedTo = row['Posted To']
-                  ? row['Posted To'].split(',').map((p) => p.trim()).filter(Boolean)
+                  ? row['Posted To']
+                      .split(',')
+                      .map((p) => p.trim())
+                      .filter(Boolean)
                   : [];
 
                 // Parse dates
@@ -79,13 +90,21 @@ export class ImportService {
                 }
 
                 // Parse numbers
-                const duration = row.Duration ? parseInt(row.Duration, 10) : null;
-                const viralScore = row['Viral Score'] ? parseInt(row['Viral Score'], 10) : null;
+                const duration = row.Duration
+                  ? parseInt(row.Duration, 10)
+                  : null;
+                const viralScore = row['Viral Score']
+                  ? parseInt(row['Viral Score'], 10)
+                  : null;
 
                 // Validate status
-                const status = row.Status && ['DRAFT', 'SCHEDULED', 'POSTED', 'ARCHIVED'].includes(row.Status)
-                  ? row.Status
-                  : 'DRAFT';
+                const status =
+                  row.Status &&
+                  ['DRAFT', 'SCHEDULED', 'POSTED', 'ARCHIVED'].includes(
+                    row.Status,
+                  )
+                    ? row.Status
+                    : 'DRAFT';
 
                 // Find or create folder
                 let folderId: string | null = null;
@@ -128,8 +147,9 @@ export class ImportService {
                     language: row.Language || 'en',
                     duration: duration && !isNaN(duration) ? duration : null,
                     scheduledAt,
-                    status: status as any,
-                    viralScore: viralScore && !isNaN(viralScore) ? viralScore : null,
+                    status: status,
+                    viralScore:
+                      viralScore && !isNaN(viralScore) ? viralScore : null,
                     postedTo,
                     folderId,
                   },
@@ -163,10 +183,11 @@ export class ImportService {
           }
         },
         error: (error) => {
-          reject(new BadRequestException(`CSV parsing failed: ${error.message}`));
+          reject(
+            new BadRequestException(`CSV parsing failed: ${error.message}`),
+          );
         },
       });
     });
   }
 }
-

@@ -7,6 +7,3 @@ export class UpdateKanbanCardDto extends PartialType(CreateKanbanCardDto) {
   @IsOptional()
   position?: number;
 }
-
-
-

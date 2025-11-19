@@ -18,4 +18,3 @@ export class ConnectFacebookPageDto {
   @IsString()
   userAccessToken: string; // User's access token to get pages
 }
-

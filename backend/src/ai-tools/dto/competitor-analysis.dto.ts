@@ -18,6 +18,3 @@ export class CompetitorAnalysisDto {
   @IsOptional()
   language?: string; // Language code (default: 'en')
 }
-
-
-

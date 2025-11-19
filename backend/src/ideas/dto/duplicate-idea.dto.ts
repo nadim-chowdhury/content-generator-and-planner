@@ -9,6 +9,3 @@ export class DuplicateIdeaDto {
   @IsOptional()
   folderId?: string; // Optional folder to place duplicate in
 }
-
-
-

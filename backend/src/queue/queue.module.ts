@@ -26,13 +26,18 @@ import { SocialModule } from '../social/social.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const redisUrl = configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
+        const redisUrl =
+          configService.get<string>('REDIS_URL') || 'redis://localhost:6379';
         return {
           connection: {
             host: configService.get<string>('REDIS_HOST') || 'localhost',
-            port: parseInt(configService.get<string>('REDIS_PORT') || '6379', 10),
+            port: parseInt(
+              configService.get<string>('REDIS_PORT') || '6379',
+              10,
+            ),
             password: configService.get<string>('REDIS_PASSWORD'),
-            ...(redisUrl.startsWith('redis://') || redisUrl.startsWith('rediss://')
+            ...(redisUrl.startsWith('redis://') ||
+            redisUrl.startsWith('rediss://')
               ? { url: redisUrl }
               : {}),
           },
@@ -70,4 +75,3 @@ import { SocialModule } from '../social/social.module';
   exports: [QueueService],
 })
 export class QueueModule {}
-

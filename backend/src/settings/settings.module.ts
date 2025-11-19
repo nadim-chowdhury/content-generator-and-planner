@@ -11,5 +11,3 @@ import { TeamsModule } from '../teams/teams.module';
   exports: [SettingsService],
 })
 export class SettingsModule {}
-
-

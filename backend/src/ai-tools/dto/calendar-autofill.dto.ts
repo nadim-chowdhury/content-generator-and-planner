@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsOptional, IsDateString, IsInt, Min, Max } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsDateString,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class CalendarAutofillDto {
   @IsDateString()
@@ -35,6 +43,3 @@ export class CalendarAutofillDto {
   @IsOptional()
   additionalContext?: string;
 }
-
-
-
