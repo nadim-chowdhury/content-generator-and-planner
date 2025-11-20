@@ -95,7 +95,9 @@ async function bootstrap() {
       try {
         const config = new DocumentBuilder()
           .setTitle('Content Generator & Planner API')
-          .setDescription('API documentation for Content Generator & Planner SaaS')
+          .setDescription(
+            'API documentation for Content Generator & Planner SaaS',
+          )
           .setVersion('1.0')
           .addBearerAuth(
             {
