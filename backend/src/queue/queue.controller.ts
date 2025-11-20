@@ -36,3 +36,4 @@ export class QueueController {
     return this.queueService.getQueueStats();
   }
 }
+

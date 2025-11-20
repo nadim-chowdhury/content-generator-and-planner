@@ -45,3 +45,4 @@ ALTER TABLE "blog_posts" ADD CONSTRAINT "blog_posts_authorId_fkey" FOREIGN KEY (
 
 
 
+

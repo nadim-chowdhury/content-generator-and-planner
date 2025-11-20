@@ -62,3 +62,4 @@ ALTER TABLE "workspace_settings" ADD CONSTRAINT "workspace_settings_teamId_fkey"
 
 
 
+
